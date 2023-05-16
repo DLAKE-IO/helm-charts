@@ -1,0 +1,123 @@
+# Default values for cryptgeon.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: cupcakearmy/cryptgeon
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+cryptgeon:
+  # Max size for body. Accepted values according to byte-unit.
+  # 512 MiB is the maximum allowed.
+  # The frontend will show that number including the ~35% encoding overhead.
+  size_limit: "1 KiB"
+  # Maximal number of views.
+  max_views: 100
+  # Maximal expiration in minutes.
+  max_expiration: 360
+  # Allow custom configuration. If set to false all notes will be one view only.
+  allow_advanced: "true"
+  # Verbosity level for the backend. Possible values are: error, warn, info, debug, trace
+  verbosity: "warn"
+  # Custom image for replacing the logo. Must be publicly reachable
+  theme_image:	""
+  # Custom text for replacing the description below the logo
+  theme_text:	""
+  # Custom text the page title
+  theme_page_title:	""
+  # Custom url for the favicon. Must be publicly reachable
+  theme_favicon:	""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+redis:
+  ## Deploy Redis using bundled chart
+  # To use an external Redis instance, set this to false and configure the
+  # settings under externalRedis
+  enabled: true
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: false
+  replica:
+    persistence:
+      enabled: false
+
+externalRedis:
+  # Used only when redis.enabled is false.
+  # Existing secret's content must be of the following form : https://docs.rs/redis/latest/redis/#connection-parameters
+  existingSecretName: ""
+  existingSecretKey: redis-connection
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

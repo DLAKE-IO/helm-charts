@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cryptgeon.fullname" . }}
+  labels:
+    {{- include "cryptgeon.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "cryptgeon.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "cryptgeon.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "cryptgeon.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: REDIS
+              {{- if .Values.redis.enabled }}
+              value: {{ printf "redis://%s-master" (include "common.names.fullname" .Subcharts.redis) | quote }}
+              {{- else }}
+              valueFrom:                                
+                secretKeyRef:             
+                  key: {{ .Values.externalRedis.existingSecretKey }}
+                  name: {{ .Values.externalRedis.existingSecretName }}
+              {{- end }}
+            - name: SIZE_LIMIT
+              value: {{ .Values.cryptgeon.size_limit }}
+            - name: MAX_VIEWS
+              value: {{ .Values.cryptgeon.max_views }}
+            - name: MAX_EXPIRATION
+              value: {{ .Values.cryptgeon.max_expiration }}
+            - name: ALLOW_ADVANCED
+              value: {{ .Values.cryptgeon.allow_advanced }}
+            - name: VERBOSITY
+              value: {{ .Values.cryptgeon.verbosity }}
+            {{- if .Values.cryptgeon.theme_image }}
+            - name: THEME_IMAGE
+              value: {{ .Values.cryptgeon.theme_image }}
+            {{- end }}
+            {{- if .Values.cryptgeon.theme_text }}
+            - name: THEME_TEXT
+              value: {{ .Values.cryptgeon.theme_text }}
+            {{- end }}
+            {{- if .Values.cryptgeon.theme_page_title }}
+            - name: THEME_PAGE_TITLE
+              value: {{ .Values.cryptgeon.theme_page_title }}
+            {{- end }}
+            {{- if .Values.cryptgeon.theme_favicon}}
+            - name: THEME_FAVICON
+              value: {{ .Values.cryptgeon.theme_favicon }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

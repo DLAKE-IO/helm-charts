@@ -1,0 +1,11 @@
+apiVersion: v2
+name: cryptgeon
+description: A Helm chart to install cryptgeon
+type: application
+version: 2.2.0
+appVersion: "2.2.0"
+dependencies:
+- name: redis
+  version: 17.x.x
+  repository: https://charts.bitnami.com/bitnami
+  condition: redis.enabled
