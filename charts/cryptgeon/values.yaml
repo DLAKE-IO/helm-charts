@@ -36,6 +36,13 @@ cryptgeon:
   # Custom url for the favicon. Must be publicly reachable
   theme_favicon:	""
 
+## @param extraVolumes Optionally specify extra list of additional volumes for cryptgeon pods
+##
+extraVolumes: []
+## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts for cryptgeon container(s)
+##
+extraVolumeMounts: []
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
