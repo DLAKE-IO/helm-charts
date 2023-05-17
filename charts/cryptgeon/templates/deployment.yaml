@@ -38,36 +38,36 @@ spec:
               {{- if .Values.redis.enabled }}
               value: {{ printf "redis://%s-master" (include "common.names.fullname" .Subcharts.redis) | quote }}
               {{- else }}
-              valueFrom:                                
-                secretKeyRef:             
+              valueFrom:
+                secretKeyRef:
                   key: {{ .Values.externalRedis.existingSecretKey }}
                   name: {{ .Values.externalRedis.existingSecretName }}
               {{- end }}
             - name: SIZE_LIMIT
-              value: {{ .Values.cryptgeon.size_limit }}
+              value: {{ .Values.cryptgeon.size_limit | quote }}
             - name: MAX_VIEWS
-              value: {{ .Values.cryptgeon.max_views }}
+              value: {{ .Values.cryptgeon.max_views | quote }}
             - name: MAX_EXPIRATION
-              value: {{ .Values.cryptgeon.max_expiration }}
+              value: {{ .Values.cryptgeon.max_expiration | quote }}
             - name: ALLOW_ADVANCED
-              value: {{ .Values.cryptgeon.allow_advanced }}
+              value: {{ .Values.cryptgeon.allow_advanced | quote }}
             - name: VERBOSITY
-              value: {{ .Values.cryptgeon.verbosity }}
+              value: {{ .Values.cryptgeon.verbosity | quote }}
             {{- if .Values.cryptgeon.theme_image }}
             - name: THEME_IMAGE
-              value: {{ .Values.cryptgeon.theme_image }}
+              value: {{ .Values.cryptgeon.theme_image | quote }}
             {{- end }}
             {{- if .Values.cryptgeon.theme_text }}
             - name: THEME_TEXT
-              value: {{ .Values.cryptgeon.theme_text }}
+              value: {{ .Values.cryptgeon.theme_text | quote }}
             {{- end }}
             {{- if .Values.cryptgeon.theme_page_title }}
             - name: THEME_PAGE_TITLE
-              value: {{ .Values.cryptgeon.theme_page_title }}
+              value: {{ .Values.cryptgeon.theme_page_title | quote }}
             {{- end }}
             {{- if .Values.cryptgeon.theme_favicon}}
             - name: THEME_FAVICON
-              value: {{ .Values.cryptgeon.theme_favicon }}
+              value: {{ .Values.cryptgeon.theme_favicon | quote }}
             {{- end }}
           ports:
             - name: http
