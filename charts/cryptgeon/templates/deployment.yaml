@@ -40,7 +40,7 @@ spec:
           env:
             - name: REDIS
               {{- if .Values.redis.enabled }}
-              value: {{ printf "redis://%s-master" (include "common.names.fullname" .Subcharts.redis) | quote }}
+              value: {{ printf "redis://%s-headless" (include "common.names.fullname" .Subcharts.redis) | quote }}
               {{- else }}
               valueFrom:
                 secretKeyRef:

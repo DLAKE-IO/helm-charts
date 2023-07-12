@@ -1,0 +1,34 @@
+apiVersion: v1
+entries:
+  cryptgeon:
+  - apiVersion: v2
+    appVersion: 2.3.1
+    created: "2023-06-26T07:05:28.811960437Z"
+    dependencies:
+    - condition: redis.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 17.x.x
+    description: A Helm chart to install cryptgeon
+    digest: 2befb379a9c3b8577072f9853e8cc5e5a33f2c8e9f5944c8b7b3a612efa04fb0
+    name: cryptgeon
+    type: application
+    urls:
+    - https://github.com/DLAKE-IO/helm-charts/releases/download/cryptgeon-2.3.1/cryptgeon-2.3.1.tgz
+    version: 2.3.1
+  - apiVersion: v2
+    appVersion: 2.2.0
+    created: "2023-05-17T09:26:49.018284915Z"
+    dependencies:
+    - condition: redis.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 17.x.x
+    description: A Helm chart to install cryptgeon
+    digest: 859c82e4353b9e92829e93e39a4a6806cdf7e10053e39079bbeb6f12aaea9827
+    name: cryptgeon
+    type: application
+    urls:
+    - https://github.com/DLAKE-IO/helm-charts/releases/download/cryptgeon-2.2.0/cryptgeon-2.2.0.tgz
+    version: 2.2.0
+generated: "2023-06-26T07:05:28.811975537Z"
