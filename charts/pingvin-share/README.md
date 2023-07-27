@@ -13,6 +13,8 @@ helm install pingvin-share dlake/pingvin-share -n pingvin-share
 
 This chart bootstraps a [pingvin-share](https://github.com/stonith404/pingvin-share) Deployment on a [Kubernetes](https://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
+> :warning: Currently, this serves as a proof of concept since the application's architecture restricts it from having more than one replica.
+
 ## Installing the Chart
 
 To install the chart with the release name `pingvin-share`:
@@ -36,7 +38,7 @@ The following table lists the configurable parameters of the pingvin-share chart
 | Key | Default Value | Description |
 | --- | --- | --- |
 | replicaCount | 1 | The number of replicas for the deployment. |
-| image.repository | cupcakearmy/pingvin-share | The repository of the container image. |
+| image.repository | stonith404/pingvin-share | The repository of the container image. |
 | image.pullPolicy | IfNotPresent | The pull policy for the container image. |
 | image.tag | "" | Overrides the image tag whose default is the chart appVersion. |
 | imagePullSecrets | [] | Secrets needed to pull the container image. |
@@ -56,7 +58,7 @@ The following table lists the configurable parameters of the pingvin-share chart
 | podSecurityContext | {"fsGroup":2000} | The security context for the pod. |
 | securityContext | {"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}} | The security context for the container. |
 | service.type | ClusterIP | The type of the service. |
-| service.port | 8000 | The port for the service. |
+| service.port | 3000 | The port for the service. |
 | ingress.enabled | false | Specifies whether ingress is enabled. |
 | ingress.className | "" | The ingress class name. |
 | ingress.annotations | {} | Annotations to add to the ingress. |
@@ -74,7 +76,7 @@ The following table lists the configurable parameters of the pingvin-share chart
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```bash
-helm install pingvin-share dlake/pingvin-share -n pingvin-share --set replicas=1
+helm install pingvin-share dlake/pingvin-share -n pingvin-share --set image.tag="v0.17.0"
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
