@@ -33,6 +33,22 @@ entries:
     version: 2.2.0
   pingvin-share:
   - apiVersion: v2
+    appVersion: v0.21.3
+    created: "2024-01-03T16:17:33.719980588Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/bitnamicharts
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: A Helm chart to install Pingvin Share
+    digest: ca011bdd3bee8d35d2d580de339cc0a685036fa1361215607ac61be2f92ea19f
+    name: pingvin-share
+    type: application
+    urls:
+    - https://github.com/DLAKE-IO/helm-charts/releases/download/pingvin-share-0.0.2/pingvin-share-0.0.2.tgz
+    version: 0.0.2
+  - apiVersion: v2
     appVersion: v0.17.0
     created: "2023-07-26T15:23:36.898139384Z"
     dependencies:
@@ -48,4 +64,4 @@ entries:
     urls:
     - https://github.com/DLAKE-IO/helm-charts/releases/download/pingvin-share-0.0.1/pingvin-share-0.0.1.tgz
     version: 0.0.1
-generated: "2023-07-26T15:23:36.898148284Z"
+generated: "2024-01-03T16:17:33.719996097Z"
