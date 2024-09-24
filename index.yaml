@@ -2,6 +2,21 @@ apiVersion: v1
 entries:
   cryptgeon:
   - apiVersion: v2
+    appVersion: 2.8.2
+    created: "2024-09-24T16:22:04.955185406Z"
+    dependencies:
+    - condition: redis.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 17.x.x
+    description: A Helm chart to install cryptgeon
+    digest: 886d5993c425d21109f4a97622eb98824f9cf49c33b45504d8b9b5abe2f03f52
+    name: cryptgeon
+    type: application
+    urls:
+    - https://github.com/DLAKE-IO/helm-charts/releases/download/cryptgeon-2.8.2/cryptgeon-2.8.2.tgz
+    version: 2.8.2
+  - apiVersion: v2
     appVersion: 2.3.1
     created: "2023-07-12T16:55:45.709232239Z"
     dependencies:
@@ -32,6 +47,22 @@ entries:
     - https://github.com/DLAKE-IO/helm-charts/releases/download/cryptgeon-2.2.0/cryptgeon-2.2.0.tgz
     version: 2.2.0
   pingvin-share:
+  - apiVersion: v2
+    appVersion: v1.1.2
+    created: "2024-09-24T16:22:05.142396638Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/bitnamicharts
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: A Helm chart to install Pingvin Share
+    digest: 82c1adad824c04287be4d530c47cb696a7f1f29644b074b2b71be44ac0ae7210
+    name: pingvin-share
+    type: application
+    urls:
+    - https://github.com/DLAKE-IO/helm-charts/releases/download/pingvin-share-0.0.3/pingvin-share-0.0.3.tgz
+    version: 0.0.3
   - apiVersion: v2
     appVersion: v0.21.3
     created: "2024-01-03T16:17:33.719980588Z"
@@ -64,4 +95,4 @@ entries:
     urls:
     - https://github.com/DLAKE-IO/helm-charts/releases/download/pingvin-share-0.0.1/pingvin-share-0.0.1.tgz
     version: 0.0.1
-generated: "2024-01-03T16:17:33.719996097Z"
+generated: "2024-09-24T16:22:05.142418679Z"
