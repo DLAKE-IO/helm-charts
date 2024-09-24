@@ -79,7 +79,7 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /api/health/
+              path: /api/live/
               port: {{ .Values.service.port }}
           readinessProbe:
             httpGet:
