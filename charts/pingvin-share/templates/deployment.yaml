@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "pingvin-share.fullname" . }}
+  labels:
+    {{- include "pingvin-share.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "pingvin-share.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "pingvin-share.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "pingvin-share.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        - name: var-lib-nginx
+          emptyDir: {}
+        - name: var-lib-nginx-logs
+          emptyDir: {}
+        - name: var-lib-nginx-tmp
+          emptyDir: {}
+        - name: run-nginx
+          emptyDir: {}
+        - name: node-home
+          emptyDir: {}
+        - name: frontend-cache
+          emptyDir:
+            medium: Memory
+        - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (printf "%s-data" (include "pingvin-share.fullname" .)) }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+      {{- if .Values.extraVolumes -}}
+      {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" $) | nindent 8 -}}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: DATABASE_URL
+              value: {{ index .Values "pingvin-share" "backend" "databaseUrl" | quote }}
+            - name: DATA_DIRECTORY
+              value: {{ index .Values "pingvin-share" "backend" "dataDirectory" | quote }}
+            - name: CLAMAV_HOST
+              value: {{ index .Values "pingvin-share" "backend" "clamavHost" | quote }}
+            - name: CLAMAV_PORT
+              value: {{ index .Values "pingvin-share" "backend" "clamavPort" | quote }}
+            - name: API_URL
+              value: {{ index .Values "pingvin-share" "frontend" "apiUrl" | quote }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.livenessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.readinessProbe "enabled") "context" $) | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: "/var/lib/nginx"
+              name: var-lib-nginx
+            - mountPath: "/var/lib/nginx/logs"
+              name: var-lib-nginx-logs
+            - mountPath: "/var/lib/nginx/tmp"
+              name: var-lib-nginx-tmp
+            - mountPath: "/run/nginx"
+              name: run-nginx
+            - name: node-home
+              mountPath: /home/node
+            - name: frontend-cache
+              mountPath: /opt/app/frontend/.next/cache
+            - name: data
+              mountPath: /opt/app/backend/data
+              subPathExpr: data
+            - name: data
+              mountPath: /opt/app/frontend/public/img
+              subPathExpr: img
+          {{- if .Values.extraVolumeMounts -}}
+          {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 -}}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

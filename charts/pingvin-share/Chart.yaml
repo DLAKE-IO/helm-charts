@@ -1,0 +1,12 @@
+apiVersion: v2
+name: pingvin-share
+description: A Helm chart to install Pingvin Share
+type: application
+version: 1.6.1
+appVersion: "v1.6.1"
+dependencies:
+- name: common
+  repository: oci://registry-1.docker.io/bitnamicharts
+  tags:
+    - bitnami-common
+  version: 2.x.x
