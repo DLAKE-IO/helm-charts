@@ -1,0 +1,42 @@
+{{ template "chart.description" . }}
+
+{{ template "chart.versionBadge" . }}
+{{ template "chart.typeBadge" . }}
+{{ template "chart.appVersionBadge" . }}
+
+
+{{ template "chart.maintainersSection" . }}
+
+## TL;DR;
+
+```bash
+helm repo add dlake https://dlake-io.github.io/helm-charts/
+helm install pingvin-share dlake/pingvin-share -n pingvin-share
+```
+
+## Introduction
+
+This chart bootstraps a [pingvin-share](https://github.com/stonith404/pingvin-share) Deployment on a [Kubernetes](https://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+
+> :warning: Currently, this serves as a proof of concept since the application's architecture restricts it from having more than one replica.
+
+## Installing the Chart
+
+To install the chart with the release name `pingvin-share`:
+
+```bash
+helm install pingvin-share dlake/pingvin-share
+```
+
+## Uninstalling the Chart
+
+To uninstall the `pingvin-share` deployment:
+
+```bash
+helm uninstall pingvin-share
+```
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}
