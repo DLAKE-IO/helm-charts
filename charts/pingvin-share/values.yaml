@@ -114,7 +114,7 @@ livenessProbe:
     ##   value: https
     ##
     httpHeaders: []
-  initialDelaySeconds: 10
+  initialDelaySeconds: 30
   periodSeconds: 10
   timeoutSeconds: 5
   failureThreshold: 3
@@ -143,7 +143,7 @@ readinessProbe:
     ##   value: https
     ##
     httpHeaders: []
-  initialDelaySeconds: 10
+  initialDelaySeconds: 30
   periodSeconds: 10
   timeoutSeconds: 5
   failureThreshold: 3
