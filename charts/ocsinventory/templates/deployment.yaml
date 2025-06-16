@@ -46,7 +46,7 @@ spec:
           - name: OCS_DB_NAME
             valueFrom:
               secretKeyRef:
-                name: {{ if .Values.existingSecret }}{{ .Values.existingSecret }}{{ else }}{{ template "ocsinventory.fullname" . }}{{ end }}
+                name: {{ template "ocsinventory.fullname" . }}
                 key: db-name
           - name: OCS_DB_PASS
             valueFrom:
@@ -56,12 +56,12 @@ spec:
           - name: OCS_DB_SERVER
             valueFrom:
               secretKeyRef:
-                name: {{ if .Values.existingSecret }}{{ .Values.existingSecret }}{{ else }}{{ template "ocsinventory.fullname" . }}{{ end }}
+                name: {{ template "ocsinventory.fullname" . }}
                 key: db-host
           - name: OCS_DB_USER
             valueFrom:
               secretKeyRef:
-                name: {{ if .Values.existingSecret }}{{ .Values.existingSecret }}{{ else }}{{ template "ocsinventory.fullname" . }}{{ end }}
+                name: {{ template "ocsinventory.fullname" . }}
                 key: db-user
           - name: OCS_SSL_ENABLED
             value: "0"
