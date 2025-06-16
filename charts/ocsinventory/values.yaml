@@ -21,6 +21,8 @@ image:
   pullPolicy: IfNotPresent
   tag: "2.12.1"
 
+imagePullSecrets: []
+
 # Number of replicas to be deployed
 replicaCount: 1
 
