@@ -5,16 +5,16 @@ metadata:
   name: {{ template "ocsinventory.fullname" . }}-ocsreports
   labels:
     {{- include "ocsinventory.labels" . | nindent 4 }}
+  {{- if .Values.ingress.annotations }}
   annotations:
-  {{- with .Values.ingress.annotations }}
-    {{- toYaml . | nindent 4 }}
+    {{- toYaml .Values.ingress.annotations | nindent 4 }}
   {{- end }}
 spec:
   {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
   ingressClassName: {{ .Values.ingress.className }}
   {{- end }}
   {{- if .Values.ingress.tls }}
-    tls:
+  tls:
     {{- range .Values.ingress.tls }}
     - hosts:
         {{- range .hosts }}
@@ -31,17 +31,16 @@ spec:
           {{- range .paths }}
           - path: {{ .path }}
             pathType: {{ .pathType }}
-            {{- end }}
             backend:
               service:
                 name: {{ template "ocsinventory.fullname" $ }}
                 port:
                   number: 80
-    {{- end}}
+          {{- end }}
+    {{- end }}
 {{- end }}
 ---
-{{- if .Values.ingress.enabled }}
-{{- if .Values.ingress.basicauth.enabled }}
+{{- if and .Values.ingress.enabled .Values.ingress.basicauth.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -49,9 +48,9 @@ metadata:
   labels:
     {{- include "ocsinventory.labels" . | nindent 4 }}
   annotations:
-  {{- with .Values.ingress.annotations }}
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- if .Values.ingress.annotations }}
+    {{- toYaml .Values.ingress.annotations | nindent 4 }}
+    {{- end }}
     nginx.ingress.kubernetes.io/auth-type: basic
     nginx.ingress.kubernetes.io/auth-secret: {{ if .Values.existingSecret }}{{ .Values.existingSecret }}{{ else }}{{ template "ocsinventory.fullname" . }}{{ end }}
     nginx.ingress.kubernetes.io/auth-realm: {{ .Values.ingress.basicauth.authRealm | quote }}
@@ -60,7 +59,7 @@ spec:
   ingressClassName: {{ .Values.ingress.className }}
   {{- end }}
   {{- if .Values.ingress.tls }}
-    tls:
+  tls:
     {{- range .Values.ingress.tls }}
     - hosts:
         {{- range .hosts }}
@@ -83,6 +82,5 @@ spec:
                 port:
                   number: 80
           {{- end }}
-    {{- end}}
-{{- end }}
+    {{- end }}
 {{- end }}
