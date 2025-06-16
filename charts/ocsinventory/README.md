@@ -1,6 +1,6 @@
 # ocsinventory
 
-![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.12.3](https://img.shields.io/badge/AppVersion-2.12.3-informational?style=flat-square)
+![Version: 1.2.0](https://img.shields.io/badge/Version-1.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.12.3](https://img.shields.io/badge/AppVersion-2.12.3-informational?style=flat-square)
 
 Open Computers and Software Inventory Next Generation is an assets management and deployment solution.
 
@@ -46,24 +46,20 @@ Open Computers and Software Inventory Next Generation is an assets management an
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"ocsinventory/ocsinventory-docker-image"` |  |
 | image.tag | string | `"2.12.1"` |  |
-| ingress.annotations."cert-manager.io/cluster-issuer" | string | `""` |  |
-| ingress.annotations."kubernetes.io/ingress.class" | string | `"nginx"` |  |
-| ingress.annotations."nginx.ingress.kubernetes.io/app-root" | string | `"/ocsreports/"` |  |
-| ingress.annotations."nginx.ingress.kubernetes.io/force-ssl-redirect" | string | `"true"` |  |
-| ingress.annotations."nginx.ingress.kubernetes.io/proxy-body-size" | string | `"200M"` |  |
-| ingress.annotations."nginx.ingress.kubernetes.io/proxy-connect-timeout" | string | `"300s"` |  |
-| ingress.annotations."nginx.ingress.kubernetes.io/proxy-read-timeout" | string | `"300s"` |  |
-| ingress.annotations."nginx.ingress.kubernetes.io/proxy-send-timeout" | string | `"300s"` |  |
+| ingress.annotations | object | `{}` |  |
 | ingress.basicauth.authRealm | string | `"Authentication Required"` |  |
 | ingress.basicauth.enabled | bool | `false` |  |
 | ingress.basicauth.password | string | `""` |  |
 | ingress.basicauth.paths[0] | string | `"/ocsapi"` |  |
 | ingress.basicauth.paths[1] | string | `"/ocsinventory"` |  |
 | ingress.basicauth.username | string | `""` |  |
+| ingress.className | string | `""` |  |
 | ingress.enabled | bool | `true` |  |
-| ingress.hosts[0] | string | `""` |  |
+| ingress.hosts[0].host | string | `"chart-example.local"` |  |
+| ingress.hosts[0].paths[0].path | string | `"/"` |  |
+| ingress.hosts[0].paths[0].pathType | string | `"ImplementationSpecific"` |  |
 | ingress.labels | object | `{}` |  |
-| ingress.tls | bool | `true` |  |
+| ingress.tls | list | `[]` |  |
 | mariadb.auth.database | string | `""` |  |
 | mariadb.auth.password | string | `""` |  |
 | mariadb.auth.rootPassword | string | `""` |  |
