@@ -60,7 +60,7 @@
             CR_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
             CR_RELEASE_NAME_TEMPLATE: '{{ .Version }}-helm'
 
-        - uses: sigstore/cosign-installer@v3.5.0
+        - uses: sigstore/cosign-installer@v3.10.0
         - name: Push chart to GHCR
           run: |
             shopt -s nullglob
