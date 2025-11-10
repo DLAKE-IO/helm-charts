@@ -97,7 +97,7 @@ spec:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ printf "%s-%s" .Release.Name "externaldb" }}
+                  name: {{ .Values.externalDatabase.existingSecret | default (printf "%s-%s" .Release.Name "externaldb") }}
                   key: db-password
           {{- end }}
             - name: APP_KEY
