@@ -1,15 +1,14 @@
 {{- if .Values.rbac.create }}
-kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
 metadata:
-  name: {{ template "bookstack.fullname" . }}
+  name: {{ include "bookstack.fullname" . }}
   labels:
-    app: {{ template "bookstack.name" . }}
-    chart: {{ template "bookstack.chart" .  }}
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
+    {{- include "bookstack.labels" . | nindent 4 }}
 rules:
-- apiGroups: [""]
-  resources: ["endpoints"]
-  verbs: ["get"]
+  # Note: These permissions are kept for backward compatibility but may not be necessary.
+  # Consider disabling RBAC (rbac.create: false) if not needed.
+  - apiGroups: [""]
+    resources: ["endpoints"]
+    verbs: ["get"]
 {{- end }}
