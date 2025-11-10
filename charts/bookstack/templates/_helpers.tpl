@@ -49,3 +49,23 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- define "bookstack.mariadb.fullname" -}}
 {{- printf "%s-%s" .Release.Name "mariadb" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Common labels
+*/}}
+{{- define "bookstack.labels" -}}
+helm.sh/chart: {{ include "bookstack.chart" . }}
+{{ include "bookstack.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "bookstack.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "bookstack.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
