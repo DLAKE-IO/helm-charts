@@ -14,8 +14,25 @@
 *.swp
 *.bak
 *.tmp
+*.orig
 *~
 # Various IDEs
 .project
 .idea/
 *.tmproj
+.vscode/
+*.code-workspace
+# Documentation and CI files
+*.md
+.github/
+ci/
+OWNERS
+VALUES_SUMMARY.md
+# Testing
+test/
+tests/
+*.test.yaml
+# Development files
+.editorconfig
+.prettierrc
+.eslintrc
