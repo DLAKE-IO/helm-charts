@@ -162,9 +162,9 @@ spec:
           emptyDir: {}
         {{- end }}
         - name: mysql-cert-file
-        {{- if .Values.externalDatabase.tlsCert }}
+        {{- if or .Values.externalDatabase.tlsCert .Values.externalDatabase.existingTlsSecret }}
           secret:
-            secretName: {{ printf "%s-%s" .Release.Name "cert"  }}
+            secretName: {{ .Values.externalDatabase.existingTlsSecret | default (printf "%s-%s" .Release.Name "cert") }}
         {{- else }}
           emptyDir: {}
         {{- end -}}
