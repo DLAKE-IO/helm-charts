@@ -107,7 +107,7 @@ spec:
                   key: app-key
             - name: APP_URL
               value: {{ required "value app.url is required" .Values.app.url }}
-          {{- if .Values.externalDatabase.tlsCert }}
+          {{- if or .Values.externalDatabase.tlsCert .Values.externalDatabase.existingTlsSecret }}
             - name: MYSQL_ATTR_SSL_CA
               value: /etc/mysql/mysql.cert
           {{- end }}
