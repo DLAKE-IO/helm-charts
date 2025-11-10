@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "bookstack.fullname" . }}
+  name: {{ include "bookstack.fullname" . }}
   labels:
-    app: {{ template "bookstack.name" . }}
-    chart: {{ template "bookstack.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    {{- include "bookstack.labels" . | nindent 4 }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "bookstack.name" . }}
-      release: {{ .Release.Name }}
+      {{- include "bookstack.selectorLabels" . | nindent 6 }}
 {{- if .Values.deploymentStrategy }}
   strategy:
 {{ toYaml .Values.deploymentStrategy | indent 4 }}
@@ -20,28 +20,41 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "bookstack.name" . }}
-        release: {{ .Release.Name }}
+        {{- include "bookstack.selectorLabels" . | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       securityContext:
-{{ toYaml .Values.securityContext | indent 8 }}
-      serviceAccountName: {{ template "bookstack.serviceAccountName" . }}
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ include "bookstack.serviceAccountName" . }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
           ports:
             - name: http
               containerPort: 8080
               protocol: TCP
+          {{- with .Values.livenessProbe }}
           livenessProbe:
-            httpGet:
-              path: /status
-              port: http
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
           readinessProbe:
-            httpGet:
-              path: /status
-              port: http
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           env:
           {{- if .Values.ldap.enabled }}
             - name: AUTH_METHOD
@@ -53,7 +66,10 @@ spec:
             - name: LDAP_DN
               value: {{ .Values.ldap.dn | quote }}
             - name: LDAP_PASS
-              value: {{ .Values.ldap.pass | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bookstack.fullname" . }}-ldap
+                  key: ldap-password
             - name: LDAP_USER_FILTER
               value: {{ .Values.ldap.userFilter | quote }}
             - name: LDAP_VERSION
@@ -61,7 +77,7 @@ spec:
           {{- end }}
           {{- if .Values.mariadb.enabled }}
             - name: DB_HOST
-              value: {{ template "bookstack.mariadb.fullname" . }}
+              value: {{ include "bookstack.mariadb.fullname" . }}
             - name: DB_DATABASE
               value: {{ .Values.mariadb.auth.database | quote }}
             - name: DB_USERNAME
@@ -69,7 +85,7 @@ spec:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "bookstack.mariadb.fullname" . }}
+                  name: {{ include "bookstack.mariadb.fullname" . }}
                   key: mariadb-password
           {{- else }}
             - name: DB_HOST
@@ -99,6 +115,13 @@ spec:
             - name: {{ $key | upper | replace "." "_" }}
               value: {{ $value | quote }}
           {{- end }}
+          {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.extraEnvFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           volumeMounts:
           - name: uploads
             mountPath: /var/www/bookstack/public/uploads
@@ -110,7 +133,19 @@ spec:
             readOnly: true
           {{- end }}
           resources:
-{{ toYaml .Values.resources | indent 12 }}
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       volumes:
         - name: uploads
         {{- if .Values.persistence.uploads.enabled }}
