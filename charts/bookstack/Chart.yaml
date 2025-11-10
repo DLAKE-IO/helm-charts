@@ -13,3 +13,8 @@ maintainers:
   email: bart@verwilst.be
 - name: baskoopmans
   email: helm@baskoopmans.nl
+dependencies:
+  - name: mariadb
+    version: "20.x.x"
+    repository: https://charts.bitnami.com/bitnami
+    condition: mariadb.enabled
