@@ -1,18 +1,15 @@
 {{- if .Values.rbac.create }}
-kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
 metadata:
-  name: {{ template "bookstack.fullname" . }}
+  name: {{ include "bookstack.fullname" . }}
   labels:
-    app: {{ template "bookstack.name" . }}
-    chart: {{ template "bookstack.chart" .  }}
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
+    {{- include "bookstack.labels" . | nindent 4 }}
 subjects:
-- kind: ServiceAccount
-  name: {{ template "bookstack.serviceAccountName" . }}
+  - kind: ServiceAccount
+    name: {{ include "bookstack.serviceAccountName" . }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ template "bookstack.fullname" . }}
+  name: {{ include "bookstack.fullname" . }}
 {{- end }}

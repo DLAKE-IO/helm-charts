@@ -2,183 +2,311 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# -- Number of BookStack replicas to deploy (currently only 1 is supported without shared storage)
 replicaCount: 1
 
-# This will use the default deployment strategy unless it is overridden
+# -- Deployment strategy configuration
+# @default -- `{}` (defaults to RollingUpdate)
 deploymentStrategy: {}
+# Uncomment for Recreate strategy (recommended if not using shared storage):
+#  type: Recreate
 
 image:
+  # -- BookStack image repository
   repository: solidnerd/bookstack
+  # -- Image pull policy
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
+  # -- Overrides the image tag (defaults to chart appVersion)
   tag: ""
 
+# -- Image pull secrets for private registries
 imagePullSecrets: []
+
+# -- Override the name of the chart
 nameOverride: ""
+
+# -- Override the full name of the release
 fullnameOverride: ""
 
 serviceAccount:
-  # Specifies whether a ServiceAccount should be created
+  # -- Specifies whether a ServiceAccount should be created
   create: true
-  # Annotations to add to the service account
+  # -- Annotations to add to the service account
   annotations: {}
-  # The name of the ServiceAccount to use.
-  # If not set and create is true, a name is generated using the fullname template
+  # -- The name of the ServiceAccount to use (auto-generated if not set and create is true)
   name: ""
 
-# Set security context for bookstack pod
-securityContext:
+# -- Annotations to add to the deployment
+deploymentAnnotations: {}
+
+# -- Annotations to add to the pod
+podAnnotations: {}
+
+# -- Pod-level security context
+podSecurityContext:
   fsGroup: 33  # www-data
+  runAsNonRoot: true
+  runAsUser: 33
+
+# -- Container-level security context
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 33
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false  # BookStack needs write access to certain directories
 
 service:
+  # -- Kubernetes service type
   type: ClusterIP
+  # -- Service port
   port: 80
+  # -- Annotations to add to the service
+  annotations: {}
 
 ingress:
+  # -- Enable ingress
   enabled: false
+  # -- Ingress class name (e.g., "nginx")
+  className: ""
+  # -- Ingress annotations
   annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+    # nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+  # -- Ingress path
   path: /
+  # -- Ingress path type
+  pathType: ImplementationSpecific
+  # -- Ingress hostnames
   hosts:
-    - bookstack-example.local
+    - bookstack.example.local
+  # -- Ingress TLS configuration
   tls: []
-  #  - secretName: chart-example-tls
+  #  - secretName: bookstack-tls
   #    hosts:
-  #      - chart-example.local
+  #      - bookstack.example.local
 
+# -- Resource limits and requests
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
+  #   cpu: 1000m
+  #   memory: 512Mi
   # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
+  #   cpu: 100m
+  #   memory: 256Mi
 
+# -- Liveness probe configuration
+livenessProbe:
+  httpGet:
+    path: /status
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+
+# -- Readiness probe configuration
+readinessProbe:
+  httpGet:
+    path: /status
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# -- Startup probe configuration
+startupProbe:
+  httpGet:
+    path: /status
+    port: http
+  initialDelaySeconds: 0
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 30
+
+# -- Node selector for pod assignment
 nodeSelector: {}
 
+# -- Tolerations for pod assignment
 tolerations: []
 
+# -- Affinity rules for pod assignment
 affinity: {}
 
-
 app:
-  # Laravel APP_KEY. Generate one with `php artisan key:generate` and put here if you want a static key.
+  # -- Laravel APP_KEY (required). Generate with: php artisan key:generate --show
+  # @default -- "" (must be provided)
   key: ""
+  # -- Application URL (required). Must match ingress host or service URL
   url: ""
 
+# -- Additional environment variables (deprecated, use extraEnv instead)
 env: {}
+
+# -- Extra environment variables to add to the container (list format)
+# @default -- `[]`
+extraEnv: []
+# - name: CUSTOM_VAR
+#   value: "custom_value"
+# - name: SECRET_VAR
+#   valueFrom:
+#     secretKeyRef:
+#       name: my-secret
+#       key: secret-key
+
+# -- Extra environment variables from ConfigMaps or Secrets
+# @default -- `[]`
+extraEnvFrom: []
+# - configMapRef:
+#     name: my-config
+# - secretRef:
+#     name: my-secret
 
 ##
 ## External database configuration
 ##
 externalDatabase:
-  ## Database host
-  host:
-
-  ## Database host
+  # -- External database host
+  host: ""
+  # -- External database port
   port: 3306
-
-  ## Database user
+  # -- External database user
   user: bookstack
-
-  ## Database password
-  password:
-
-  ## Database name
+  # -- External database password
+  password: ""
+  # -- External database name
   database: bookstack
-
-  ## TLS cert file to setup TLS connection with externalDatabase
-  ## tlsCert: <cert file content>
+  # -- TLS certificate content for secure database connection
+  tlsCert: ""
 
 ##
 ## MariaDB chart configuration
+## ref: https://github.com/bitnami/charts/tree/main/bitnami/mariadb
 ##
 mariadb:
-  ## Whether to deploy a mariadb server to satisfy the applications database requirements. To use an external database set this to false and configure the externalDatabase parameters
+  # -- Enable MariaDB subchart. Set to false to use externalDatabase
   enabled: true
 
-  ## Disable MariaDB replication
+  # -- MariaDB architecture (standalone or replication)
   architecture: standalone
 
-  ## Create a database and a database user
-  ## ref: https://github.com/bitnami/bitnami-docker-mariadb/blob/master/README.md#creating-a-database-user-on-first-run
-  ##
   auth:
+    # -- MariaDB database name
     database: bookstack
+    # -- MariaDB database user
     username: bookstack
-    ## If the password is not specified, mariadb will generates a random password
-    ##
-    # password:
+    # -- MariaDB user password (auto-generated if not specified)
+    password: ""
+    # -- MariaDB root password (auto-generated if not specified)
+    rootPassword: ""
 
-    ## MariaDB admin password
-    ## ref: https://github.com/bitnami/bitnami-docker-mariadb/blob/master/README.md#setting-the-root-password-on-first-run
-    ##
-    # rootPassword:
-
-  ## Enable persistence using Persistent Volume Claims
-  ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
-  ##
   primary:
     persistence:
+      # -- Enable persistence for MariaDB
       enabled: false
-      ## mariadb data Persistent Volume Storage Class
-      ## If defined, storageClassName: <storageClass>
-      ## If set to "-", storageClassName: "", which disables dynamic provisioning
-      ## If undefined (the default) or set to null, no storageClassName spec is
-      ##   set, choosing the default provisioner.  (gp2 on AWS, standard on GKE, AWS & OpenStack)
-      ##
-      # storageClass: "-"
-      # accessModes: [ReadWriteOnce]
-      # size: 8Gi
+      # -- Storage class for MariaDB PVC
+      # @default -- `""` (use cluster default)
+      storageClass: ""
+      # -- Access mode for MariaDB PVC
+      accessModes:
+        - ReadWriteOnce
+      # -- Size of MariaDB PVC
+      size: 8Gi
 
-## For RBAC support:
+##
+## RBAC configuration
+##
 rbac:
-  # Specifies whether RBAC resources should be created
+  # -- Create RBAC resources (Role and RoleBinding)
+  # Note: The default RBAC permissions may not be necessary for BookStack.
+  # Consider setting this to false unless you have a specific use case.
   create: true
 
-## Enable persistence using Persistent Volume Claims
-## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+## Persistence configuration
 ##
 persistence:
   # Persistence for the public/uploads folder
   uploads:
+    # -- Enable persistence for uploads
     enabled: true
-    ## database data Persistent Volume Storage Class
-    ## If defined, storageClassName: <storageClass>
-    ## If set to "-", storageClassName: "", which disables dynamic provisioning
-    ## If undefined (the default) or set to null, no storageClassName spec is
-    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-    ##   GKE, AWS & OpenStack)
-    ##
-    # storageClass: "-"
+    # -- Use existing PVC for uploads
+    existingClaim: ""
+    # -- Storage class for uploads PVC
+    # @default -- `""` (use cluster default)
+    storageClass: ""
+    # -- Access mode for uploads PVC
     accessMode: ReadWriteOnce
+    # -- Size of uploads PVC
     size: 8Gi
+    # -- Annotations for uploads PVC
+    annotations: {}
 
-  # Persistence for the public/storage folder
+  # Persistence for the storage/uploads folder
   storage:
+    # -- Enable persistence for storage
     enabled: true
-    ## database data Persistent Volume Storage Class
-    ## If defined, storageClassName: <storageClass>
-    ## If set to "-", storageClassName: "", which disables dynamic provisioning
-    ## If undefined (the default) or set to null, no storageClassName spec is
-    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-    ##   GKE, AWS & OpenStack)
-    ##
-    # storageClass: "-"
+    # -- Use existing PVC for storage
+    existingClaim: ""
+    # -- Storage class for storage PVC
+    # @default -- `""` (use cluster default)
+    storageClass: ""
+    # -- Access mode for storage PVC
     accessMode: ReadWriteOnce
+    # -- Size of storage PVC
     size: 8Gi
+    # -- Annotations for storage PVC
+    annotations: {}
 
-## Enable ldap authentication. See https://www.bookstackapp.com/docs/admin/ldap-auth/ for details on how to set it up.
+##
+## LDAP authentication configuration
+## ref: https://www.bookstackapp.com/docs/admin/ldap-auth/
+##
 ldap:
+  # -- Enable LDAP authentication
   enabled: false
-  server:
-  base_dn:
-  dn:
-  pass:
-  userFilter:
-  version:
+  # -- LDAP server address (e.g., "ldap://ldap.example.com:389")
+  server: ""
+  # -- LDAP base DN (e.g., "dc=example,dc=com")
+  base_dn: ""
+  # -- LDAP bind DN (e.g., "cn=admin,dc=example,dc=com")
+  dn: ""
+  # -- LDAP bind password (stored in Kubernetes Secret)
+  pass: ""
+  # -- LDAP user filter (e.g., "(&(uid=${user}))")
+  userFilter: ""
+  # -- LDAP protocol version (usually "3")
+  version: ""
+
+##
+## Pod Disruption Budget
+##
+podDisruptionBudget:
+  # -- Enable PodDisruptionBudget
+  enabled: false
+  # -- Minimum available pods during disruption
+  minAvailable: 1
+  # -- Maximum unavailable pods during disruption (alternative to minAvailable)
+  # maxUnavailable: 1
+
+##
+## Network Policy
+##
+networkPolicy:
+  # -- Enable NetworkPolicy
+  enabled: false
+  ingress:
+    # -- Pod selector for ingress traffic
+    podSelector: {}
+    # -- Namespace selector for ingress traffic
+    namespaceSelector: {}
+  egress:
+    # -- Additional egress rules
+    extraRules: []
