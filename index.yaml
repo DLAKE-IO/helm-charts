@@ -1,5 +1,29 @@
 apiVersion: v1
 entries:
+  bookstack:
+  - apiVersion: v2
+    appVersion: "25.11"
+    created: "2025-11-10T22:37:18.753580093Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: https://charts.bitnami.com/bitnami
+      version: 20.x.x
+    description: BookStack is a simple, self-hosted, easy-to-use platform for organising
+      and storing information.
+    digest: 5482f3b53ccb177a9b682b500bac7ebdd471af8280c00b466082a1d23ce692f0
+    home: https://www.bookstackapp.com/
+    icon: https://media.githubusercontent.com/media/BookStackApp/website/master/static/images/logo.png
+    maintainers:
+    - email: 5606292+drustan@users.noreply.github.com
+      name: Tristan
+    name: bookstack
+    sources:
+    - https://github.com/BookStackApp/BookStack
+    type: application
+    urls:
+    - https://github.com/DLAKE-IO/helm-charts/releases/download/bookstack-2.0.0/bookstack-2.0.0.tgz
+    version: 2.0.0
   cryptgeon:
   - apiVersion: v2
     appVersion: 2.8.2
@@ -336,4 +360,4 @@ entries:
     urls:
     - https://github.com/DLAKE-IO/helm-charts/releases/download/pingvin-share-0.0.1/pingvin-share-0.0.1.tgz
     version: 0.0.1
-generated: "2025-06-16T13:23:10.983528622Z"
+generated: "2025-11-10T22:37:18.753628183Z"
