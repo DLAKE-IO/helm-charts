@@ -188,6 +188,12 @@ externalDatabase:
   database: bookstack
   # -- TLS certificate content for secure database connection
   tlsCert: ""
+  # -- Name of existing secret containing database password (key: db-password)
+  # If set, externalDatabase.password is ignored
+  existingSecret: ""
+  # -- Name of existing secret containing TLS certificate (key: mysql.cert)
+  # If set, externalDatabase.tlsCert is ignored
+  existingTlsSecret: ""
 
 ##
 ## MariaDB chart configuration
