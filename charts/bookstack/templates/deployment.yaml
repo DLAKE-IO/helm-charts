@@ -97,17 +97,17 @@ spec:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ printf "%s-%s" .Release.Name "externaldb" }}
+                  name: {{ .Values.externalDatabase.existingSecret | default (printf "%s-%s" .Release.Name "externaldb") }}
                   key: db-password
           {{- end }}
             - name: APP_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ printf "%s-%s" .Release.Name "app" }}
+                  name: {{ .Values.app.existingSecret | default (printf "%s-%s" .Release.Name "app") }}
                   key: app-key
             - name: APP_URL
               value: {{ required "value app.url is required" .Values.app.url }}
-          {{- if .Values.externalDatabase.tlsCert }}
+          {{- if or .Values.externalDatabase.tlsCert .Values.externalDatabase.existingTlsSecret }}
             - name: MYSQL_ATTR_SSL_CA
               value: /etc/mysql/mysql.cert
           {{- end }}
@@ -162,9 +162,9 @@ spec:
           emptyDir: {}
         {{- end }}
         - name: mysql-cert-file
-        {{- if .Values.externalDatabase.tlsCert }}
+        {{- if or .Values.externalDatabase.tlsCert .Values.externalDatabase.existingTlsSecret }}
           secret:
-            secretName: {{ printf "%s-%s" .Release.Name "cert"  }}
+            secretName: {{ .Values.externalDatabase.existingTlsSecret | default (printf "%s-%s" .Release.Name "cert") }}
         {{- else }}
           emptyDir: {}
         {{- end -}}

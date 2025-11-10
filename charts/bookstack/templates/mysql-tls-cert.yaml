@@ -1,4 +1,4 @@
-{{- if .Values.externalDatabase.tlsCert }}
+{{- if and .Values.externalDatabase.tlsCert (not .Values.externalDatabase.existingTlsSecret) }}
 apiVersion: v1
 kind: Secret
 metadata:
