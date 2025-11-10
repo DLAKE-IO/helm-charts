@@ -28,6 +28,7 @@ BookStack is a simple, self-hosted, easy-to-use platform for organising and stor
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity rules for pod assignment |
+| app.existingSecret | string | `""` | Name of existing secret containing APP_KEY (key: app-key) If set, app.key is ignored |
 | app.key | string | `""` |  |
 | app.url | string | `""` | Application URL (required). Must match ingress host or service URL |
 | containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":false,"runAsNonRoot":true,"runAsUser":33}` | Container-level security context |
@@ -35,6 +36,8 @@ BookStack is a simple, self-hosted, easy-to-use platform for organising and stor
 | deploymentStrategy | object | `{}` (defaults to RollingUpdate) | Deployment strategy configuration |
 | env | object | `{}` | Additional environment variables (deprecated, use extraEnv instead) |
 | externalDatabase.database | string | `"bookstack"` | External database name |
+| externalDatabase.existingSecret | string | `""` | Name of existing secret containing database password (key: db-password) If set, externalDatabase.password is ignored |
+| externalDatabase.existingTlsSecret | string | `""` | Name of existing secret containing TLS certificate (key: mysql.cert) If set, externalDatabase.tlsCert is ignored |
 | externalDatabase.host | string | `""` | External database host |
 | externalDatabase.password | string | `""` | External database password |
 | externalDatabase.port | int | `3306` | External database port |
