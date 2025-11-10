@@ -1,14 +1,23 @@
-name: Release Charts
+name: Release and Publish Charts
 
 on:
   push:
     branches:
       - main
+    paths:
+      - 'charts/**'
+  workflow_dispatch:
+
+env:
+  HELM_VERSION: 'v3.15.2'
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
 
 jobs:
   release:
-    permissions:
-      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -18,17 +27,116 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git config user.name "helm-bot"
+          git config user.email "helm-bot@users.noreply.github.com"
 
       - name: Install Helm
         uses: azure/setup-helm@v4
+        with:
+          version: ${{ env.HELM_VERSION }}
 
       - name: Add dependency chart repos
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo update
 
-      - name: Run chart-releaser
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run chart-releaser (GitHub Pages)
         uses: helm/chart-releaser-action@v1.7.0
+        with:
+          charts_dir: charts
+          config: './.github/configs/cr.yaml'
         env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v4.0.0
+
+      - name: Push charts to GHCR as OCI artifacts
+        id: push-oci
+        run: |
+          shopt -s nullglob
+          released_charts=""
+          
+          for pkg in .cr-release-packages/*.tgz; do
+            if [ ! -f "${pkg}" ]; then
+              echo "ℹ️ No new chart packages found to publish"
+              exit 0
+            fi
+            
+            chart_name=$(basename "${pkg}" .tgz)
+            echo "📦 Publishing ${chart_name} to GHCR..."
+            
+            # Push to GHCR and capture output
+            helm push "${pkg}" "oci://ghcr.io/${{ github.repository_owner }}/charts" |& tee .digest
+            
+            # Extract digest from output
+            digest=$(cat .digest | awk -F "[, ]+" '/Pushed/{print $NF}')
+            
+            if [ -n "${digest}" ]; then
+              echo "✅ Pushed: ${digest}"
+              released_charts="${released_charts}${chart_name}, "
+            else
+              echo "❌ Failed to push ${chart_name}"
+              exit 1
+            fi
+          done
+          
+          # Store released charts for summary
+          echo "released_charts=${released_charts%, }" >> $GITHUB_OUTPUT
+
+      - name: Sign charts with cosign
+        if: steps.push-oci.outputs.released_charts != ''
+        run: |
+          shopt -s nullglob
+          
+          for pkg in .cr-release-packages/*.tgz; do
+            chart_name=$(basename "${pkg}" .tgz)
+            
+            # Push again to get digest (idempotent operation)
+            helm push "${pkg}" "oci://ghcr.io/${{ github.repository_owner }}/charts" |& tee .digest
+            digest=$(cat .digest | awk -F "[, ]+" '/Pushed/{print $NF}')
+            
+            if [ -n "${digest}" ]; then
+              echo "🔐 Signing ${chart_name}..."
+              cosign sign --yes "${digest}"
+              echo "✅ Signed: ${digest}"
+            fi
+          done
+
+      - name: Generate release summary
+        if: steps.push-oci.outputs.released_charts != ''
+        run: |
+          echo "## 🚀 Charts Released Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Released Charts:** ${{ steps.push-oci.outputs.released_charts }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Distribution Channels" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "1. **GitHub Pages (Helm Repository)**" >> $GITHUB_STEP_SUMMARY
+          echo "   \`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "   helm repo add ${{ github.repository_owner }} https://${{ github.repository_owner }}.github.io/helm-charts/" >> $GITHUB_STEP_SUMMARY
+          echo "   helm repo update" >> $GITHUB_STEP_SUMMARY
+          echo "   \`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "2. **GitHub Container Registry (OCI)**" >> $GITHUB_STEP_SUMMARY
+          echo "   \`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "   helm pull oci://ghcr.io/${{ github.repository_owner }}/charts/<chart-name> --version <version>" >> $GITHUB_STEP_SUMMARY
+          echo "   \`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Security" >> $GITHUB_STEP_SUMMARY
+          echo "- All charts are signed with cosign" >> $GITHUB_STEP_SUMMARY
+          echo "- Release notes automatically generated" >> $GITHUB_STEP_SUMMARY
+
+      - name: No releases needed
+        if: steps.push-oci.outputs.released_charts == ''
+        run: |
+          echo "## ℹ️ No New Releases" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "No chart version bumps detected. Charts are only released when the \`version\` field in Chart.yaml is incremented." >> $GITHUB_STEP_SUMMARY
