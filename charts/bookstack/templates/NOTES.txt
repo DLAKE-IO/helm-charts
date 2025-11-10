@@ -1,19 +1,80 @@
-1. Get the application URL by running these commands:
+******************************************************************************
+***   BookStack has been installed successfully!                         ***
+******************************************************************************
+
 {{- if .Values.ingress.enabled }}
+
+1. BookStack is available at:
 {{- range .Values.ingress.hosts }}
-  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ $.Values.ingress.path }}
+   http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ $.Values.ingress.path }}
 {{- end }}
-{{- else if contains "NodePort" .Values.service.type }}
-  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ template "bookstack.fullname" . }})
+
+{{- else }}
+
+1. Get the application URL by running these commands:
+
+{{- if contains "NodePort" .Values.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "bookstack.fullname" . }})
   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
-  echo http://$NODE_IP:$NODE_PORT
+  echo "Visit http://$NODE_IP:$NODE_PORT to use BookStack"
+
 {{- else if contains "LoadBalancer" .Values.service.type }}
-     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
-           You can watch the status of by running 'kubectl get svc -w {{ template "bookstack.fullname" . }}'
-  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ template "bookstack.fullname" . }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-  echo http://$SERVICE_IP:{{ .Values.service.port }}
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+        You can watch the status by running:
+        kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "bookstack.fullname" . }}
+
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "bookstack.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo "Visit http://$SERVICE_IP:{{ .Values.service.port }} to use BookStack"
+
 {{- else if contains "ClusterIP" .Values.service.type }}
-  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app={{ template "bookstack.name" . }},release={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
-  echo "Visit http://127.0.0.1:8080 to use your application"
-  kubectl port-forward $POD_NAME 8080:80
+  kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "bookstack.fullname" . }} 8080:80
+  echo "Visit http://127.0.0.1:8080 to use BookStack"
 {{- end }}
+{{- end }}
+
+2. Default administrator credentials (if using a fresh database):
+   Email:    admin@admin.com
+   Password: password
+
+   ⚠️  IMPORTANT: Change these credentials immediately after first login!
+
+{{- if not .Values.app.key }}
+
+   ⚠️  WARNING: No APP_KEY set!
+   Generate a secure key with: php artisan key:generate --show
+   Then update your values.yaml with the generated key.
+{{- end }}
+
+3. Configuration Details:
+{{- if .Values.mariadb.enabled }}
+   - Database: Internal MariaDB ({{ .Values.mariadb.auth.database }})
+{{- else }}
+   - Database: External database at {{ .Values.externalDatabase.host }}
+{{- end }}
+{{- if .Values.persistence.uploads.enabled }}
+   - Uploads persistence: Enabled ({{ .Values.persistence.uploads.size }})
+{{- else }}
+   - Uploads persistence: Disabled (using emptyDir)
+{{- end }}
+{{- if .Values.persistence.storage.enabled }}
+   - Storage persistence: Enabled ({{ .Values.persistence.storage.size }})
+{{- else }}
+   - Storage persistence: Disabled (using emptyDir)
+{{- end }}
+{{- if .Values.ldap.enabled }}
+   - Authentication: LDAP enabled ({{ .Values.ldap.server }})
+{{- if not .Values.ldap.pass }}
+   ⚠️  WARNING: LDAP enabled but no password configured!
+{{- end }}
+{{- else }}
+   - Authentication: Standard (email/password)
+{{- end }}
+
+4. Useful Commands:
+   - View logs:      kubectl logs -f -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "bookstack.name" . }}
+   - Get pod status: kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "bookstack.name" . }}
+   - Describe pod:   kubectl describe pod -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "bookstack.name" . }}
+
+For more information and documentation, visit:
+- BookStack Documentation: https://www.bookstackapp.com/docs/
+- Chart Repository: https://github.com/dlake-io/helm-charts
