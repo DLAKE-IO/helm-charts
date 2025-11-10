@@ -103,7 +103,7 @@ spec:
             - name: APP_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ printf "%s-%s" .Release.Name "app" }}
+                  name: {{ .Values.app.existingSecret | default (printf "%s-%s" .Release.Name "app") }}
                   key: app-key
             - name: APP_URL
               value: {{ required "value app.url is required" .Values.app.url }}
