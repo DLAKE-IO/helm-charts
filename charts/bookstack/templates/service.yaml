@@ -1,12 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "bookstack.fullname" . }}
+  name: {{ include "bookstack.fullname" . }}
   labels:
-    app: {{ template "bookstack.name" . }}
-    chart: {{ template "bookstack.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    {{- include "bookstack.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -15,5 +16,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app: {{ template "bookstack.name" . }}
-    release: {{ .Release.Name }}
+    {{- include "bookstack.selectorLabels" . | nindent 4 }}
