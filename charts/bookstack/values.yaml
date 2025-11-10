@@ -146,6 +146,9 @@ app:
   key: ""
   # -- Application URL (required). Must match ingress host or service URL
   url: ""
+  # -- Name of existing secret containing APP_KEY (key: app-key)
+  # If set, app.key is ignored
+  existingSecret: ""
 
 # -- Additional environment variables (deprecated, use extraEnv instead)
 env: {}
