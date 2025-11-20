@@ -75,6 +75,18 @@ spec:
             - name: LDAP_VERSION
               value: {{ .Values.ldap.version | quote }}
           {{- end }}
+          {{- if .Values.oidc.enabled }}
+            - name: OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.oidc.existingSecret | default (printf "%s-%s" .Release.Name "oidc") }}
+                  key: oidc-client-id
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.oidc.existingSecret | default (printf "%s-%s" .Release.Name "oidc") }}
+                  key: oidc-client-secret
+          {{- end }}
           {{- if .Values.mariadb.enabled }}
             - name: DB_HOST
               value: {{ include "bookstack.mariadb.fullname" . }}
