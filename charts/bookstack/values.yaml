@@ -295,6 +295,92 @@ ldap:
   version: ""
 
 ##
+## OIDC authentication configuration
+## ref: https://www.bookstackapp.com/docs/admin/oidc-auth/
+##
+oidc:
+  # -- Enable OIDC authentication. Note: When enabled, AUTH_METHOD will be set to 'oidc'
+  enabled: false
+  
+  ## Required OIDC settings
+  # -- OIDC issuer URL (required). Must start with 'https://'
+  # Example: "https://accounts.google.com" or "https://login.microsoftonline.com/tenant-id/v2.0"
+  issuer: ""
+  # -- OIDC client ID (required unless using existingSecret)
+  clientId: ""
+  # -- OIDC client secret (required unless using existingSecret)
+  clientSecret: ""
+  # -- Name of existing secret containing OIDC credentials
+  # If set, clientId and clientSecret are ignored
+  # Secret must contain keys: oidc-client-id, oidc-client-secret
+  existingSecret: ""
+  
+  ## Login behavior
+  # -- Display name for the SSO button (e.g., "Login with SSO")
+  # @default -- "SSO"
+  name: "SSO"
+  # -- Automatically initiate OIDC login if it's the only auth method
+  # @default -- "false"
+  autoInitiate: "false"
+  
+  ## User identity mapping
+  # -- Claim(s) to use for user display names. Use '|' to concatenate multiple claims
+  # Examples: "name", "given_name|family_name", "preferred_username"
+  # @default -- "name"
+  displayNameClaims: "name"
+  # -- Claim to use for unique user identification (advanced use only)
+  # @default -- "sub" (OIDC standard)
+  # WARNING: Changing this with existing users may cause login issues
+  externalIdClaim: ""
+  
+  ## Discovery and endpoints
+  # -- Enable auto-discovery of OIDC endpoints and keys from issuer
+  # @default -- "true"
+  issuerDiscover: "true"
+  # -- Public key path for token validation (only if issuerDiscover is false)
+  # Format: "file:///path/to/public.key"
+  publicKey: ""
+  # -- Authorization endpoint URL (only if issuerDiscover is false)
+  authEndpoint: ""
+  # -- Token endpoint URL (only if issuerDiscover is false)
+  tokenEndpoint: ""
+  # -- User info endpoint URL (only if issuerDiscover is false)
+  userinfoEndpoint: ""
+  
+  ## Session management
+  # -- RP-initiated logout endpoint. Options: "false" (disabled), "true" (auto-discover), or specific URL
+  # @default -- "false"
+  endSessionEndpoint: "false"
+  
+  ## Avatar handling
+  # -- Fetch user avatars from the 'picture' claim on login
+  # @default -- "false"
+  # WARNING: This can be a security risk due to server-side fetching
+  fetchAvatar: "false"
+  
+  ## Group synchronization
+  # -- Enable syncing BookStack roles based on OIDC groups
+  # @default -- "false"
+  userToGroups: "false"
+  # -- Claim containing group names (supports dot-notation for nested properties)
+  # Examples: "groups", "resource_access.bookstack.roles"
+  groupsClaim: "groups"
+  # -- Additional OAuth scopes to request (comma-separated)
+  # Note: 'openid', 'profile', and 'email' are always included
+  # Example: "groups" or "groups,roles"
+  additionalScopes: ""
+  # -- Remove users from BookStack roles not present in OIDC groups
+  # @default -- "false"
+  # Note: "Default Registration Role" is always treated as matched
+  removeFromGroups: "false"
+  
+  ## Debugging (do not use in production)
+  # -- Dump user claim details for troubleshooting (blocks login)
+  # @default -- "false"
+  # WARNING: May expose private details - only for debugging
+  dumpUserDetails: "false"
+
+##
 ## Pod Disruption Budget
 ##
 podDisruptionBudget:
