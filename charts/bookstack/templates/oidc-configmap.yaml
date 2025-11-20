@@ -1,0 +1,59 @@
+{{- if .Values.oidc.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "bookstack.fullname" . }}-oidc
+  labels:
+    {{- include "bookstack.labels" . | nindent 4 }}
+data:
+  AUTH_METHOD: "oidc"
+  {{- with .Values.oidc.autoInitiate }}
+  AUTH_AUTO_INITIATE: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.oidc.name }}
+  OIDC_NAME: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.oidc.displayNameClaims }}
+  OIDC_DISPLAY_NAME_CLAIMS: {{ . | quote }}
+  {{- end }}
+  OIDC_ISSUER: {{ required "OIDC issuer is required when OIDC is enabled" .Values.oidc.issuer | quote }}
+  {{- with .Values.oidc.endSessionEndpoint }}
+  OIDC_END_SESSION_ENDPOINT: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.oidc.fetchAvatar }}
+  OIDC_FETCH_AVATAR: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.oidc.issuerDiscover }}
+  OIDC_ISSUER_DISCOVER: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.oidc.userToGroups }}
+  OIDC_USER_TO_GROUPS: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.oidc.groupsClaim }}
+  OIDC_GROUPS_CLAIM: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.oidc.additionalScopes }}
+  OIDC_ADDITIONAL_SCOPES: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.oidc.removeFromGroups }}
+  OIDC_REMOVE_FROM_GROUPS: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.oidc.externalIdClaim }}
+  OIDC_EXTERNAL_ID_CLAIM: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.oidc.dumpUserDetails }}
+  OIDC_DUMP_USER_DETAILS: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.oidc.publicKey }}
+  OIDC_PUBLIC_KEY: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.oidc.authEndpoint }}
+  OIDC_AUTH_ENDPOINT: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.oidc.tokenEndpoint }}
+  OIDC_TOKEN_ENDPOINT: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.oidc.userinfoEndpoint }}
+  OIDC_USERINFO_ENDPOINT: {{ . | quote }}
+  {{- end }}
+{{- end }}
