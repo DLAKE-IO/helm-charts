@@ -130,8 +130,12 @@ spec:
           {{- with .Values.extraEnv }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.extraEnvFrom }}
           envFrom:
+          {{- if .Values.oidc.enabled }}
+            - configMapRef:
+                name: {{ include "bookstack.fullname" . }}-oidc
+          {{- end }}
+          {{- with .Values.extraEnvFrom }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
