@@ -298,6 +298,37 @@ ldap:
 ## OIDC authentication configuration
 ## ref: https://www.bookstackapp.com/docs/admin/oidc-auth/
 ##
+## Example configurations:
+##
+## Basic OIDC configuration with inline credentials:
+# oidc:
+#   enabled: true
+#   issuer: "https://accounts.google.com"
+#   clientId: "your-client-id"
+#   clientSecret: "your-client-secret"
+#   name: "Google"
+#   displayNameClaims: "name"
+##
+## OIDC with existing secret for credentials:
+# oidc:
+#   enabled: true
+#   issuer: "https://login.microsoftonline.com/tenant-id/v2.0"
+#   existingSecret: "bookstack-oidc-credentials"
+#   name: "Azure AD"
+#   displayNameClaims: "name"
+##
+## OIDC with group synchronization:
+# oidc:
+#   enabled: true
+#   issuer: "https://keycloak.example.com/realms/myrealm"
+#   clientId: "bookstack"
+#   clientSecret: "secret"
+#   name: "Keycloak"
+#   userToGroups: "true"
+#   groupsClaim: "groups"
+#   additionalScopes: "groups"
+#   removeFromGroups: "true"
+##
 oidc:
   # -- Enable OIDC authentication. Note: When enabled, AUTH_METHOD will be set to 'oidc'
   enabled: false
