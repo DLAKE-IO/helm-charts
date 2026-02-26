@@ -48,7 +48,7 @@ jobs:
       - name: Cache helm-docs
         if: steps.list-changed.outputs.changed == 'true'
         id: cache-helm-docs
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /usr/local/bin/helm-docs
           key: helm-docs-${{ env.HELM_DOCS_VERSION }}
@@ -83,7 +83,7 @@ jobs:
 
       - name: Create kind cluster
         if: steps.list-changed.outputs.changed == 'true'
-        uses: helm/kind-action@v1.13.0
+        uses: helm/kind-action@v1.14.0
 
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
