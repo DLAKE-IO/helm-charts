@@ -2,7 +2,7 @@ apiVersion: v2
 name: bookstack
 description: BookStack is a simple, self-hosted, easy-to-use platform for organising and storing information.
 type: application
-version: 2.1.0
+version: 2.1.1
 appVersion: "25.11"
 home: https://www.bookstackapp.com/
 icon: https://media.githubusercontent.com/media/BookStackApp/website/master/static/images/logo.png
@@ -11,6 +11,9 @@ sources:
 maintainers:
   - name: Tristan
     email: 5606292+drustan@users.noreply.github.com
+annotations:
+  artifacthub.io/category: web
+  artifacthub.io/prerelease: "false"
 dependencies:
   - name: mariadb
     version: "20.x.x"

@@ -1,0 +1,26 @@
+# CI test values for bookstack chart
+# Used by chart-testing (ct install) to validate the chart installs correctly.
+
+app:
+  key: "base64:Y2hhcnQtdGVzdGluZy1jaS1rZXktZm9yLXRlc3Rpbmctb25seQ=="
+  url: "http://bookstack.ci.local"
+
+mariadb:
+  enabled: true
+  auth:
+    rootPassword: "ci-root-password"
+    database: "bookstack"
+    username: "bookstack"
+    password: "ci-bookstack-password"
+  primary:
+    persistence:
+      enabled: false
+
+persistence:
+  uploads:
+    enabled: false
+  storage:
+    enabled: false
+
+rbac:
+  create: false

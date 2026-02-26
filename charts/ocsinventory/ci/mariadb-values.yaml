@@ -1,0 +1,23 @@
+# CI test values for ocsinventory chart
+# Used by chart-testing (ct install) to validate the chart installs correctly.
+
+# Disable external DB and use bundled MariaDB for testing
+externalDatabase:
+  enabled: false
+
+mariadb:
+  enabled: true
+  auth:
+    rootPassword: "ci-root-password"
+    database: "ocsinventory"
+    username: "ocsinventory"
+    password: "ci-ocsinventory-password"
+  primary:
+    persistence:
+      enabled: false
+
+persistence:
+  enabled: false
+
+ingress:
+  enabled: false

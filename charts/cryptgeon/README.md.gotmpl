@@ -1,0 +1,36 @@
+{{ template "chart.header" . }}
+
+{{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}{{ template "chart.appVersionBadge" . }}
+
+{{ template "chart.description" . }}
+
+## TL;DR;
+
+```bash
+helm repo add dlake https://dlake-io.github.io/helm-charts/
+helm install cryptgeon dlake/cryptgeon -n cryptgeon --create-namespace
+```
+
+## Introduction
+
+This chart bootstraps a [cryptgeon](https://github.com/cupcakearmy/cryptgeon) Deployment on a [Kubernetes](https://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+
+## Installing the Chart
+
+To install the chart with the release name `cryptgeon`:
+
+```bash
+helm install cryptgeon dlake/cryptgeon
+```
+
+## Uninstalling the Chart
+
+To uninstall the `cryptgeon` deployment:
+
+```bash
+helm uninstall cryptgeon
+```
+{{ template "chart.maintainersSection" . }}
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}{{ template "helm-docs.versionFooter" . }}

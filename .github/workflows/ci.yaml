@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  HELM_DOCS_VERSION: '1.14.2'
+
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
@@ -42,10 +45,16 @@ jobs:
             echo "changed_charts=$(echo "$changed" | tr '\n' ' ' | xargs)" >> $GITHUB_OUTPUT
           fi
 
-      - name: Install helm-docs
+      - name: Cache helm-docs
         if: steps.list-changed.outputs.changed == 'true'
-        env:
-          HELM_DOCS_VERSION: '1.14.2'
+        id: cache-helm-docs
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bin/helm-docs
+          key: helm-docs-${{ env.HELM_DOCS_VERSION }}
+
+      - name: Install helm-docs
+        if: steps.list-changed.outputs.changed == 'true' && steps.cache-helm-docs.outputs.cache-hit != 'true'
         run: |
           cd /tmp
           wget -q https://github.com/norwoodj/helm-docs/releases/download/v${HELM_DOCS_VERSION}/helm-docs_${HELM_DOCS_VERSION}_Linux_x86_64.tar.gz

@@ -1,0 +1,20 @@
+{{ template "chart.header" . }}
+
+{{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}{{ template "chart.appVersionBadge" . }}
+
+{{ template "chart.description" . }}{{ template "chart.homepageSection" . }}
+{{ template "chart.maintainersSection" . }}
+{{ template "chart.sourcesSection" . }}
+
+## TL;DR;
+
+```bash
+helm repo add dlake https://dlake-io.github.io/helm-charts/
+helm install ocsinventory dlake/ocsinventory -n ocsinventory --create-namespace
+```
+
+> **Note:** An external database is required. Configure `externalDatabase` or enable the bundled `mariadb` subchart.
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}{{ template "helm-docs.versionFooter" . }}

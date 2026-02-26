@@ -2,8 +2,14 @@ apiVersion: v2
 name: pingvin-share
 description: A Helm chart to install Pingvin Share
 type: application
-version: 1.6.1
+version: 1.6.2
 appVersion: "v1.6.1"
+maintainers:
+  - name: Drustan
+    email: 5606292+drustan@users.noreply.github.com
+annotations:
+  artifacthub.io/category: storage
+  artifacthub.io/prerelease: "false"
 dependencies:
 - name: common
   repository: oci://registry-1.docker.io/bitnamicharts

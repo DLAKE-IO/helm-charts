@@ -1,14 +1,47 @@
 # cryptgeon
 
-![Version: 2.8.2](https://img.shields.io/badge/Version-2.8.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.8.2](https://img.shields.io/badge/AppVersion-2.8.2-informational?style=flat-square)
+![Version: 2.9.0](https://img.shields.io/badge/Version-2.9.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.8.2](https://img.shields.io/badge/AppVersion-2.8.2-informational?style=flat-square)
 
 A Helm chart to install cryptgeon
+
+## TL;DR;
+
+```bash
+helm repo add dlake https://dlake-io.github.io/helm-charts/
+helm install cryptgeon dlake/cryptgeon -n cryptgeon --create-namespace
+```
+
+## Introduction
+
+This chart bootstraps a [cryptgeon](https://github.com/cupcakearmy/cryptgeon) Deployment on a [Kubernetes](https://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+
+## Installing the Chart
+
+To install the chart with the release name `cryptgeon`:
+
+```bash
+helm install cryptgeon dlake/cryptgeon
+```
+
+## Uninstalling the Chart
+
+To uninstall the `cryptgeon` deployment:
+
+```bash
+helm uninstall cryptgeon
+```
+
+## Maintainers
+
+| Name | Email | Url |
+| ---- | ------ | --- |
+| Drustan | <5606292+drustan@users.noreply.github.com> |  |
 
 ## Requirements
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.bitnami.com/bitnami | redis | 17.x.x |
+| https://charts.bitnami.com/bitnami | redis | 20.x.x |
 
 ## Values
 

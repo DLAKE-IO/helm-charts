@@ -5,11 +5,12 @@ on:
     branches:
       - main
     paths:
-      - 'charts/**'
+      - "charts/**"
   workflow_dispatch:
 
 env:
-  HELM_VERSION: 'v3.15.2'
+  HELM_VERSION: "v3.15.2"
+  HELM_DOCS_VERSION: "1.14.2"
 
 permissions:
   contents: write
@@ -51,9 +52,9 @@ jobs:
         uses: helm/chart-releaser-action@v1.7.0
         with:
           charts_dir: charts
-          config: './.github/configs/cr.yaml'
+          config: "./.github/configs/cr.yaml"
         env:
-          CR_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Install cosign
         uses: sigstore/cosign-installer@v4.0.0
@@ -63,52 +64,67 @@ jobs:
         run: |
           shopt -s nullglob
           released_charts=""
-          
+          rm -f .oci-digests
+
           for pkg in .cr-release-packages/*.tgz; do
-            if [ ! -f "${pkg}" ]; then
-              echo "ℹ️ No new chart packages found to publish"
-              exit 0
-            fi
-            
             chart_name=$(basename "${pkg}" .tgz)
             echo "📦 Publishing ${chart_name} to GHCR..."
-            
-            # Push to GHCR and capture output
-            helm push "${pkg}" "oci://ghcr.io/${{ github.repository_owner }}/charts" |& tee .digest
-            
-            # Extract digest from output
-            digest=$(cat .digest | awk -F "[, ]+" '/Pushed/{print $NF}')
-            
-            if [ -n "${digest}" ]; then
-              echo "✅ Pushed: ${digest}"
-              released_charts="${released_charts}${chart_name}, "
-            else
-              echo "❌ Failed to push ${chart_name}"
+
+            output=$(helm push "${pkg}" "oci://ghcr.io/${{ github.repository_owner }}/charts" 2>&1)
+            echo "$output"
+
+            # helm push outputs:
+            #   Pushed: oci://ghcr.io/owner/charts/name:version
+            #   Digest: sha256:...
+            pushed_ref=$(echo "$output" | grep "^Pushed:" | sed 's|^Pushed: oci://||')
+            digest=$(echo "$output" | grep "^Digest:" | awk '{print $2}')
+
+            if [ -z "${digest}" ]; then
+              echo "❌ Failed to extract digest for ${chart_name}"
               exit 1
             fi
+
+            # Build cosign reference: repo@sha256:... (no tag, exact digest)
+            chart_repo="${pushed_ref%:*}"
+            cosign_ref="${chart_repo}@${digest}"
+            echo "${cosign_ref}" >> .oci-digests
+
+            echo "✅ Pushed: ${pushed_ref} (${digest})"
+            released_charts="${released_charts}${chart_name}, "
           done
-          
-          # Store released charts for summary
+
           echo "released_charts=${released_charts%, }" >> $GITHUB_OUTPUT
 
       - name: Sign charts with cosign
         if: steps.push-oci.outputs.released_charts != ''
         run: |
-          shopt -s nullglob
-          
-          for pkg in .cr-release-packages/*.tgz; do
-            chart_name=$(basename "${pkg}" .tgz)
-            
-            # Push again to get digest (idempotent operation)
-            helm push "${pkg}" "oci://ghcr.io/${{ github.repository_owner }}/charts" |& tee .digest
-            digest=$(cat .digest | awk -F "[, ]+" '/Pushed/{print $NF}')
-            
-            if [ -n "${digest}" ]; then
-              echo "🔐 Signing ${chart_name}..."
-              cosign sign --yes "${digest}"
-              echo "✅ Signed: ${digest}"
-            fi
-          done
+          if [ ! -f .oci-digests ]; then
+            echo "No digests file found — nothing to sign"
+            exit 0
+          fi
+          while IFS= read -r ref; do
+            [ -n "${ref}" ] || continue
+            echo "🔐 Signing ${ref}..."
+            cosign sign --yes "${ref}"
+            echo "✅ Signed: ${ref}"
+          done < .oci-digests
+
+      - name: Install helm-docs
+        if: steps.push-oci.outputs.released_charts != ''
+        run: |
+          cd /tmp
+          wget -q https://github.com/norwoodj/helm-docs/releases/download/v${HELM_DOCS_VERSION}/helm-docs_${HELM_DOCS_VERSION}_Linux_x86_64.tar.gz
+          tar -xzf helm-docs_${HELM_DOCS_VERSION}_Linux_x86_64.tar.gz
+          sudo mv helm-docs /usr/local/bin/
+
+      - name: Update READMEs and root chart table
+        if: steps.push-oci.outputs.released_charts != ''
+        run: |
+          helm-docs
+          python3 scripts/update-readme.py
+          git add README.md charts/*/README.md
+          git diff --staged --quiet || git commit -m "docs: regenerate READMEs after release"
+          git push
 
       - name: Generate release summary
         if: steps.push-oci.outputs.released_charts != ''

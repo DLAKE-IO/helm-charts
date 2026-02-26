@@ -19,7 +19,8 @@ existingSecret: ""
 image:
   repository: ocsinventory/ocsinventory-docker-image
   pullPolicy: IfNotPresent
-  tag: "2.12.1"
+  # Overrides the image tag. Defaults to chart appVersion when empty.
+  tag: ""
 
 imagePullSecrets: []
 
@@ -138,7 +139,7 @@ metrics:
     enabled: false
     image: 
       repository: "docker.io/bitnami/apache-exporter"
-      tag: "1.0.3-debian-11-r2"
+      tag: "1.0.9-debian-12-r5"
       pullPolicy: IfNotPresent
     serviceMonitor:
       enabled: false

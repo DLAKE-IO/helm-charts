@@ -1,0 +1,12 @@
+# CI test values for pingvin-share chart
+# Used by chart-testing (ct install) to validate the chart installs correctly.
+
+persistence:
+  enabled: false
+
+"pingvin-share":
+  backend:
+    databaseUrl: "file:/tmp/pingvin-share.db?connection_limit=1"
+    dataDirectory: "/tmp"
+  frontend:
+    apiUrl: "http://pingvin-share:3000"

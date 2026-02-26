@@ -1,6 +1,6 @@
 # ocsinventory
 
-![Version: 1.3.2](https://img.shields.io/badge/Version-1.3.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.12.3](https://img.shields.io/badge/AppVersion-2.12.3-informational?style=flat-square)
+![Version: 1.3.3](https://img.shields.io/badge/Version-1.3.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.12.3](https://img.shields.io/badge/AppVersion-2.12.3-informational?style=flat-square)
 
 Open Computers and Software Inventory Next Generation is an assets management and deployment solution.
 
@@ -16,6 +16,15 @@ Open Computers and Software Inventory Next Generation is an assets management an
 
 * <http://wiki.ocsinventory-ng.org>
 * <https://github.com/OCSInventory-NG/OCSInventory-Docker-Image>
+
+## TL;DR;
+
+```bash
+helm repo add dlake https://dlake-io.github.io/helm-charts/
+helm install ocsinventory dlake/ocsinventory -n ocsinventory --create-namespace
+```
+
+> **Note:** An external database is required. Configure `externalDatabase` or enable the bundled `mariadb` subchart.
 
 ## Requirements
 
@@ -45,7 +54,7 @@ Open Computers and Software Inventory Next Generation is an assets management an
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"ocsinventory/ocsinventory-docker-image"` |  |
-| image.tag | string | `"2.12.1"` |  |
+| image.tag | string | `""` |  |
 | imagePullSecrets | list | `[]` |  |
 | ingress.annotations | object | `{}` |  |
 | ingress.basicauth.authRealm | string | `"Authentication Required"` |  |
@@ -70,7 +79,7 @@ Open Computers and Software Inventory Next Generation is an assets management an
 | metrics.enabled | bool | `false` |  |
 | metrics.image.pullPolicy | string | `"IfNotPresent"` |  |
 | metrics.image.repository | string | `"docker.io/bitnami/apache-exporter"` |  |
-| metrics.image.tag | string | `"1.0.3-debian-11-r2"` |  |
+| metrics.image.tag | string | `"1.0.9-debian-12-r5"` |  |
 | metrics.resources.limits.cpu | string | `"200m"` |  |
 | metrics.resources.limits.memory | string | `"256Mi"` |  |
 | metrics.resources.requests.cpu | string | `"100m"` |  |

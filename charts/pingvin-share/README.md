@@ -1,8 +1,14 @@
 A Helm chart to install Pingvin Share
 
-![Version: 1.6.1](https://img.shields.io/badge/Version-1.6.1-informational?style=flat-square)
+![Version: 1.6.2](https://img.shields.io/badge/Version-1.6.2-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 ![AppVersion: v1.6.1](https://img.shields.io/badge/AppVersion-v1.6.1-informational?style=flat-square)
+
+## Maintainers
+
+| Name | Email | Url |
+| ---- | ------ | --- |
+| Drustan | <5606292+drustan@users.noreply.github.com> |  |
 
 ## TL;DR;
 
