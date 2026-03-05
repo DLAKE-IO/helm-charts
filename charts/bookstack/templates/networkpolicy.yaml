@@ -47,6 +47,17 @@ spec:
         - protocol: TCP
           port: 3306
     {{- end }}
+    {{- if .Values.valkey.enabled }}
+    # Allow connection to Valkey (Redis-compatible session store)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: valkey
+              app.kubernetes.io/instance: {{ .Release.Name }}
+      ports:
+        - protocol: TCP
+          port: 6379
+    {{- end }}
     {{- if .Values.ldap.enabled }}
     # Allow LDAP connections
     - to:

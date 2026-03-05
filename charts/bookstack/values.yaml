@@ -282,6 +282,51 @@ mariadb:
       size: 8Gi
 
 ##
+## External Valkey / Redis configuration
+## Used when valkey.enabled is false and you want Redis-backed sessions via an
+## existing Redis-compatible service.
+##
+externalValkey:
+  # -- External Valkey/Redis host
+  host: ""
+  # -- External Valkey/Redis port
+  port: 6379
+  # -- Redis database index
+  database: 0
+  # -- Name of an existing Secret whose "redis-servers" key contains the full
+  # BookStack REDIS_SERVERS connection string (host:port:database[:password]).
+  # When set, host/port/database above are ignored for the connection string.
+  existingSecret: ""
+
+##
+## Valkey subchart configuration
+## ref: https://github.com/bitnami/charts/tree/main/bitnami/valkey
+##
+## Enabling Valkey stores PHP sessions in a Redis-compatible key/value store,
+## allowing multiple BookStack pods to share sessions (horizontal scaling).
+##
+valkey:
+  # -- Enable the Valkey subchart for PHP session (and optionally cache) storage.
+  # When true, SESSION_DRIVER is automatically set to "redis".
+  enabled: true
+  # -- Valkey server configuration overrides (redis.conf directives)
+  commonConfiguration: |-
+    appendonly no
+    save ""
+  auth:
+    # -- Disable password authentication for in-cluster session storage.
+    # Enable and set auth.password for stricter environments.
+    enabled: false
+  primary:
+    persistence:
+      # -- Persistence is intentionally disabled: session data is ephemeral and
+      # does not need to survive cluster restarts.
+      enabled: false
+  replica:
+    persistence:
+      enabled: false
+
+##
 ## RBAC configuration
 ##
 rbac:

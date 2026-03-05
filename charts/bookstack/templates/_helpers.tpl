@@ -51,6 +51,36 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 
 {{/*
+Fully qualified name for the Valkey subchart.
+The Bitnami Valkey chart exposes its primary service as <fullname>-primary.
+*/}}
+{{- define "bookstack.valkey.fullname" -}}
+{{- printf "%s-%s" .Release.Name "valkey" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+REDIS_SERVERS connection string for BookStack (format: host:port:database).
+Returns the internal Valkey primary service when valkey.enabled, otherwise
+falls back to externalValkey settings.
+*/}}
+{{- define "bookstack.redisServers" -}}
+{{- if .Values.valkey.enabled -}}
+{{- printf "%s-primary:6379:0" (include "bookstack.valkey.fullname" .) -}}
+{{- else -}}
+{{- printf "%s:%d:%d" .Values.externalValkey.host (int .Values.externalValkey.port) (int .Values.externalValkey.database) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Returns a non-empty string when a Redis-compatible session/cache backend is
+configured (either the bundled Valkey subchart or an external host).
+Use as: {{- if include "bookstack.redis.enabled" . }}
+*/}}
+{{- define "bookstack.redis.enabled" -}}
+{{- if or .Values.valkey.enabled .Values.externalValkey.host -}}true{{- end -}}
+{{- end -}}
+
+{{/*
 Common labels
 */}}
 {{- define "bookstack.labels" -}}

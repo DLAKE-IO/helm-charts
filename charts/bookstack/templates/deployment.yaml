@@ -123,6 +123,22 @@ spec:
             - name: MYSQL_ATTR_SSL_CA
               value: /etc/mysql/mysql.cert
           {{- end }}
+          {{- if or .Values.valkey.enabled .Values.externalValkey.host }}
+            - name: SESSION_DRIVER
+              value: redis
+            - name: CACHE_DRIVER
+              value: redis
+            {{- if and .Values.externalValkey.existingSecret (not .Values.valkey.enabled) }}
+            - name: REDIS_SERVERS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.externalValkey.existingSecret }}
+                  key: redis-servers
+            {{- else }}
+            - name: REDIS_SERVERS
+              value: {{ include "bookstack.redisServers" . | quote }}
+            {{- end }}
+          {{- end }}
           {{- range $key, $value := .Values.env }}
             - name: {{ $key | upper | replace "." "_" }}
               value: {{ $value | quote }}
@@ -148,10 +164,12 @@ spec:
             mountPath: /etc/mysql/
             readOnly: true
           {{- end }}
+          {{- if not (include "bookstack.redis.enabled" .) }}
           - name: storage-framework-cache
             mountPath: /var/www/bookstack/storage/framework/cache
           - name: storage-framework-sessions
             mountPath: /var/www/bookstack/storage/framework/sessions
+          {{- end }}
           {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 10 }}
           {{- end }}
@@ -191,10 +209,12 @@ spec:
         {{- else }}
           emptyDir: {}
         {{- end }}
+        {{- if not (include "bookstack.redis.enabled" .) }}
         - name: storage-framework-cache
           emptyDir: {}
         - name: storage-framework-sessions
           emptyDir: {}
+        {{- end }}
         {{- with .Values.extraVolumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
