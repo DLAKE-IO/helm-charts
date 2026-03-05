@@ -5,6 +5,10 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ## [Unreleased]
 
 ### Added
+- **bookstack** Valkey subchart dependency (`oci://registry-1.docker.io/bitnamicharts/valkey ^5.4.3`) for centralized PHP session and cache storage; enables horizontal scaling with multiple replicas
+- **bookstack** `externalValkey` values block for connecting to an existing Redis-compatible service instead of the bundled subchart
+- **bookstack** `bookstack.valkey.fullname`, `bookstack.redisServers`, and `bookstack.redis.enabled` template helpers in `_helpers.tpl`
+- **bookstack** NetworkPolicy egress rule for Valkey port 6379 when `valkey.enabled`
 - `values.schema.json` for all four charts (bookstack, cryptgeon, ocsinventory, pingvin-share)
 - `ci/` test values directories for all charts — enables reliable `ct install` testing
 - `README.md.gotmpl` templates for bookstack, cryptgeon, and ocsinventory
@@ -15,6 +19,9 @@ All notable changes to the dlake Helm Charts repository are documented here.
 - `restartPolicy: Never` on ocsinventory Helm test pod
 
 ### Changed
+- **bookstack** version bump `2.2.1` → `2.3.0`; `SESSION_DRIVER` and `CACHE_DRIVER` automatically set to `redis` when Valkey is configured; `storage-framework-cache` and `storage-framework-sessions` emptyDir mounts are now chart-managed and omitted when Valkey is active; MariaDB subchart migrated to OCI registry (`oci://registry-1.docker.io/bitnamicharts`) and version bumped `20.x.x` → `23.x.x`
+- **bookstack** version bump `2.2.0` → `2.2.1`; appVersion bumped `25.11` → `25.12`
+- **bookstack** version bump `2.1.1` → `2.2.0`; hardened pod security (`readOnlyRootFilesystem: true`, `seccompProfile: RuntimeDefault`, `runAsGroup`); added `extraVolumeMounts`/`extraVolumes` Deployment support with seven emptyDir mounts for all runtime-writable paths
 - **bookstack** version bump `2.1.0` → `2.1.1`
 - **cryptgeon** version bump `2.8.2` → `2.9.0`; Redis subchart upgraded `17.x.x` → `20.x.x`
 - **ocsinventory** version bump `1.3.2` → `1.3.3`; `image.tag` fixed to `""` (was `"2.12.1"` mismatched with appVersion `2.12.3`); metrics exporter updated from `debian-11` to `debian-12`
@@ -34,6 +41,24 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## bookstack
+
+### [2.3.0] — 2026-03-05
+- Added Valkey subchart dependency (`oci://registry-1.docker.io/bitnamicharts/valkey ^5.x.x`) for centralized PHP session and cache storage
+- Added `externalValkey` values block for using an existing Redis-compatible service
+- `SESSION_DRIVER` and `CACHE_DRIVER` automatically set to `redis` when `valkey.enabled` or `externalValkey.host` is configured
+- `storage-framework-cache` and `storage-framework-sessions` emptyDir mounts are now chart-managed; omitted from the pod spec when Valkey (or externalValkey) is active
+- Added `bookstack.valkey.fullname`, `bookstack.redisServers`, and `bookstack.redis.enabled` template helpers
+- Added NetworkPolicy egress rule for Valkey port 6379
+- Migrated MariaDB subchart from Bitnami Helm repository to OCI registry (`oci://registry-1.docker.io/bitnamicharts`); version bumped `20.x.x` → `23.x.x`
+
+### [2.2.1] — 2026-03-05
+- Bumped appVersion `25.11` → `25.12`
+
+### [2.2.0] — 2026-03-05
+- Enabled `readOnlyRootFilesystem: true` on the BookStack container
+- Added `runAsGroup: 33` and `seccompProfile: RuntimeDefault` to both pod and container security contexts
+- Added `extraVolumeMounts` and `extraVolumes` support to the Deployment template
+- Mounted seven `emptyDir` volumes for all runtime-writable paths: `/tmp`, `/run`, `bootstrap/cache`, `storage/logs`, `storage/framework/cache`, `storage/framework/sessions`, `storage/framework/views`
 
 ### [2.1.1] — 2026-02-26
 - Added `values.schema.json` for values validation
