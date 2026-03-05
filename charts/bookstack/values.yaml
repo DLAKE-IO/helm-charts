@@ -2,7 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# -- Number of BookStack replicas to deploy (currently only 1 is supported without shared storage)
+# -- Number of BookStack replicas to deploy.
+# Multiple replicas require: (1) valkey.enabled=true for shared PHP sessions, and
+# (2) persistence PVCs with accessMode ReadWriteMany (or a shared storage class).
 replicaCount: 1
 
 # -- Deployment strategy configuration
@@ -47,16 +49,22 @@ podSecurityContext:
   fsGroup: 33  # www-data
   runAsNonRoot: true
   runAsUser: 33
+  runAsGroup: 33
+  seccompProfile:
+    type: RuntimeDefault
 
 # -- Container-level security context
 containerSecurityContext:
   allowPrivilegeEscalation: false
   runAsNonRoot: true
   runAsUser: 33
+  runAsGroup: 33
   capabilities:
     drop:
       - ALL
-  readOnlyRootFilesystem: false  # BookStack needs write access to certain directories
+  readOnlyRootFilesystem: true
+  seccompProfile:
+    type: RuntimeDefault
 
 service:
   # -- Kubernetes service type
@@ -149,6 +157,50 @@ app:
   # -- Name of existing secret containing APP_KEY (key: app-key)
   # If set, app.key is ignored
   existingSecret: ""
+
+##
+## Read-only root filesystem — writable emptyDir mounts
+##
+## The container runs with readOnlyRootFilesystem: true.
+## The paths below are the only directories BookStack/Laravel/PHP write to at
+## runtime. All are ephemeral (emptyDir) except for the two PVCs above.
+##
+## Path                                             Reason
+## ────────────────────────────────────────────────────────────────────────────
+## /tmp                                             PHP temp uploads & runtime
+## /run                                             Web server PID/socket files
+## bootstrap/cache                                  Laravel bootstrap cache
+##                                                  (config.php, routes.php…)
+## storage/logs                                     Laravel application logs
+## storage/framework/cache                          Serialised cache entries (chart-managed; omitted when Valkey enabled)
+## storage/framework/sessions                       File-based PHP sessions (chart-managed; omitted when Valkey enabled)
+## storage/framework/views                          Compiled Blade templates
+
+# -- Extra volume mounts appended to the BookStack container
+extraVolumeMounts:
+  - name: tmp
+    mountPath: /tmp
+  - name: run
+    mountPath: /run
+  - name: bootstrap-cache
+    mountPath: /var/www/bookstack/bootstrap/cache
+  - name: storage-logs
+    mountPath: /var/www/bookstack/storage/logs
+  - name: storage-framework-views
+    mountPath: /var/www/bookstack/storage/framework/views
+
+# -- Extra volumes appended to the pod spec
+extraVolumes:
+  - name: tmp
+    emptyDir: {}
+  - name: run
+    emptyDir: {}
+  - name: bootstrap-cache
+    emptyDir: {}
+  - name: storage-logs
+    emptyDir: {}
+  - name: storage-framework-views
+    emptyDir: {}
 
 # -- Additional environment variables (deprecated, use extraEnv instead)
 env: {}

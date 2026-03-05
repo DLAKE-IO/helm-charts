@@ -148,6 +148,13 @@ spec:
             mountPath: /etc/mysql/
             readOnly: true
           {{- end }}
+          - name: storage-framework-cache
+            mountPath: /var/www/bookstack/storage/framework/cache
+          - name: storage-framework-sessions
+            mountPath: /var/www/bookstack/storage/framework/sessions
+          {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
@@ -183,4 +190,11 @@ spec:
             secretName: {{ .Values.externalDatabase.existingTlsSecret | default (printf "%s-%s" .Release.Name "cert") }}
         {{- else }}
           emptyDir: {}
-        {{- end -}}
+        {{- end }}
+        - name: storage-framework-cache
+          emptyDir: {}
+        - name: storage-framework-sessions
+          emptyDir: {}
+        {{- with .Values.extraVolumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
