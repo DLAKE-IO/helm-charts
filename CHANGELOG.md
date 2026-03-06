@@ -21,6 +21,7 @@ All notable changes to the dlake Helm Charts repository are documented here.
 - `restartPolicy: Never` on ocsinventory Helm test pod
 
 ### Changed
+- **bookstack** version bump `2.4.0` → `2.4.1`; patch bump for CI/CD pipeline testing
 - **bookstack** version bump `2.3.0` → `2.4.0`; authenticated Valkey support via `REDIS_PASSWORD` injected from a Kubernetes Secret
 - **bookstack** version bump `2.2.1` → `2.3.0`; `SESSION_DRIVER` and `CACHE_DRIVER` automatically set to `redis` when Valkey is configured; `storage-framework-cache` and `storage-framework-sessions` emptyDir mounts are now chart-managed and omitted when Valkey is active; MariaDB subchart migrated to OCI registry (`oci://registry-1.docker.io/bitnamicharts`) and version bumped `20.x.x` → `23.x.x`
 - **bookstack** version bump `2.2.0` → `2.2.1`; appVersion bumped `25.11` → `25.12`
@@ -45,6 +46,9 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## bookstack
+
+### [2.4.1] — 2026-03-06
+- Patch version bump for CI/CD pipeline testing
 
 ### [2.4.0] — 2026-03-06
 - Added `valkey.auth.existingSecret` and `valkey.auth.existingSecretPasswordKey` values to the Valkey auth block
