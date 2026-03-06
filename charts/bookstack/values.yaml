@@ -46,7 +46,7 @@ podAnnotations: {}
 
 # -- Pod-level security context
 podSecurityContext:
-  fsGroup: 33  # www-data
+  fsGroup: 33 # www-data
   runAsNonRoot: true
   runAsUser: 33
   runAsGroup: 33
@@ -315,6 +315,9 @@ valkey:
   # -- Enable the Valkey subchart for PHP session (and optionally cache) storage.
   # When true, SESSION_DRIVER is automatically set to "redis".
   enabled: true
+  # -- Valkey deployment architecture. Use "standalone" (single pod) for BookStack
+  # session storage; "replication" would deploy an unnecessary primary+replica cluster.
+  architecture: standalone
   # -- Valkey server configuration overrides (redis.conf directives)
   commonConfiguration: |-
     appendonly no
@@ -342,11 +345,13 @@ valkey:
     # Prefer existingSecret for production deployments.
     password: ""
   primary:
+    disableCommands: []
     persistence:
       # -- Persistence is intentionally disabled: session data is ephemeral and
       # does not need to survive cluster restarts.
       enabled: false
   replica:
+    disableCommands: []
     persistence:
       enabled: false
 
@@ -453,7 +458,7 @@ ldap:
 oidc:
   # -- Enable OIDC authentication. Note: When enabled, AUTH_METHOD will be set to 'oidc'
   enabled: false
-  
+
   ## Required OIDC settings
   # -- OIDC issuer URL (required). Must start with 'https://'
   # Example: "https://accounts.google.com" or "https://login.microsoftonline.com/tenant-id/v2.0"
@@ -466,7 +471,7 @@ oidc:
   # If set, clientId and clientSecret are ignored
   # Secret must contain keys: oidc-client-id, oidc-client-secret
   existingSecret: ""
-  
+
   ## Login behavior
   # -- Display name for the SSO button (e.g., "Login with SSO")
   # @default -- "SSO"
@@ -474,7 +479,7 @@ oidc:
   # -- Automatically initiate OIDC login if it's the only auth method
   # @default -- "false"
   autoInitiate: "false"
-  
+
   ## User identity mapping
   # -- Claim(s) to use for user display names. Use '|' to concatenate multiple claims
   # Examples: "name", "given_name|family_name", "preferred_username"
@@ -484,7 +489,7 @@ oidc:
   # @default -- "sub" (OIDC standard)
   # WARNING: Changing this with existing users may cause login issues
   externalIdClaim: ""
-  
+
   ## Discovery and endpoints
   # -- Enable auto-discovery of OIDC endpoints and keys from issuer
   # @default -- "true"
@@ -498,18 +503,18 @@ oidc:
   tokenEndpoint: ""
   # -- User info endpoint URL (only if issuerDiscover is false)
   userinfoEndpoint: ""
-  
+
   ## Session management
   # -- RP-initiated logout endpoint. Options: "false" (disabled), "true" (auto-discover), or specific URL
   # @default -- "false"
   endSessionEndpoint: "false"
-  
+
   ## Avatar handling
   # -- Fetch user avatars from the 'picture' claim on login
   # @default -- "false"
   # WARNING: This can be a security risk due to server-side fetching
   fetchAvatar: "false"
-  
+
   ## Group synchronization
   # -- Enable syncing BookStack roles based on OIDC groups
   # @default -- "false"
@@ -525,7 +530,7 @@ oidc:
   # @default -- "false"
   # Note: "Default Registration Role" is always treated as matched
   removeFromGroups: "false"
-  
+
   ## Debugging (do not use in production)
   # -- Dump user claim details for troubleshooting (blocks login)
   # @default -- "false"

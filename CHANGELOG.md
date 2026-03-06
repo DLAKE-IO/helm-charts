@@ -4,6 +4,9 @@ All notable changes to the dlake Helm Charts repository are documented here.
 
 ## [Unreleased]
 
+### Fixed
+- **bookstack** version bump `2.5.1` → `2.5.2`; set `valkey.architecture: standalone` to prevent the Bitnami Valkey subchart from defaulting to `replication` mode (which deploys an unneeded primary + 3-replica cluster)
+
 ### Added
 - **bookstack** `valkey.auth.password` value; inline Valkey password passed to the Bitnami subchart
 
@@ -50,6 +53,9 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## bookstack
+
+### [2.5.2] — 2026-03-06
+- Fixed `valkey.architecture: standalone` not being set; the Bitnami Valkey subchart was defaulting to `replication` architecture and deploying a 4-pod cluster (1 primary + 3 replicas) instead of a single instance
 
 ### [2.5.1] — 2026-03-06
 - Added `valkey.auth.password` value for inline Valkey password (passed to the Bitnami subchart; stored in the auto-generated `<release>-valkey` Secret)
