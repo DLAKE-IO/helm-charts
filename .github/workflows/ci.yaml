@@ -6,6 +6,10 @@ on:
       - main
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   HELM_DOCS_VERSION: '1.14.2'
 
@@ -45,6 +49,13 @@ jobs:
             echo "changed_charts=$(echo "$changed" | tr '\n' ' ' | xargs)" >> $GITHUB_OUTPUT
           fi
 
+      - name: Update chart dependencies
+        if: steps.list-changed.outputs.changed == 'true'
+        run: |
+          for chart in charts/*/; do
+            helm dependency update "$chart"
+          done
+
       - name: Cache helm-docs
         if: steps.list-changed.outputs.changed == 'true'
         id: cache-helm-docs
@@ -74,6 +85,18 @@ jobs:
           fi
           echo "✅ Chart documentation is up to date"
 
+      - name: Verify root README is up to date
+        if: steps.list-changed.outputs.changed == 'true'
+        run: |
+          python3 scripts/update-readme.py
+          if ! git diff --exit-code README.md; then
+            echo "❌ Root README chart table is out of date!"
+            echo "Please run 'python3 scripts/update-readme.py' locally and commit the changes."
+            git diff README.md
+            exit 1
+          fi
+          echo "✅ Root README is up to date"
+
       - name: Run chart-testing (lint)
         if: steps.list-changed.outputs.changed == 'true'
         run: |
@@ -98,7 +121,7 @@ jobs:
           echo "**Changed Charts:** ${{ steps.list-changed.outputs.changed_charts }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Linting passed" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Documentation up to date" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Documentation up to date (helm-docs + root README)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Installation test passed" >> $GITHUB_STEP_SUMMARY
 
       - name: No changes detected

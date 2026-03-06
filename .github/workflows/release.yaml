@@ -8,6 +8,10 @@ on:
       - "charts/**"
   workflow_dispatch:
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 env:
   HELM_VERSION: "v3.15.2"
   HELM_DOCS_VERSION: "1.14.2"
@@ -44,7 +48,7 @@ jobs:
       - name: Update chart dependencies
         run: |
           for chart in charts/*/; do
-            helm dependency update "$chart" || true
+            helm dependency update "$chart"
           done
 
       - name: Login to GitHub Container Registry
@@ -115,8 +119,16 @@ jobs:
             echo "✅ Signed: ${ref}"
           done < .oci-digests
 
-      - name: Install helm-docs
+      - name: Cache helm-docs
         if: steps.push-oci.outputs.released_charts != ''
+        id: cache-helm-docs
+        uses: actions/cache@v5
+        with:
+          path: /usr/local/bin/helm-docs
+          key: helm-docs-${{ env.HELM_DOCS_VERSION }}
+
+      - name: Install helm-docs
+        if: steps.push-oci.outputs.released_charts != '' && steps.cache-helm-docs.outputs.cache-hit != 'true'
         run: |
           cd /tmp
           wget -q https://github.com/norwoodj/helm-docs/releases/download/v${HELM_DOCS_VERSION}/helm-docs_${HELM_DOCS_VERSION}_Linux_x86_64.tar.gz
@@ -129,8 +141,11 @@ jobs:
           helm-docs
           python3 scripts/update-readme.py
           git add README.md charts/*/README.md
-          git diff --staged --quiet || git commit -m "docs: regenerate READMEs after release"
-          git push
+          if ! git diff --staged --quiet; then
+            git commit -m "docs: regenerate READMEs after release"
+            git pull --rebase origin main
+            git push
+          fi
 
       - name: Generate release summary
         if: steps.push-oci.outputs.released_charts != ''
