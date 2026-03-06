@@ -294,9 +294,15 @@ externalValkey:
   # -- Redis database index
   database: 0
   # -- Name of an existing Secret whose "redis-servers" key contains the full
-  # BookStack REDIS_SERVERS connection string (host:port:database[:password]).
+  # BookStack REDIS_SERVERS connection string (host:port:database).
   # When set, host/port/database above are ignored for the connection string.
   existingSecret: ""
+  auth:
+    # -- Name of an existing Secret containing the external Valkey/Redis password.
+    # When set, REDIS_PASSWORD is injected into the BookStack container from this Secret.
+    existingSecret: ""
+    # -- Key inside the Secret that holds the password.
+    existingSecretPasswordKey: "redis-password"
 
 ##
 ## Valkey subchart configuration
@@ -315,8 +321,18 @@ valkey:
     save ""
   auth:
     # -- Disable password authentication for in-cluster session storage.
-    # Enable and set auth.password for stricter environments.
+    # Enable for stricter environments by setting enabled: true and providing
+    # either auth.password (plain-text, stored in an auto-generated Secret) or
+    # auth.existingSecret (preferred — reference a pre-existing Secret).
     enabled: false
+    # -- Name of an existing Secret that contains the Valkey password.
+    # When set, the BookStack Deployment injects REDIS_PASSWORD from this Secret.
+    # Leave empty to let the Bitnami Valkey subchart auto-generate the Secret
+    # (auto-generated secret name: <release>-valkey, key: valkey-password).
+    existingSecret: ""
+    # -- Key inside existingSecret that holds the Valkey password.
+    # Must match the key used by the Bitnami Valkey subchart (default: valkey-password).
+    existingSecretPasswordKey: "valkey-password"
   primary:
     persistence:
       # -- Persistence is intentionally disabled: session data is ephemeral and

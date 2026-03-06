@@ -5,6 +5,8 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ## [Unreleased]
 
 ### Added
+- **bookstack** `valkey.auth.existingSecret` and `valkey.auth.existingSecretPasswordKey` values; `REDIS_PASSWORD` is now injected from the referenced Secret when `valkey.auth.enabled` is true
+- **bookstack** `externalValkey.auth.existingSecret` and `externalValkey.auth.existingSecretPasswordKey` values for authenticated external Valkey/Redis
 - **bookstack** Valkey subchart dependency (`oci://registry-1.docker.io/bitnamicharts/valkey ^5.4.3`) for centralized PHP session and cache storage; enables horizontal scaling with multiple replicas
 - **bookstack** `externalValkey` values block for connecting to an existing Redis-compatible service instead of the bundled subchart
 - **bookstack** `bookstack.valkey.fullname`, `bookstack.redisServers`, and `bookstack.redis.enabled` template helpers in `_helpers.tpl`
@@ -19,6 +21,7 @@ All notable changes to the dlake Helm Charts repository are documented here.
 - `restartPolicy: Never` on ocsinventory Helm test pod
 
 ### Changed
+- **bookstack** version bump `2.3.0` → `2.4.0`; authenticated Valkey support via `REDIS_PASSWORD` injected from a Kubernetes Secret
 - **bookstack** version bump `2.2.1` → `2.3.0`; `SESSION_DRIVER` and `CACHE_DRIVER` automatically set to `redis` when Valkey is configured; `storage-framework-cache` and `storage-framework-sessions` emptyDir mounts are now chart-managed and omitted when Valkey is active; MariaDB subchart migrated to OCI registry (`oci://registry-1.docker.io/bitnamicharts`) and version bumped `20.x.x` → `23.x.x`
 - **bookstack** version bump `2.2.0` → `2.2.1`; appVersion bumped `25.11` → `25.12`
 - **bookstack** version bump `2.1.1` → `2.2.0`; hardened pod security (`readOnlyRootFilesystem: true`, `seccompProfile: RuntimeDefault`, `runAsGroup`); added `extraVolumeMounts`/`extraVolumes` Deployment support with seven emptyDir mounts for all runtime-writable paths
@@ -42,6 +45,11 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## bookstack
+
+### [2.4.0] — 2026-03-06
+- Added `valkey.auth.existingSecret` and `valkey.auth.existingSecretPasswordKey` values to the Valkey auth block
+- Deployment now injects `REDIS_PASSWORD` from the referenced Kubernetes Secret when `valkey.auth.enabled: true`; falls back to the Bitnami auto-generated Secret (`<release>-valkey`, key: `valkey-password`) when no `existingSecret` is specified
+- Added `externalValkey.auth.existingSecret` and `externalValkey.auth.existingSecretPasswordKey` for authenticated external Valkey/Redis connections
 
 ### [2.3.0] — 2026-03-05
 - Added Valkey subchart dependency (`oci://registry-1.docker.io/bitnamicharts/valkey ^5.x.x`) for centralized PHP session and cache storage

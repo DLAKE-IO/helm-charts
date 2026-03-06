@@ -138,6 +138,21 @@ spec:
             - name: REDIS_SERVERS
               value: {{ include "bookstack.redisServers" . | quote }}
             {{- end }}
+            {{- if .Values.valkey.enabled }}
+            {{- if .Values.valkey.auth.enabled }}
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.valkey.auth.existingSecret | default (include "bookstack.valkey.fullname" .) }}
+                  key: {{ .Values.valkey.auth.existingSecretPasswordKey | default "valkey-password" }}
+            {{- end }}
+            {{- else if .Values.externalValkey.auth.existingSecret }}
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.externalValkey.auth.existingSecret }}
+                  key: {{ .Values.externalValkey.auth.existingSecretPasswordKey | default "redis-password" }}
+            {{- end }}
           {{- end }}
           {{- range $key, $value := .Values.env }}
             - name: {{ $key | upper | replace "." "_" }}
