@@ -8,9 +8,9 @@ on:
       - "charts/**"
   workflow_dispatch:
 
-concurrency:
-  group: release
-  cancel-in-progress: false
+#concurrency:
+#  group: release
+#  cancel-in-progress: false
 
 env:
   HELM_VERSION: "v3.15.2"
