@@ -20,6 +20,7 @@ permissions:
   contents: write
   packages: write
   id-token: write
+  pull-requests: read
 
 jobs:
   release:
@@ -64,7 +65,7 @@ jobs:
           charts_dir: charts
           config: "./.github/configs/cr.yaml"
         env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_TOKEN: "${{ secrets.CR_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}"
 
       - name: Install cosign
         uses: sigstore/cosign-installer@v4.0.0
