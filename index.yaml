@@ -6,6 +6,36 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: "25.12"
+    created: "2026-03-06T11:00:01.200699962Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 23.x.x
+    - condition: valkey.enabled
+      name: valkey
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 5.x.x
+    description: BookStack is a simple, self-hosted, easy-to-use platform for organising
+      and storing information.
+    digest: b6ad3c1273bf655f9595ad34adf9c8458e3f9b0f42be259e976038c1466ced3b
+    home: https://www.bookstackapp.com/
+    icon: https://media.githubusercontent.com/media/BookStackApp/website/master/static/images/logo.png
+    maintainers:
+    - email: 5606292+drustan@users.noreply.github.com
+      name: Tristan
+    name: bookstack
+    sources:
+    - https://github.com/BookStackApp/BookStack
+    type: application
+    urls:
+    - https://github.com/DLAKE-IO/helm-charts/releases/download/bookstack-2.5.0/bookstack-2.5.0.tgz
+    version: 2.5.0
+  - annotations:
+      artifacthub.io/category: web
+      artifacthub.io/prerelease: "false"
+    apiVersion: v2
+    appVersion: "25.12"
     created: "2026-03-06T10:08:49.718083572Z"
     dependencies:
     - condition: mariadb.enabled
@@ -568,4 +598,4 @@ entries:
     urls:
     - https://github.com/DLAKE-IO/helm-charts/releases/download/pingvin-share-0.0.1/pingvin-share-0.0.1.tgz
     version: 0.0.1
-generated: "2026-03-06T10:08:49.718149525Z"
+generated: "2026-03-06T11:00:01.200758218Z"
