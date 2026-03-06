@@ -1,6 +1,6 @@
 # bookstack
 
-![Version: 2.4.1](https://img.shields.io/badge/Version-2.4.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 25.12](https://img.shields.io/badge/AppVersion-25.12-informational?style=flat-square)
+![Version: 2.5.0](https://img.shields.io/badge/Version-2.5.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 25.12](https://img.shields.io/badge/AppVersion-25.12-informational?style=flat-square)
 
 BookStack is a simple, self-hosted, easy-to-use platform for organising and storing information.
 **Homepage:** <https://www.bookstackapp.com/>
@@ -137,9 +137,10 @@ BookStack is a simple, self-hosted, easy-to-use platform for organising and stor
 | serviceAccount.name | string | `""` | The name of the ServiceAccount to use (auto-generated if not set and create is true) |
 | startupProbe | object | `{"failureThreshold":30,"httpGet":{"path":"/status","port":"http"},"initialDelaySeconds":0,"periodSeconds":5,"timeoutSeconds":3}` | Startup probe configuration |
 | tolerations | list | `[]` | Tolerations for pod assignment |
-| valkey.auth.enabled | bool | `false` | Enable password authentication for in-cluster Valkey. When true, REDIS_PASSWORD is injected from the referenced Secret. |
-| valkey.auth.existingSecret | string | `""` | Name of an existing Secret containing the Valkey password. When set, the BookStack Deployment injects REDIS_PASSWORD from this Secret. Leave empty to use the Bitnami auto-generated Secret (<release>-valkey, key: valkey-password). |
+| valkey.auth.enabled | bool | `false` | Enable password authentication for in-cluster Valkey. When true, the chart creates a `<release>-redis-servers` Secret containing the full `REDIS_SERVERS` connection string (`host:port:db:password`); BookStack reads it via `secretKeyRef`. |
+| valkey.auth.existingSecret | string | `""` | Name of a pre-existing Secret that contains the Valkey password. The chart reads the password via Helm lookup() and embeds it in the chart-managed `<release>-redis-servers` Secret. Must be created before `helm install`. |
 | valkey.auth.existingSecretPasswordKey | string | `"valkey-password"` | Key inside existingSecret that holds the Valkey password. Must match the key used by the Bitnami Valkey subchart. |
+| valkey.auth.password | string | `""` | Inline Valkey password (alternative to existingSecret). Prefer existingSecret for production to avoid storing credentials in values files. |
 | valkey.commonConfiguration | string | `"appendonly no\nsave \"\""` | Valkey server configuration overrides (redis.conf directives) |
 | valkey.enabled | bool | `true` | Enable the Valkey subchart for PHP session (and optionally cache) storage. When true, SESSION_DRIVER and CACHE_DRIVER are automatically set to "redis". |
 | valkey.primary.persistence.enabled | bool | `false` | Persistence for Valkey primary. Intentionally disabled: session data is ephemeral. |

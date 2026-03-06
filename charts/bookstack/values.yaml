@@ -322,17 +322,26 @@ valkey:
   auth:
     # -- Disable password authentication for in-cluster session storage.
     # Enable for stricter environments by setting enabled: true and providing
-    # either auth.password (plain-text, stored in an auto-generated Secret) or
-    # auth.existingSecret (preferred — reference a pre-existing Secret).
+    # either auth.existingSecret (preferred) or auth.password (inline).
+    # When enabled, the chart creates a Secret (<release>-redis-servers) that
+    # stores the full REDIS_SERVERS connection string (host:port:db:password).
+    # The BookStack Deployment reads REDIS_SERVERS from this Secret via secretKeyRef.
     enabled: false
-    # -- Name of an existing Secret that contains the Valkey password.
-    # When set, the BookStack Deployment injects REDIS_PASSWORD from this Secret.
-    # Leave empty to let the Bitnami Valkey subchart auto-generate the Secret
-    # (auto-generated secret name: <release>-valkey, key: valkey-password).
+    # -- Name of a pre-existing Secret that contains the Valkey password.
+    # The chart uses Helm's lookup() to read the password and embed it in the
+    # chart-managed <release>-redis-servers Secret.
+    # Must be created before `helm install`; also passed to the Bitnami Valkey
+    # subchart so both BookStack and Valkey share the same credentials.
     existingSecret: ""
     # -- Key inside existingSecret that holds the Valkey password.
-    # Must match the key used by the Bitnami Valkey subchart (default: valkey-password).
+    # Must match the key used by the Bitnami Valkey subchart.
     existingSecretPasswordKey: "valkey-password"
+    # -- Inline Valkey password (alternative to existingSecret).
+    # When set, the chart embeds this value in the <release>-redis-servers Secret
+    # and passes it to the Bitnami subchart for authentication.
+    # Prefer existingSecret for production deployments to avoid storing
+    # credentials in values files.
+    password: ""
   primary:
     persistence:
       # -- Persistence is intentionally disabled: session data is ephemeral and

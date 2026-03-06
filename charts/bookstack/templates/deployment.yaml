@@ -128,25 +128,27 @@ spec:
               value: redis
             - name: CACHE_DRIVER
               value: redis
-            {{- if and .Values.externalValkey.existingSecret (not .Values.valkey.enabled) }}
+            {{- if and .Values.valkey.enabled .Values.valkey.auth.enabled }}
+            {{- /* Auth enabled: full host:port:db:password stored in chart-managed Secret */}}
+            - name: REDIS_SERVERS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-redis-servers" (include "bookstack.fullname" .) }}
+                  key: redis-servers
+            {{- else if and (not .Values.valkey.enabled) .Values.externalValkey.existingSecret }}
+            {{- /* External Valkey with operator-provided connection-string Secret */}}
             - name: REDIS_SERVERS
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.externalValkey.existingSecret }}
                   key: redis-servers
             {{- else }}
+            {{- /* No auth / external Valkey without existingSecret: plain connection string */}}
             - name: REDIS_SERVERS
               value: {{ include "bookstack.redisServers" . | quote }}
             {{- end }}
-            {{- if .Values.valkey.enabled }}
-            {{- if .Values.valkey.auth.enabled }}
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.valkey.auth.existingSecret | default (include "bookstack.valkey.fullname" .) }}
-                  key: {{ .Values.valkey.auth.existingSecretPasswordKey | default "valkey-password" }}
-            {{- end }}
-            {{- else if .Values.externalValkey.auth.existingSecret }}
+            {{- if and (not .Values.valkey.enabled) .Values.externalValkey.auth.existingSecret }}
+            {{- /* External Valkey with a separate password Secret */}}
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
