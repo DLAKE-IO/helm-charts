@@ -320,27 +320,26 @@ valkey:
     appendonly no
     save ""
   auth:
-    # -- Disable password authentication for in-cluster session storage.
-    # Enable for stricter environments by setting enabled: true and providing
-    # either auth.existingSecret (preferred) or auth.password (inline).
-    # When enabled, the chart creates a Secret (<release>-redis-servers) that
-    # stores the full REDIS_SERVERS connection string (host:port:db:password).
-    # The BookStack Deployment reads REDIS_SERVERS from this Secret via secretKeyRef.
+    # -- Enable password authentication for in-cluster Valkey.
+    # When true, a VALKEY_PASSWORD env var is injected into the BookStack container
+    # from the Secret referenced by auth.existingSecret (or the Bitnami
+    # auto-generated Secret when existingSecret is empty).
+    # Kubernetes then expands $(VALKEY_PASSWORD) inside REDIS_SERVERS at container
+    # start time, so BookStack receives the full host:port:db:password string.
+    # This approach requires no Helm lookup() and works with GitOps tools
+    # (ArgoCD, Flux) and restricted-RBAC environments.
     enabled: false
     # -- Name of a pre-existing Secret that contains the Valkey password.
-    # The chart uses Helm's lookup() to read the password and embed it in the
-    # chart-managed <release>-redis-servers Secret.
-    # Must be created before `helm install`; also passed to the Bitnami Valkey
-    # subchart so both BookStack and Valkey share the same credentials.
+    # When set, the Deployment reads VALKEY_PASSWORD from this Secret.
+    # Leave empty to let the Bitnami Valkey subchart auto-generate the Secret
+    # (auto-generated secret name: <release>-valkey, key: valkey-password).
     existingSecret: ""
     # -- Key inside existingSecret that holds the Valkey password.
-    # Must match the key used by the Bitnami Valkey subchart.
+    # Must match the key used when the Secret was created.
     existingSecretPasswordKey: "valkey-password"
     # -- Inline Valkey password (alternative to existingSecret).
-    # When set, the chart embeds this value in the <release>-redis-servers Secret
-    # and passes it to the Bitnami subchart for authentication.
-    # Prefer existingSecret for production deployments to avoid storing
-    # credentials in values files.
+    # When set, the Bitnami subchart stores it in an auto-generated Secret.
+    # Prefer existingSecret for production deployments.
     password: ""
   primary:
     persistence:

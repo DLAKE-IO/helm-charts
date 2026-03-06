@@ -129,12 +129,21 @@ spec:
             - name: CACHE_DRIVER
               value: redis
             {{- if and .Values.valkey.enabled .Values.valkey.auth.enabled }}
-            {{- /* Auth enabled: full host:port:db:password stored in chart-managed Secret */}}
-            - name: REDIS_SERVERS
+            {{- /*
+              Inject the Valkey password from the existing/auto-generated Secret so
+              Kubernetes can expand $(VALKEY_PASSWORD) inside REDIS_SERVERS at
+              container start time.  This avoids helm lookup() and works in all
+              environments (GitOps, ArgoCD, Flux, plain helm install/upgrade).
+              VALKEY_PASSWORD must be declared *before* REDIS_SERVERS for the
+              $(VAR) substitution to resolve correctly.
+            */}}
+            - name: VALKEY_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ printf "%s-redis-servers" (include "bookstack.fullname" .) }}
-                  key: redis-servers
+                  name: {{ .Values.valkey.auth.existingSecret | default (include "bookstack.valkey.fullname" .) }}
+                  key: {{ .Values.valkey.auth.existingSecretPasswordKey | default "valkey-password" }}
+            - name: REDIS_SERVERS
+              value: {{ printf "%s-primary:6379:0:$(VALKEY_PASSWORD)" (include "bookstack.valkey.fullname" .) | quote }}
             {{- else if and (not .Values.valkey.enabled) .Values.externalValkey.existingSecret }}
             {{- /* External Valkey with operator-provided connection-string Secret */}}
             - name: REDIS_SERVERS

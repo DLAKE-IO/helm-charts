@@ -81,26 +81,6 @@ Use as: {{- if include "bookstack.redis.enabled" . }}
 {{- end -}}
 
 {{/*
-Returns the Valkey authentication password for embedding in REDIS_SERVERS.
-Sources (in priority order):
-  1. Helm lookup from operator-supplied existingSecret (must pre-exist in the cluster)
-  2. Inline valkey.auth.password value
-Returns an empty string when neither is configured.
-Note: lookup returns nil during `helm template` (no cluster) — the generated
-Secret will contain a placeholder; re-run helm upgrade once the Secret exists.
-*/}}
-{{- define "bookstack.valkeyPassword" -}}
-{{- if .Values.valkey.auth.existingSecret -}}
-{{- $s := lookup "v1" "Secret" .Release.Namespace .Values.valkey.auth.existingSecret -}}
-{{- if $s -}}
-{{- index $s.data .Values.valkey.auth.existingSecretPasswordKey | b64dec -}}
-{{- end -}}
-{{- else if .Values.valkey.auth.password -}}
-{{- .Values.valkey.auth.password -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Common labels
 */}}
 {{- define "bookstack.labels" -}}

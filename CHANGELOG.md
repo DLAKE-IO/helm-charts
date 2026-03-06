@@ -5,12 +5,10 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ## [Unreleased]
 
 ### Added
-- **bookstack** `valkey.auth.password` value; inline Valkey password alternative to `existingSecret`
-- **bookstack** `bookstack.valkeyPassword` template helper; reads password from `existingSecret` via Helm `lookup()` or from the inline `valkey.auth.password` value
-- **bookstack** `<release>-redis-servers` chart-managed Secret; created when `valkey.auth.enabled: true`, stores the full `REDIS_SERVERS` connection string (`host:port:db:password`); BookStack Deployment consumes it via `valueFrom.secretKeyRef`
+- **bookstack** `valkey.auth.password` value; inline Valkey password passed to the Bitnami subchart
 
 ### Changed
-- **bookstack** version bump `2.4.1` → `2.5.0`; `REDIS_SERVERS` now embeds the Valkey password as the 4th colon-delimited field and is sourced from a chart-managed Secret; the erroneous `REDIS_PASSWORD` separate env var (unused by BookStack) is replaced by this approach
+- **bookstack** version bump `2.4.1` → `2.5.1`; when `valkey.auth.enabled: true`, `VALKEY_PASSWORD` is now injected via `secretKeyRef` from the referenced Secret and `REDIS_SERVERS` is composed as `host:port:db:$(VALKEY_PASSWORD)` — Kubernetes expands the variable at container start time, delivering the correct four-part connection string BookStack requires, without relying on Helm `lookup()`
 - **bookstack** `valkey.auth.existingSecret` and `valkey.auth.existingSecretPasswordKey` values; `REDIS_PASSWORD` is now injected from the referenced Secret when `valkey.auth.enabled` is true
 - **bookstack** `externalValkey.auth.existingSecret` and `externalValkey.auth.existingSecretPasswordKey` values for authenticated external Valkey/Redis
 - **bookstack** Valkey subchart dependency (`oci://registry-1.docker.io/bitnamicharts/valkey ^5.4.3`) for centralized PHP session and cache storage; enables horizontal scaling with multiple replicas
@@ -53,11 +51,11 @@ All notable changes to the dlake Helm Charts repository are documented here.
 
 ## bookstack
 
-### [2.5.0] — 2026-03-06
-- Added `valkey.auth.password` value for inline Valkey password (alternative to `existingSecret`)
-- Added `bookstack.valkeyPassword` template helper that reads the password from an existing Secret via Helm `lookup()` or falls back to the inline `valkey.auth.password` value
-- Added `<release>-redis-servers` chart-managed Secret (rendered when `valkey.auth.enabled: true`) containing the full `REDIS_SERVERS` connection string in `host:port:db:password` format — the format BookStack actually requires
-- Removed separate `REDIS_PASSWORD` env var for the bundled Valkey path; BookStack does not support it as a standalone variable. Password is now correctly embedded as the 4th field of `REDIS_SERVERS` and consumed via `valueFrom.secretKeyRef`, keeping credentials out of the pod spec
+### [2.5.1] — 2026-03-06
+- Added `valkey.auth.password` value for inline Valkey password (passed to the Bitnami subchart; stored in the auto-generated `<release>-valkey` Secret)
+- When `valkey.auth.enabled: true`, a `VALKEY_PASSWORD` env var is now injected via `secretKeyRef` from the referenced Secret (or the Bitnami auto-generated Secret), and `REDIS_SERVERS` is set to `host:port:db:$(VALKEY_PASSWORD)`. Kubernetes expands the variable at container start time, giving BookStack the full four-part connection string it requires
+- Removed the Helm `lookup()`-based chart-managed Secret approach: that approach silently produced an empty password in GitOps environments (ArgoCD, Flux) and clusters with restricted Secret-read RBAC. The `$(VAR_NAME)` substitution mechanism is reliable in all environments
+- Removed the incorrect standalone `REDIS_PASSWORD` env var from the bundled Valkey path (BookStack does not read this variable; the password must be the 4th field of `REDIS_SERVERS`)
 
 ### [2.4.1] — 2026-03-06
 - Patch version bump for CI/CD pipeline testing
