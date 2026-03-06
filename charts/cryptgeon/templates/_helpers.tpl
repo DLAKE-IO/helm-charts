@@ -51,6 +51,14 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Fully qualified name for the Valkey subchart.
+The Bitnami Valkey chart exposes its primary service as <fullname>-primary.
+*/}}
+{{- define "cryptgeon.valkey.fullname" -}}
+{{- printf "%s-%s" .Release.Name "valkey" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "cryptgeon.serviceAccountName" -}}

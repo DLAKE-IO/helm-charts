@@ -39,13 +39,13 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: REDIS
-              {{- if .Values.redis.enabled }}
-              value: {{ printf "redis://%s-master" (include "common.names.fullname" .Subcharts.redis) | quote }}
+              {{- if .Values.valkey.enabled }}
+              value: {{ printf "redis://%s-primary" (include "cryptgeon.valkey.fullname" .) | quote }}
               {{- else }}
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.externalRedis.existingSecretKey }}
-                  name: {{ .Values.externalRedis.existingSecretName }}
+                  key: {{ .Values.externalValkey.existingSecretKey }}
+                  name: {{ .Values.externalValkey.existingSecretName }}
               {{- end }}
             - name: SIZE_LIMIT
               value: {{ .Values.cryptgeon.size_limit | quote }}

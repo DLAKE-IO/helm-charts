@@ -34,13 +34,13 @@
         "theme_favicon": { "type": "string" }
       }
     },
-    "redis": {
+    "valkey": {
       "type": "object",
       "properties": {
         "enabled": { "type": "boolean" }
       }
     },
-    "externalRedis": {
+    "externalValkey": {
       "type": "object",
       "properties": {
         "existingSecretName": { "type": "string" },

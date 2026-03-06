@@ -23,6 +23,7 @@ All notable changes to the dlake Helm Charts repository are documented here.
 - **bookstack** version bump `2.2.0` → `2.2.1`; appVersion bumped `25.11` → `25.12`
 - **bookstack** version bump `2.1.1` → `2.2.0`; hardened pod security (`readOnlyRootFilesystem: true`, `seccompProfile: RuntimeDefault`, `runAsGroup`); added `extraVolumeMounts`/`extraVolumes` Deployment support with seven emptyDir mounts for all runtime-writable paths
 - **bookstack** version bump `2.1.0` → `2.1.1`
+- **cryptgeon** version bump `2.9.0` → `2.10.0`; migrated from Bitnami Redis `20.x.x` (HTTPS repo) to Bitnami Valkey `5.x.x` (OCI registry); `redis.*` / `externalRedis.*` values renamed to `valkey.*` / `externalValkey.*` (**breaking**)
 - **cryptgeon** version bump `2.8.2` → `2.9.0`; Redis subchart upgraded `17.x.x` → `20.x.x`
 - **ocsinventory** version bump `1.3.2` → `1.3.3`; `image.tag` fixed to `""` (was `"2.12.1"` mismatched with appVersion `2.12.3`); metrics exporter updated from `debian-11` to `debian-12`
 - **pingvin-share** version bump `1.6.1` → `1.6.2`
@@ -81,6 +82,21 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## cryptgeon
+
+### [2.10.0] — 2026-03-06
+
+**Breaking changes:**
+- `redis.*` values key renamed to `valkey.*` — update your `values.yaml` overrides accordingly
+- `externalRedis.*` values key renamed to `externalValkey.*`
+- The Bitnami Redis subchart (`https://charts.bitnami.com/bitnami`, `20.x.x`) has been replaced by the Bitnami Valkey subchart (`oci://registry-1.docker.io/bitnamicharts`, `5.x.x`)
+- Under the new `valkey` block, `master.persistence` is replaced by `primary.persistence` (Valkey primary/replica naming convention)
+
+**Changes:**
+- Migrated cache/store backend from Bitnami Redis to Bitnami Valkey (`oci://registry-1.docker.io/bitnamicharts/valkey ^5.x.x`)
+- Added `externalValkey` values block for connecting to an existing Redis-compatible service when `valkey.enabled: false`
+- Added `cryptgeon.valkey.fullname` template helper in `_helpers.tpl`
+- Internal REDIS URI updated from `redis://<release>-redis-master` to `redis://<release>-valkey-primary`
+- Updated `values.schema.json` to validate `valkey` and `externalValkey` keys
 
 ### [2.9.0] — 2026-02-26
 - Added maintainers block

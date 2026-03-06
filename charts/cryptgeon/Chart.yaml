@@ -2,7 +2,7 @@ apiVersion: v2
 name: cryptgeon
 description: A Helm chart to install cryptgeon
 type: application
-version: 2.9.0
+version: 2.10.0
 appVersion: "2.8.2"
 maintainers:
   - name: Drustan
@@ -11,7 +11,7 @@ annotations:
   artifacthub.io/category: security
   artifacthub.io/prerelease: "false"
 dependencies:
-- name: redis
-  version: 20.x.x
-  repository: https://charts.bitnami.com/bitnami
-  condition: redis.enabled
+- name: valkey
+  version: 5.x.x
+  repository: oci://registry-1.docker.io/bitnamicharts
+  condition: valkey.enabled

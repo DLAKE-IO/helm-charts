@@ -1,11 +1,11 @@
 # CI test values for cryptgeon chart
 # Used by chart-testing (ct install) to validate the chart installs correctly.
 
-redis:
+valkey:
   enabled: true
   auth:
     enabled: false
-  master:
+  primary:
     persistence:
       enabled: false
   replica:

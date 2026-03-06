@@ -67,23 +67,32 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
-redis:
-  ## Deploy Redis using bundled chart
-  # To use an external Redis instance, set this to false and configure the
-  # settings under externalRedis
+##
+## Valkey subchart configuration
+## ref: https://github.com/bitnami/charts/tree/main/bitnami/valkey
+##
+valkey:
+  ## Deploy Valkey using the bundled chart.
+  # To use an external Redis-compatible instance instead, set this to false
+  # and configure the settings under externalValkey.
   enabled: true
   auth:
     enabled: false
-  master:
+  primary:
     persistence:
       enabled: false
   replica:
     persistence:
       enabled: false
 
-externalRedis:
-  # Used only when redis.enabled is false.
-  # Existing secret's content must be of the following form : https://docs.rs/redis/latest/redis/#connection-parameters
+##
+## External Valkey / Redis configuration
+## Used when valkey.enabled is false.
+##
+externalValkey:
+  # Existing secret containing the Valkey/Redis connection URI.
+  # Secret content must follow the format documented at:
+  # https://docs.rs/redis/latest/redis/#connection-parameters
   existingSecretName: ""
   existingSecretKey: redis-connection
 
