@@ -1,0 +1,21 @@
+apiVersion: v2
+name: celery
+description: A Helm chart to deploy Celery distributed task queue (worker, beat scheduler, flower dashboard)
+type: application
+version: 0.1.0
+appVersion: "5.4.0"
+home: https://docs.celeryq.dev/
+icon: https://docs.celeryq.dev/en/stable/_static/celery_512.png
+sources:
+  - https://github.com/celery/celery
+maintainers:
+  - name: Tristan
+    email: 5606292+drustan@users.noreply.github.com
+annotations:
+  artifacthub.io/category: integration-delivery
+  artifacthub.io/prerelease: "true"
+dependencies:
+  - name: valkey
+    version: "0.9.x"
+    repository: "https://valkey.io/valkey-helm/"
+    condition: valkey.enabled

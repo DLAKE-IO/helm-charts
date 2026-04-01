@@ -9,6 +9,7 @@ This is a Helm charts repository that hosts multiple application charts. Charts 
 ## Available Charts
 
 - **bookstack** - Self-hosted platform for organizing and storing information
+- **celery** - Celery distributed task queue (worker, beat scheduler, flower dashboard)
 - **cryptgeon** - Secure note sharing application with Redis backend
 - **ocsinventory** - IT assets management and deployment solution with MariaDB backend
 - **pingvin-share** - File sharing application (note: limited to 1 replica due to architecture)
@@ -33,6 +34,7 @@ ct --config ./.github/configs/ct.yaml list-changed
 ```bash
 # Add required dependency repositories
 helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add valkey https://valkey.io/valkey-helm/
 
 # Update dependencies for a chart
 helm dependency update charts/<chart-name>

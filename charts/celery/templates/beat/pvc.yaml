@@ -1,0 +1,18 @@
+{{- if and .Values.beat.enabled .Values.beat.persistence.enabled (ne .Values.beat.scheduler "redbeat") }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "celery.fullname" . }}-beat
+  labels:
+    {{- include "celery.labels" . | nindent 4 }}
+    app.kubernetes.io/component: beat
+spec:
+  accessModes:
+    - {{ .Values.beat.persistence.accessMode }}
+  {{- if .Values.beat.persistence.storageClass }}
+  storageClassName: {{ .Values.beat.persistence.storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.beat.persistence.size }}
+{{- end }}

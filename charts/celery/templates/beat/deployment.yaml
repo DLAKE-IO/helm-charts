@@ -1,0 +1,135 @@
+{{- if .Values.beat.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "celery.fullname" . }}-beat
+  labels:
+    {{- include "celery.labels" . | nindent 4 }}
+    app.kubernetes.io/component: beat
+  {{- with .Values.podAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  # Beat MUST be a singleton. Recreate strategy prevents two beat processes
+  # from running simultaneously during a rollout, which would cause duplicate
+  # task scheduling.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "celery.beat.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "celery.beat.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "celery.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: beat
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            # beat writes the schedule file to /data — readOnlyRootFilesystem must be false.
+            # The emptyDir or PVC at /data is the only writable path.
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.beat.command }}
+          command:
+            {{- toYaml .Values.beat.command | nindent 12 }}
+          {{- else if eq .Values.beat.scheduler "redbeat" }}
+          command:
+            - celery
+            - -A
+            - {{ required "celery.app is required when beat.command is not set — set celery.app to your Celery application module" .Values.celery.app | quote }}
+            - beat
+            - --loglevel=info
+            - --scheduler
+            - redbeat.RedBeatScheduler
+            {{- range .Values.beat.extraArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          {{- else }}
+          command:
+            - celery
+            - -A
+            - {{ required "celery.app is required when beat.command is not set — set celery.app to your Celery application module" .Values.celery.app | quote }}
+            - beat
+            - --loglevel=info
+            - --schedule=/data/celerybeat-schedule
+            {{- range .Values.beat.extraArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          {{- end }}
+          env:
+            {{- include "celery.brokerEnv" . | nindent 12 }}
+            {{- with .Values.celery.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if and (not .Values.beat.command) (ne .Values.beat.scheduler "redbeat") }}
+          # File-based liveness: check that the schedule file was written recently.
+          # The wildcard catches all shelve variants: .db, .dir/.dat, or bare file.
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "test $(find /data -name 'celerybeat-schedule*' -mmin -2 2>/dev/null | wc -l) -gt 0"
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            timeoutSeconds: 5
+            failureThreshold: 3
+          {{- end }}
+          volumeMounts:
+            {{- if ne .Values.beat.scheduler "redbeat" }}
+            - name: beat-data
+              mountPath: /data
+            {{- end }}
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.beat.resources | nindent 12 }}
+      volumes:
+        {{- if ne .Values.beat.scheduler "redbeat" }}
+        - name: beat-data
+          {{- if .Values.beat.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "celery.fullname" . }}-beat
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.beat.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.beat.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.beat.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

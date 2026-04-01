@@ -8,6 +8,7 @@ All notable changes to the dlake Helm Charts repository are documented here.
 - **bookstack** version bump `2.5.1` → `2.5.2`; set `valkey.architecture: standalone` to prevent the Bitnami Valkey subchart from defaulting to `replication` mode (which deploys an unneeded primary + 3-replica cluster)
 
 ### Added
+- **celery** version `0.1.0`; new chart deploying Celery distributed task queue — independent worker, beat, and flower Deployments with bundled official Valkey subchart (standalone mode)
 - **bookstack** `valkey.auth.password` value; inline Valkey password passed to the Bitnami subchart
 
 ### Changed
@@ -49,6 +50,17 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ### Removed
 - Deprecated workflows directory `.github/workflows/deprecated/`
 - `CHANGELOG.md` placeholder (replaced with this file)
+
+---
+
+## celery
+
+### [0.1.0] — 2026-04-01
+- Initial release: worker Deployment (stateless, scalable with HPA), beat Deployment (singleton, `Recreate` strategy, file-based or RedBeat scheduler), Flower dashboard Deployment with Service and optional Ingress
+- Bundled official Valkey chart (`valkey.io/valkey-helm`) in standalone mode as broker and result backend
+- `celery.brokerEnv` shared helper covers existingSecret, bundled Valkey, and manual brokerUrl/resultBackend
+- Beat scheduler: `default` (file-based with optional PVC) or `redbeat` (Redis-backed, no PVC required)
+- CI values file with sleep-command worker override for `ct install` compatibility
 
 ---
 

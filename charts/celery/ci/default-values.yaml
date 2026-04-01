@@ -1,0 +1,24 @@
+# CI test values for celery chart.
+# Used by chart-testing (ct install) to validate the chart installs correctly.
+# Override worker command to avoid needing a real Celery application in CI.
+
+celery:
+  app: "ci_placeholder"
+
+worker:
+  command:
+    - sh
+    - -c
+    - sleep 3600
+  replicaCount: 1
+
+beat:
+  enabled: false
+
+flower:
+  enabled: false
+
+valkey:
+  enabled: true
+  replica:
+    enabled: false

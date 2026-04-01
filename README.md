@@ -21,6 +21,7 @@ helm pull oci://ghcr.io/dlake-io/charts/<chart-name> --version <version>
 | Chart | Version | App Version | Description |
 |-------|---------|-------------|-------------|
 | [bookstack](charts/bookstack/) | 2.5.2 | 25.12 | BookStack is a simple, self-hosted, easy-to-use platform for organising and storing information. |
+| [celery](charts/celery/) | 0.1.0 | 5.4.0 | A Helm chart to deploy Celery distributed task queue (worker, beat scheduler, flower dashboard). |
 | [cryptgeon](charts/cryptgeon/) | 2.10.0 | 2.8.2 | A Helm chart to install cryptgeon |
 | [ocsinventory](charts/ocsinventory/) | 1.3.3 | 2.12.3 | Open Computers and Software Inventory Next Generation is an assets management and deployment solution. |
 | [pingvin-share](charts/pingvin-share/) | 1.6.2 | v1.6.1 | A Helm chart to install Pingvin Share |
@@ -31,6 +32,18 @@ helm pull oci://ghcr.io/dlake-io/charts/<chart-name> --version <version>
 ---
 
 ## Chart Documentation
+
+### celery
+
+![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 5.4.0](https://img.shields.io/badge/AppVersion-5.4.0-informational?style=flat-square)
+
+A Helm chart to deploy Celery distributed task queue with independent worker, beat scheduler, and Flower dashboard Deployments. Bundled Valkey (Redis-compatible) subchart for the broker and result backend.
+
+> **Note:** The default `library/celery` image is deprecated. You must provide your own image built from the [official Celery Dockerfile](https://github.com/celery/celery/blob/main/docker/Dockerfile).
+
+See [charts/celery/README.md](charts/celery/README.md) for full documentation.
+
+---
 
 ### bookstack
 
