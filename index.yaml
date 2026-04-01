@@ -223,6 +223,33 @@ entries:
     urls:
     - https://github.com/DLAKE-IO/helm-charts/releases/download/bookstack-2.0.0/bookstack-2.0.0.tgz
     version: 2.0.0
+  celery:
+  - annotations:
+      artifacthub.io/category: integration-delivery
+      artifacthub.io/prerelease: "true"
+    apiVersion: v2
+    appVersion: 5.4.0
+    created: "2026-04-01T09:10:04.111269989Z"
+    dependencies:
+    - condition: valkey.enabled
+      name: valkey
+      repository: https://valkey.io/valkey-helm/
+      version: 0.9.x
+    description: A Helm chart to deploy Celery distributed task queue (worker, beat
+      scheduler, flower dashboard)
+    digest: 55d34a5862a7b791b7c4e4d96e76cc82e4337bbf4bdbc63809bcd51e3bdfe5b3
+    home: https://docs.celeryq.dev/
+    icon: https://docs.celeryq.dev/en/stable/_static/celery_512.png
+    maintainers:
+    - email: 5606292+drustan@users.noreply.github.com
+      name: Tristan
+    name: celery
+    sources:
+    - https://github.com/celery/celery
+    type: application
+    urls:
+    - https://github.com/DLAKE-IO/helm-charts/releases/download/celery-0.1.0/celery-0.1.0.tgz
+    version: 0.1.0
   cryptgeon:
   - annotations:
       artifacthub.io/category: security
@@ -658,4 +685,4 @@ entries:
     urls:
     - https://github.com/DLAKE-IO/helm-charts/releases/download/pingvin-share-0.0.1/pingvin-share-0.0.1.tgz
     version: 0.0.1
-generated: "2026-03-06T15:53:13.232303099Z"
+generated: "2026-04-01T09:10:04.111325633Z"
