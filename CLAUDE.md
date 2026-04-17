@@ -9,7 +9,6 @@ This is a Helm charts repository that hosts multiple application charts. Charts 
 ## Available Charts
 
 - **bookstack** - Self-hosted platform for organizing and storing information
-- **celery** - Celery distributed task queue (worker, beat scheduler, flower dashboard)
 - **cryptgeon** - Secure note sharing application with Redis backend
 - **ocsinventory** - IT assets management and deployment solution with MariaDB backend
 - **pingvin-share** - File sharing application (note: limited to 1 replica due to architecture)
@@ -164,3 +163,64 @@ Users can add the repository with:
 ```bash
 helm repo add dlake https://dlake-io.github.io/helm-charts/
 ```
+
+## gstack
+
+Use the `/browse` skill from gstack for all web browsing. Never use `mcp__claude-in-chrome__*` tools.
+
+Available gstack skills:
+- `/office-hours` — interactive office hours session
+- `/plan-ceo-review` — CEO review planning
+- `/plan-eng-review` — engineering review planning
+- `/plan-design-review` — design review planning
+- `/design-consultation` — design consultation
+- `/design-shotgun` — rapid design exploration
+- `/design-html` — HTML design generation
+- `/review` — code review
+- `/ship` — ship a feature end-to-end
+- `/land-and-deploy` — land and deploy changes
+- `/canary` — canary deployment
+- `/benchmark` — performance benchmarking
+- `/browse` — web browsing (use this for all web browsing)
+- `/connect-chrome` — connect to Chrome browser
+- `/qa` — quality assurance testing
+- `/qa-only` — QA without implementation
+- `/design-review` — design review
+- `/setup-browser-cookies` — set up browser cookies
+- `/setup-deploy` — set up deployment
+- `/retro` — retrospective
+- `/investigate` — investigate an issue
+- `/document-release` — document a release
+- `/codex` — code generation
+- `/cso` — chief of staff operations
+- `/autoplan` — automatic planning
+- `/plan-devex-review` — developer experience review planning
+- `/devex-review` — developer experience review
+- `/careful` — careful/cautious mode
+- `/freeze` — freeze changes
+- `/guard` — guard against regressions
+- `/unfreeze` — unfreeze changes
+- `/gstack-upgrade` — upgrade gstack
+- `/learn` — learning and knowledge capture
+
+## Skill routing
+
+When the user's request matches an available skill, ALWAYS invoke it using the Skill
+tool as your FIRST action. Do NOT answer directly, do NOT use other tools first.
+The skill has specialized workflows that produce better results than ad-hoc answers.
+
+Key routing rules:
+- Product ideas, "is this worth building", brainstorming → invoke office-hours
+- Bugs, errors, "why is this broken", 500 errors → invoke investigate
+- Ship, deploy, push, create PR → invoke ship
+- QA, test the site, find bugs → invoke qa
+- Code review, check my diff → invoke review
+- Update docs after shipping → invoke document-release
+- Weekly retro → invoke retro
+- Design system, brand → invoke design-consultation
+- Visual audit, design polish → invoke design-review
+- Architecture review → invoke plan-eng-review
+- Save progress, checkpoint, resume → invoke checkpoint
+- Code quality, health check → invoke health
+checkpoint, resume → invoke checkpoint
+- Code quality, health check → invoke health
