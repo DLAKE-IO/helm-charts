@@ -1,0 +1,13 @@
+# CI test values — wazuh is excluded from ct install due to cert-manager CRD dependency.
+# This file documents minimal viable values for reference.
+cert-manager:
+  enabled: false
+
+wazuh:
+  master:
+    replicas: 1
+  worker:
+    replicas: 0
+
+indexer:
+  replicas: 1

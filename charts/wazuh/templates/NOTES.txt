@@ -1,0 +1,17 @@
+Wazuh {{ .Chart.AppVersion }} has been deployed.
+
+Components deployed:
+  - Wazuh Manager (master + workers)
+  - Wazuh Indexer (OpenSearch)
+  - Wazuh Dashboard
+
+Retrieve the dashboard URL:
+{{- if .Values.dashboard.ingress.enabled }}
+  Dashboard: https://{{ .Values.dashboard.ingress.host }}
+{{- else }}
+  kubectl port-forward svc/{{ include "wazuh.fullname" . }}-dashboard {{ .Values.dashboard.service.httpPort }}:{{ .Values.dashboard.service.httpPort }}
+  Dashboard: http://localhost:{{ .Values.dashboard.service.httpPort }}
+{{- end }}
+
+Default credentials are stored in the dashboard Secret.
+Review README.md for full configuration documentation.

@@ -4,6 +4,9 @@ All notable changes to the dlake Helm Charts repository are documented here.
 
 ## [Unreleased]
 
+### Added
+- **wazuh** version `2.0.0`; new chart deploying Wazuh XDR/SIEM platform (manager, indexer, dashboard, agent DaemonSet); sourced from clyso-dr/wazuh-helm
+
 ### Fixed
 - **bookstack** version bump `2.5.1` → `2.5.2`; set `valkey.architecture: standalone` to prevent the Bitnami Valkey subchart from defaulting to `replication` mode (which deploys an unneeded primary + 3-replica cluster)
 
@@ -49,6 +52,17 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ### Removed
 - Deprecated workflows directory `.github/workflows/deprecated/`
 - `CHANGELOG.md` placeholder (replaced with this file)
+
+---
+
+## wazuh
+
+### [2.0.0] — 2026-04-17
+- Initial chart: Wazuh 4.14.3 XDR/SIEM platform (manager master + workers, OpenSearch indexer, dashboard, agent DaemonSet)
+- Sourced from [clyso-dr/wazuh-helm](https://github.com/clyso-dr/wazuh-helm), originally [morgoved/wazuh-helm](https://github.com/morgoved/wazuh-helm)
+- cert-manager subchart dependency (condition: `cert-manager.enabled`)
+- ARM architecture support via nodeSelector
+- cert-manager integration for TLS certificate management
 
 ---
 

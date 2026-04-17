@@ -12,6 +12,7 @@ This is a Helm charts repository that hosts multiple application charts. Charts 
 - **cryptgeon** - Secure note sharing application with Redis backend
 - **ocsinventory** - IT assets management and deployment solution with MariaDB backend
 - **pingvin-share** - File sharing application (note: limited to 1 replica due to architecture)
+- **wazuh** - Wazuh XDR/SIEM security platform (manager, indexer, dashboard, agent)
 
 ## Development Commands
 

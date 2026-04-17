@@ -40,6 +40,7 @@ jobs:
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo add valkey https://valkey.io/valkey-helm/
+          helm repo add jetstack https://charts.jetstack.io
 
       - name: List changed charts
         id: list-changed
