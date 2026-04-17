@@ -20,6 +20,9 @@ data:
     node.max_local_storage_nodes: "3"
     path.data: /var/lib/wazuh-indexer
     path.logs: /var/log/wazuh-indexer
+    {{- if .Values.indexer.snapshot.enabled }}
+    path.repo: ["{{ .Values.indexer.snapshot.fs.path }}"]
+    {{- end }}
     plugins.security.ssl.http.pemcert_filepath: /usr/share/wazuh-indexer/config/certs/node.pem
     plugins.security.ssl.http.pemkey_filepath: /usr/share/wazuh-indexer/config/certs/node-key.pem
     plugins.security.ssl.http.pemtrustedcas_filepath: /usr/share/wazuh-indexer/config/certs/root-ca.pem

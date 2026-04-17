@@ -11,7 +11,7 @@ metadata:
     {{- toYaml .Values.dashboard.service.annotations | nindent 4 }}
 spec:
   type: {{ .Values.dashboard.service.type }}
-  {{- if .Values.global.dualStack.enabled }}
+  {{- if and .Values.global .Values.global.dualStack .Values.global.dualStack.enabled }}
   {{- if .Values.global.dualStack.ipFamilyPolicy }}
   ipFamilyPolicy: {{ .Values.global.dualStack.ipFamilyPolicy }}
   {{- end }}

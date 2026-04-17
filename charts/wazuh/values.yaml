@@ -397,6 +397,19 @@ indexer:
   ##     argocd.argoproj.io/hook-delete-policy: HookSucceeded,BeforeHookCreation
   job:
     annotations: {}
+    resources: {}
+
+  ## OpenSearch snapshot repository configuration
+  snapshot:
+    enabled: false
+    fs:
+      path: /mnt/snapshots
+      storageSize: 50Gi
+      storageClass: ""
+      accessModes:
+        - ReadWriteMany
+      ## If set, skips PVC creation and uses this existing claim name.
+      existingClaim: ""
 
 ## @section indexer configuration of the wazuh dashboard. Kibana for elasticsearch with Wazuh plugins
 ## pre-installed

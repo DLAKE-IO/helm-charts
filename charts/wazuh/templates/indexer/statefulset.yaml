@@ -139,6 +139,11 @@ spec:
         secret:
           secretName: {{ include "wazuh.indexer.fullname" . }}-securityconfig
           defaultMode: 0600
+      {{- if .Values.indexer.snapshot.enabled }}
+      - name: snapshot-repo
+        persistentVolumeClaim:
+          claimName: {{ .Values.indexer.snapshot.fs.existingClaim | default (printf "%s-indexer-snapshots" (include "wazuh.indexer.fullname" .)) }}
+      {{- end }}
       {{- with .Values.indexer.additionalVolumes }}
         {{- toYaml . | nindent 6 }}
       {{- end }}
@@ -276,6 +281,10 @@ spec:
               mountPath: /usr/share/wazuh-indexer/config/opensearch-security/whitelist.yml
               subPath: whitelist.yml
               readOnly: true
+            {{- if .Values.indexer.snapshot.enabled }}
+            - mountPath: {{ .Values.indexer.snapshot.fs.path }}
+              name: snapshot-repo
+            {{- end }}
             {{- with .Values.indexer.additionalVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -285,7 +294,9 @@ spec:
             - containerPort: {{ .Values.indexer.service.nodes }}
               name: indexer-nodes
   volumeClaimTemplates:
-    - metadata:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
         name: wazuh-indexer
         {{- if .Values.indexer.pvc.extraLabels }}
         labels:

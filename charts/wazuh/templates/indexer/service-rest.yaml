@@ -10,7 +10,7 @@ metadata:
     {{- toYaml .Values.indexer.service.annotations | nindent 4 }}
 spec:
   type: {{ .Values.indexer.service.type }}
-  {{- if .Values.global.dualStack.enabled }}
+  {{- if and .Values.global .Values.global.dualStack .Values.global.dualStack.enabled }}
   {{- if .Values.global.dualStack.ipFamilyPolicy }}
   ipFamilyPolicy: {{ .Values.global.dualStack.ipFamilyPolicy }}
   {{- end }}

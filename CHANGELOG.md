@@ -5,6 +5,7 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ## [Unreleased]
 
 ### Added
+- **wazuh** version bump `2.0.0` → `2.1.0`; ported upstream fixes from morgoved/wazuh-helm (5 commits evaluated through 2026-03-24, 4 applied — 1 already present in clyso-dr refactoring)
 - **wazuh** version `2.0.0`; new chart deploying Wazuh XDR/SIEM platform (manager, indexer, dashboard, agent DaemonSet); sourced from clyso-dr/wazuh-helm
 
 ### Fixed
@@ -56,6 +57,14 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## wazuh
+
+### [2.1.0] — 2026-04-17
+- Applied upstream fixes from morgoved/wazuh-helm (commits c3ccd85 through 090a902b / wazuh-1.0.22)
+- Added null-checks for `global.dualStack` in all 7 service.yaml files (prevents nil-pointer panic when `global.dualStack` is omitted from user values overrides)
+- Added `apiVersion: v1` / `kind: PersistentVolumeClaim` to all 3 volumeClaimTemplates (fixes ArgoCD SSA perpetual diff)
+- Added optional resource constraints to indexer init job (`indexer.job.resources`)
+- Added NFS-backed snapshot storage for OpenSearch backups (`indexer.snapshot.*`) — new PVC, volume mount, and `path.repo` in opensearch.yml config
+- Added `charts/wazuh/UPSTREAM.md` tracking fork lineage and sync log
 
 ### [2.0.0] — 2026-04-17
 - Initial chart: Wazuh 4.14.3 XDR/SIEM platform (manager master + workers, OpenSearch indexer, dashboard, agent DaemonSet)
