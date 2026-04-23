@@ -38,6 +38,20 @@ spec:
     {{- with .Values.wazuh.master.networkPolicy.extraIngresses }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+    {{- if .Values.wazuh.loadBalancer.enabled }}
+    {{- if .Values.wazuh.loadBalancer.sourceCIDRs }}
+    - ports:
+        {{- range .Values.wazuh.master.service.ports }}
+        - protocol: {{ .protocol | default "TCP" }}
+          port: {{ .port }}
+        {{- end }}
+      from:
+        {{- range .Values.wazuh.loadBalancer.sourceCIDRs }}
+        - ipBlock:
+            cidr: {{ . }}
+        {{- end }}
+    {{- end }}
+    {{- end }}
   egress:
     # Wazuh CTI (Cyber Threat Intelligence)
     - ports:

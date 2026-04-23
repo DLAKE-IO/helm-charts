@@ -13,6 +13,10 @@ metadata:
     {{- end }}
 spec:
   type: LoadBalancer
+  {{- if .Values.wazuh.loadBalancer.sourceCIDRs }}
+  loadBalancerSourceRanges:
+    {{- toYaml .Values.wazuh.loadBalancer.sourceCIDRs | nindent 4 }}
+  {{- end }}
   ports:
   {{- range .Values.wazuh.master.service.ports }}
     - name: {{ .name }}

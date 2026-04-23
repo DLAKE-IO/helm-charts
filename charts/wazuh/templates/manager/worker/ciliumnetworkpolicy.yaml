@@ -17,6 +17,14 @@ spec:
             - port: {{ .port | quote }}
               protocol: {{ .protocol | default "TCP" }}
             {{- end }}
+      {{- if .Values.wazuh.loadBalancer.enabled }}
+      {{- if .Values.wazuh.loadBalancer.sourceCIDRs }}
+      fromCIDR:
+        {{- toYaml .Values.wazuh.loadBalancer.sourceCIDRs | nindent 8 }}
+      {{- end }}
+      fromEntities:
+        - cluster
+      {{- end }}
     {{- if .Values.wazuh.syslog_enable }}
     - toPorts:
         - ports:
