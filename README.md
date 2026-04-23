@@ -24,7 +24,7 @@ helm pull oci://ghcr.io/dlake-io/charts/<chart-name> --version <version>
 | [cryptgeon](charts/cryptgeon/) | 2.10.0 | 2.8.2 | A Helm chart to install cryptgeon |
 | [ocsinventory](charts/ocsinventory/) | 1.3.3 | 2.12.3 | Open Computers and Software Inventory Next Generation is an assets management and deployment solution. |
 | [pingvin-share](charts/pingvin-share/) | 1.6.2 | v1.6.1 | A Helm chart to install Pingvin Share |
-| [wazuh](charts/wazuh/) | 2.3.0 | 4.14.3 | Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads. |
+| [wazuh](charts/wazuh/) | 2.3.2 | 4.14.4 | Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads. |
 <!-- END_CHARTS_TABLE -->
 
 > The table above is automatically updated on every release by `scripts/update-readme.py`.
@@ -75,7 +75,7 @@ See [charts/pingvin-share/README.md](charts/pingvin-share/README.md) for full do
 
 ### wazuh
 
-![Version: 2.3.0](https://img.shields.io/badge/Version-2.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.3](https://img.shields.io/badge/AppVersion-4.14.3-informational?style=flat-square)
+![Version: 2.3.2](https://img.shields.io/badge/Version-2.3.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.4](https://img.shields.io/badge/AppVersion-4.14.4-informational?style=flat-square)
 
 Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 

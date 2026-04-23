@@ -21,9 +21,10 @@ spec:
       {{- if .Values.wazuh.loadBalancer.sourceCIDRs }}
       fromCIDR:
         {{- toYaml .Values.wazuh.loadBalancer.sourceCIDRs | nindent 8 }}
-      {{- end }}
+      {{- else }}
       fromEntities:
         - cluster
+      {{- end }}
       {{- end }}
     {{- if .Values.wazuh.syslog_enable }}
     - toPorts:
