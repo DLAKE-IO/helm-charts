@@ -1,0 +1,67 @@
+{{- if .Values.wazuh.worker.enabled }}
+{{- if .Values.wazuh.worker.ciliumNetworkPolicy.enabled -}}
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: {{ include "wazuh.fullname" . }}-manager-worker
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: {{ include "wazuh.fullname" . }}-manager
+      node-type: worker
+  ingress:
+    - toPorts:
+        - ports:
+            {{- range .Values.wazuh.worker.service.ports }}
+            - port: {{ .port | quote }}
+              protocol: {{ .protocol | default "TCP" }}
+            {{- end }}
+    {{- if .Values.wazuh.syslog_enable }}
+    - toPorts:
+        - ports:
+            - port: "514"
+              protocol: TCP
+            - port: "514"
+              protocol: UDP
+    {{- end }}
+    - fromEndpoints:
+        - matchLabels:
+            app: {{ include "wazuh.fullname" . }}-manager
+      toPorts:
+        - ports:
+            - port: {{ .Values.wazuh.service.port | quote }}
+              protocol: TCP
+    {{- with .Values.wazuh.worker.ciliumNetworkPolicy.extraIngresses }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  egress:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    {{- if .Values.indexer.enabled }}
+    - toEndpoints:
+        - matchLabels:
+            app: {{ include "wazuh.indexer.fullname" . }}-indexer
+      toPorts:
+        - ports:
+            - port: {{ .Values.indexer.service.httpPort | quote }}
+              protocol: TCP
+    {{- end }}
+    - toEndpoints:
+        - matchLabels:
+            app: {{ include "wazuh.fullname" . }}-manager
+            node-type: master
+      toPorts:
+        - ports:
+            - port: {{ .Values.wazuh.service.port | quote }}
+              protocol: TCP
+    {{- include "wazuh.ciliumNetworkPolicy.dnsEgress" . | nindent 4 }}
+    {{- with .Values.wazuh.worker.ciliumNetworkPolicy.extraEgresses }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end -}}
+{{- end }}

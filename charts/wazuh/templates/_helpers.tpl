@@ -193,3 +193,32 @@ Define serviceaccount names
     {{ "default" }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Render the DNS egress rule for CiliumNetworkPolicy.
+Allows UDP/TCP port 53 to kube-dns and coredns pods in kube-system.
+k8s:io.kubernetes.pod.namespace is the Cilium-injected label equivalent of the
+namespaceSelector kubernetes.io/metadata.name restriction in standard NetworkPolicy.
+*/}}
+{{- define "wazuh.ciliumNetworkPolicy.dnsEgress" -}}
+- toEndpoints:
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: kube-system
+        k8s-app: kube-dns
+  toPorts:
+    - ports:
+        - port: "53"
+          protocol: UDP
+        - port: "53"
+          protocol: TCP
+- toEndpoints:
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: kube-system
+        k8s-app: coredns
+  toPorts:
+    - ports:
+        - port: "53"
+          protocol: UDP
+        - port: "53"
+          protocol: TCP
+{{- end }}

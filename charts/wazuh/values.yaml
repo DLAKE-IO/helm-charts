@@ -99,7 +99,7 @@ indexer:
     ## @param indexer.images.tag Tag of the image.
     ## @param indexer.images.pullPolicy pullPolicy of the image.
     ##
-    tag: "4.14.1"
+    tag: "4.14.3"
     pullPolicy: IfNotPresent
     ## Parameter to set the imagePullSecret
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -181,6 +181,15 @@ indexer:
     ## @param indexer.networkPolicy.extraIngresses specify additional ingress rules for the NetworkPolicy.
     extraIngresses: []
     ## @param indexer.networkPolicy.extraEgresses specify additional egress rules for the NetworkPolicy.
+    extraEgresses: []
+  ## CiliumNetworkPolicy for Cilium-managed clusters. Independent of networkPolicy.
+  ## @param indexer.ciliumNetworkPolicy.enabled Specifies whether a CiliumNetworkPolicy should be created.
+  ##
+  ciliumNetworkPolicy:
+    enabled: false
+    ## @param indexer.ciliumNetworkPolicy.extraIngresses specify additional ingress rules for the CiliumNetworkPolicy.
+    extraIngresses: []
+    ## @param indexer.ciliumNetworkPolicy.extraEgresses specify additional egress rules for the CiliumNetworkPolicy.
     extraEgresses: []
   ## Parameters for svc resource. Ref: https://kubernetes.io/de/docs/concepts/services-networking/service/
   ## @param indexer.service.type Type of the created service.
@@ -442,7 +451,7 @@ dashboard:
     ## @param dashboard.images.pullPolicy pullPolicy of the image.
     ## @param dashboard.images.updateStrategy updateStrategy of the image.
     ##
-    tag: "4.14.1"
+    tag: "4.14.3"
     pullPolicy: IfNotPresent
     updateStrategy: OnDelete
   ## Parameters to configure the resources allocated to the dashboard.
@@ -517,6 +526,15 @@ dashboard:
     ## @param dashboard.networkPolicy.extraIngresses specify additional ingress rules for the NetworkPolicy.
     extraIngresses: []
     ## @param dashboard.networkPolicy.extraEgresses specify additional egress rules for the NetworkPolicy.
+    extraEgresses: []
+  ## CiliumNetworkPolicy for Cilium-managed clusters. Independent of networkPolicy.
+  ## @param dashboard.ciliumNetworkPolicy.enabled Specifies whether a CiliumNetworkPolicy should be created.
+  ##
+  ciliumNetworkPolicy:
+    enabled: false
+    ## @param dashboard.ciliumNetworkPolicy.extraIngresses specify additional ingress rules for the CiliumNetworkPolicy.
+    extraIngresses: []
+    ## @param dashboard.ciliumNetworkPolicy.extraEgresses specify additional egress rules for the CiliumNetworkPolicy.
     extraEgresses: []
   ## Parameters for svc resource. Ref: https://kubernetes.io/de/docs/concepts/services-networking/service/
   ## @param dashboard.service.type Type of the created service.
@@ -632,14 +650,14 @@ dashboard:
         kibanaUser:
           backendRoles: []
       extraRoleMappings: {}
-#        testingUser:
-#          reserved: false
-#          hidden: false
-#          backend_roles: []
-#          hosts: []
-#          users: []
-#          and_backend_roles: []
-#          description: "Allow full access to an index named like the username"
+      #        testingUser:
+      #          reserved: false
+      #          hidden: false
+      #          backend_roles: []
+      #          hosts: []
+      #          users: []
+      #          and_backend_roles: []
+      #          description: "Allow full access to an index named like the username"
       customizeLoginButton:
         enabled: false
         text: "Log In with Single sign-on (OIDC)"
@@ -697,14 +715,14 @@ dashboard:
         kibanaUser:
           backendRoles: []
       extraRoleMappings: {}
-#        testingUser:
-#          reserved: false
-#          hidden: false
-#          backend_roles: []
-#          hosts: []
-#          users: []
-#          and_backend_roles: []
-#          description: "Allow full access to an index named like the username"
+  #        testingUser:
+  #          reserved: false
+  #          hidden: false
+  #          backend_roles: []
+  #          hosts: []
+  #          users: []
+  #          and_backend_roles: []
+  #          description: "Allow full access to an index named like the username"
 
   ## Ingress parameters for the dashboard Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
   ## @param dashboard.ingress.enabled Enable ingress record generation for dashboard.
@@ -767,7 +785,7 @@ wazuh:
   ##
   images:
     repository: wazuh/wazuh-manager
-    tag: "4.14.1"
+    tag: "4.14.3"
     pullPolicy: IfNotPresent
     imagePullSecrets:
       enabled: false
@@ -990,6 +1008,17 @@ wazuh:
       extraIngresses: []
       ## @param wazuh.master.networkPolicy.extraEgresses specify additional egress rules for the NetworkPolicy.
       extraEgresses: []
+    ## CiliumNetworkPolicy for Cilium-managed clusters. Independent of networkPolicy.
+    ## WARNING: CTI egress uses toEntities: ["world"]. If outbound traffic is routed through an
+    ## in-cluster proxy, add an explicit extraEgresses rule targeting the proxy pod instead.
+    ## @param wazuh.master.ciliumNetworkPolicy.enabled Specifies whether a CiliumNetworkPolicy should be created.
+    ##
+    ciliumNetworkPolicy:
+      enabled: false
+      ## @param wazuh.master.ciliumNetworkPolicy.extraIngresses specify additional ingress rules for the CiliumNetworkPolicy.
+      extraIngresses: []
+      ## @param wazuh.master.ciliumNetworkPolicy.extraEgresses specify additional egress rules for the CiliumNetworkPolicy.
+      extraEgresses: []
     ## @param wazuh.master.pvc.extraLabels Add addtional labels to the PersistentVolumeClaim metadata
     pvc:
       extraLabels: {}
@@ -1145,6 +1174,17 @@ wazuh:
       extraIngresses: []
       ## @param wazuh.worker.networkPolicy.extraEgresses specify additional egress rules for the NetworkPolicy.
       extraEgresses: []
+    ## CiliumNetworkPolicy for Cilium-managed clusters. Independent of networkPolicy.
+    ## WARNING: CTI egress uses toEntities: ["world"]. If outbound traffic is routed through an
+    ## in-cluster proxy, add an explicit extraEgresses rule targeting the proxy pod instead.
+    ## @param wazuh.worker.ciliumNetworkPolicy.enabled Specifies whether a CiliumNetworkPolicy should be created.
+    ##
+    ciliumNetworkPolicy:
+      enabled: false
+      ## @param wazuh.worker.ciliumNetworkPolicy.extraIngresses specify additional ingress rules for the CiliumNetworkPolicy.
+      extraIngresses: []
+      ## @param wazuh.worker.ciliumNetworkPolicy.extraEgresses specify additional egress rules for the CiliumNetworkPolicy.
+      extraEgresses: []
     ## @param wazuh.worker.pvc.extraLabels Add addtional labels to the PersistentVolumeClaim metadata
     pvc:
       extraLabels: {}
@@ -1223,7 +1263,7 @@ agent:
   ##
   images:
     repository: kinseii/wazuh-agent
-    tag: "4.14.1"
+    tag: "4.14.3"
     pullPolicy: IfNotPresent
 
   ## Parameters to configure securityContext of the pod.
@@ -1320,21 +1360,21 @@ agent:
   ## after having failed.
   ## @param wazuh.agent.livenessProbe.initialDelaySeconds Delay before liveness probe is initiated.
   livenessProbe: {}
-#    httpGet:
-#      path: /healz
-#      port: 5000
-#    initialDelaySeconds: 40
-#    periodSeconds: 10
-#    timeoutSeconds: 10
-#    failureThreshold: 5
+  #    httpGet:
+  #      path: /healz
+  #      port: 5000
+  #    initialDelaySeconds: 40
+  #    periodSeconds: 10
+  #    timeoutSeconds: 10
+  #    failureThreshold: 5
 
   ## Parameters to configure the volumes.
   ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
   ## @param wazuh.agent.volumes List of volumes
   volumes:
-#    - name: docker-socket-mount
-#      hostPath:
-#        path: /var/run/docker.sock
+    #    - name: docker-socket-mount
+    #      hostPath:
+    #        path: /var/run/docker.sock
     - name: var-run
       hostPath:
         path: /var/run
@@ -1380,10 +1420,10 @@ agent:
     - mountPath: /host/etc
       name: etc
       readOnly: true
-#    - mountPath: /var/run/docker.sock
-#      name: docker-socket-mount
-#    - mountPath: /host/var/run/docker.sock
-#      name: docker-socket-mount
+    #    - mountPath: /var/run/docker.sock
+    #      name: docker-socket-mount
+    #    - mountPath: /host/var/run/docker.sock
+    #      name: docker-socket-mount
     - mountPath: /host/boot
       name: boot
       readOnly: true

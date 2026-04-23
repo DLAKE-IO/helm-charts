@@ -1,0 +1,58 @@
+{{- if .Values.wazuh.master.enabled }}
+{{- if .Values.wazuh.master.ciliumNetworkPolicy.enabled -}}
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: {{ include "wazuh.fullname" . }}-manager-master
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: {{ include "wazuh.fullname" . }}-manager
+      node-type: master
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: {{ include "wazuh.fullname" . }}-dashboard
+        - matchLabels:
+            app: {{ include "wazuh.fullname" . }}-agent
+            node-type: agent
+      toPorts:
+        - ports:
+            {{- range .Values.wazuh.master.service.ports }}
+            - port: {{ .port | quote }}
+              protocol: {{ .protocol | default "TCP" }}
+            {{- end }}
+    - fromEndpoints:
+        - matchLabels:
+            app: {{ include "wazuh.fullname" . }}-manager
+            node-type: worker
+      toPorts:
+        - ports:
+            - port: {{ .Values.wazuh.service.port | quote }}
+              protocol: TCP
+    {{- with .Values.wazuh.master.ciliumNetworkPolicy.extraIngresses }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  egress:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    {{- if .Values.indexer.enabled }}
+    - toEndpoints:
+        - matchLabels:
+            app: {{ include "wazuh.indexer.fullname" . }}-indexer
+      toPorts:
+        - ports:
+            - port: {{ .Values.indexer.service.httpPort | quote }}
+              protocol: TCP
+    {{- end }}
+    {{- include "wazuh.ciliumNetworkPolicy.dnsEgress" . | nindent 4 }}
+    {{- with .Values.wazuh.master.ciliumNetworkPolicy.extraEgresses }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end -}}
+{{- end }}

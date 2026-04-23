@@ -1,0 +1,15 @@
+dashboard:
+  ciliumNetworkPolicy:
+    enabled: true
+
+indexer:
+  ciliumNetworkPolicy:
+    enabled: true
+
+wazuh:
+  master:
+    ciliumNetworkPolicy:
+      enabled: true
+  worker:
+    ciliumNetworkPolicy:
+      enabled: true

@@ -43,6 +43,7 @@ spec:
     - ports:
         - protocol: TCP
           port: 443
+    {{- if .Values.indexer.enabled }}
     - ports:
         - protocol: TCP
           port: {{ .Values.indexer.service.httpPort }}
@@ -50,6 +51,7 @@ spec:
         - podSelector:
             matchLabels:
               app: {{ include "wazuh.indexer.fullname" . }}-indexer
+    {{- end }}
     # DNS
     {{- range $dnsServerLabelsList := list "kube-dns" "coredns" }}
     - ports:

@@ -1,0 +1,43 @@
+{{- if .Values.dashboard.enabled }}
+{{- if .Values.dashboard.ciliumNetworkPolicy.enabled -}}
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: {{ include "wazuh.fullname" . }}-dashboard
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: {{ include "wazuh.fullname" . }}-dashboard
+  ingress:
+    - toPorts:
+        - ports:
+            - port: {{ .Values.dashboard.service.httpPort | quote }}
+              protocol: TCP
+    {{- with .Values.dashboard.ciliumNetworkPolicy.extraIngresses }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  egress:
+    {{- if .Values.indexer.enabled }}
+    - toEndpoints:
+        - matchLabels:
+            app: {{ include "wazuh.indexer.fullname" . }}-indexer
+      toPorts:
+        - ports:
+            - port: {{ .Values.indexer.service.httpPort | quote }}
+              protocol: TCP
+    {{- end }}
+    - toEndpoints:
+        - matchLabels:
+            app: {{ include "wazuh.fullname" . }}-manager
+            node-type: master
+      toPorts:
+        - ports:
+            - port: {{ include "wazuh.getPortByName" (dict "portName" "api" "ports" .Values.wazuh.master.service.ports) | quote }}
+              protocol: TCP
+    {{- include "wazuh.ciliumNetworkPolicy.dnsEgress" . | nindent 4 }}
+    {{- with .Values.dashboard.ciliumNetworkPolicy.extraEgresses }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end -}}
+{{- end }}

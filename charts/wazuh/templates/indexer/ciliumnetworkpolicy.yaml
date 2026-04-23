@@ -1,0 +1,49 @@
+{{- if .Values.indexer.enabled }}
+{{- if .Values.indexer.ciliumNetworkPolicy.enabled -}}
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: {{ include "wazuh.indexer.fullname" . }}-indexer
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app: {{ include "wazuh.indexer.fullname" . }}-indexer
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: {{ include "wazuh.indexer.fullname" . }}-indexer
+      toPorts:
+        - ports:
+            - port: {{ .Values.indexer.service.nodes | quote }}
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            app: {{ include "wazuh.fullname" . }}-dashboard
+        - matchLabels:
+            app: {{ include "wazuh.fullname" . }}-manager
+        - matchLabels:
+            app: {{ include "wazuh.indexer.fullname" . }}-indexer
+        - matchLabels:
+            job-name: {{ include "wazuh.indexer.fullname" . }}-indexer
+      toPorts:
+        - ports:
+            - port: {{ .Values.indexer.service.httpPort | quote }}
+              protocol: TCP
+    {{- with .Values.indexer.ciliumNetworkPolicy.extraIngresses }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app: {{ include "wazuh.indexer.fullname" . }}-indexer
+      toPorts:
+        - ports:
+            - port: {{ .Values.indexer.service.nodes | quote }}
+              protocol: TCP
+    {{- include "wazuh.ciliumNetworkPolicy.dnsEgress" . | nindent 4 }}
+    {{- with .Values.indexer.ciliumNetworkPolicy.extraEgresses }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end -}}
+{{- end }}

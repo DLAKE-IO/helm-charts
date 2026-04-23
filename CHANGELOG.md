@@ -5,6 +5,7 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ## [Unreleased]
 
 ### Added
+- **wazuh** version bump `2.1.0` → `2.2.0`; added `CiliumNetworkPolicy` support for all four components (dashboard, indexer, manager-master, manager-worker); each component has an independent `ciliumNetworkPolicy.enabled` flag (default `false`, coexists with existing `networkPolicy`); DNS egress (UDP+TCP/53 to kube-dns and coredns) via shared `wazuh.ciliumNetworkPolicy.dnsEgress` named template; syslog ports (514 TCP/UDP) in worker CNP gated on `wazuh.syslog_enable`; CTI egress via `toEntities: ["world"]` in master and worker CNPs; `externalIndexer` guard added to existing NetworkPolicy templates (dashboard, master, worker)
 - **wazuh** version bump `2.0.0` → `2.1.0`; ported upstream fixes from morgoved/wazuh-helm (5 commits evaluated through 2026-03-24, 4 applied — 1 already present in clyso-dr refactoring)
 - **wazuh** version `2.0.0`; new chart deploying Wazuh XDR/SIEM platform (manager, indexer, dashboard, agent DaemonSet); sourced from clyso-dr/wazuh-helm
 
