@@ -34,6 +34,18 @@ spec:
     {{- with .Values.wazuh.master.ciliumNetworkPolicy.extraIngresses }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+    {{- if .Values.wazuh.loadBalancer.enabled }}
+    {{- if .Values.wazuh.loadBalancer.sourceCIDRs }}
+    - fromCIDR:
+        {{- toYaml .Values.wazuh.loadBalancer.sourceCIDRs | nindent 8 }}
+      toPorts:
+        - ports:
+            {{- range .Values.wazuh.master.service.ports }}
+            - port: {{ .port | quote }}
+              protocol: {{ .protocol | default "TCP" }}
+            {{- end }}
+    {{- end }}
+    {{- end }}
   egress:
     - toEntities:
         - world

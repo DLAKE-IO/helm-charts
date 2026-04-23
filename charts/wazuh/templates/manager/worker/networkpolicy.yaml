@@ -19,6 +19,16 @@ spec:
         - protocol: {{ .protocol | default "TCP" }}
           port: {{ .port }}
         {{- end }}
+      {{- if .Values.wazuh.loadBalancer.enabled }}
+      from:
+        {{- if .Values.wazuh.loadBalancer.sourceCIDRs }}
+        {{- range .Values.wazuh.loadBalancer.sourceCIDRs }}
+        - ipBlock:
+            cidr: {{ . }}
+        {{- end }}
+        {{- end }}
+        - podSelector: {}
+      {{- end }}
     {{- if .Values.wazuh.syslog_enable }}
     - ports:
         - protocol: TCP
