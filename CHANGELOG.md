@@ -4,6 +4,12 @@ All notable changes to the dlake Helm Charts repository are documented here.
 
 ## [Unreleased]
 
+### Fixed
+- **wazuh** version bump `2.3.1` → `2.3.2`; fix worker CiliumNetworkPolicy: use `fromCIDR` when `loadBalancer.sourceCIDRs` is set, fall back to `fromEntities: [cluster]` otherwise (combining both is unsupported by Cilium)
+
+### Changed
+- **wazuh** version bump `2.3.0` → `2.3.1`; bump all component image tags `4.14.3` → `4.14.4`
+
 ### Added
 - **wazuh** version bump `2.2.0` → `2.3.0`; added `wazuh.loadBalancer.sourceCIDRs` (default `["0.0.0.0/0"]`) for CIDR-scoped LB ingress enforcement — applied to `loadBalancerSourceRanges` on the LB Service, `ipBlock` rules in master/worker NetworkPolicy, and `fromCIDR` rules in master/worker CiliumNetworkPolicy; worker ingress is narrowed to configured CIDRs plus same-namespace pods when LB is enabled
 - **wazuh** version bump `2.1.0` → `2.2.0`; added `CiliumNetworkPolicy` support for all four components (dashboard, indexer, manager-master, manager-worker); each component has an independent `ciliumNetworkPolicy.enabled` flag (default `false`, coexists with existing `networkPolicy`); DNS egress (UDP+TCP/53 to kube-dns and coredns) via shared `wazuh.ciliumNetworkPolicy.dnsEgress` named template; syslog ports (514 TCP/UDP) in worker CNP gated on `wazuh.syslog_enable`; CTI egress via `toEntities: ["world"]` in master and worker CNPs; `externalIndexer` guard added to existing NetworkPolicy templates (dashboard, master, worker)
@@ -59,6 +65,12 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## wazuh
+
+### [2.3.2] — 2026-04-23
+- Fixed worker CiliumNetworkPolicy: mutually exclusive `fromCIDR` (when `loadBalancer.sourceCIDRs` is set) vs `fromEntities: [cluster]` (otherwise) — combining both is unsupported by Cilium
+
+### [2.3.1] — 2026-04-23
+- Bumped all component image tags from `4.14.3` to `4.14.4`
 
 ### [2.3.0] — 2026-04-23
 - Added `wazuh.loadBalancer.sourceCIDRs` (default `["0.0.0.0/0"]`): CIDR list applied to `loadBalancerSourceRanges` on the LB Service, `ipBlock` ingress rules in master and worker NetworkPolicy, and `fromCIDR` ingress rules in master and worker CiliumNetworkPolicy; worker port ingress narrows to configured CIDRs plus same-namespace pods when LB is enabled

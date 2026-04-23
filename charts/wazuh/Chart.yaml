@@ -2,14 +2,14 @@ apiVersion: v2
 name: wazuh
 description: Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 type: application
-appVersion: 4.14.3
-version: 2.3.0
+appVersion: 4.14.4
+version: 2.3.2
 annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/category: security
   artifacthub.io/changes: |
-    - kind: added
-      description: "Add wazuh.loadBalancer.sourceCIDRs for CIDR-scoped LB ingress enforcement (NetworkPolicy, CiliumNetworkPolicy, and loadBalancerSourceRanges)"
+    - kind: fixed
+      description: "Fix worker CiliumNetworkPolicy: use fromCIDR when sourceCIDRs is set, fromEntities: [cluster] otherwise (combining both is unsupported)"
   artifacthub.io/links: |
     - name: application source
       url: https://github.com/wazuh/wazuh
@@ -57,5 +57,8 @@ keywords:
 dependencies:
   - name: cert-manager
     version: 1.19.3
+    repository: https://charts.jetstack.io
+    condition: cert-manager.enabled
+  version: 1.19.3
     repository: https://charts.jetstack.io
     condition: cert-manager.enabled
