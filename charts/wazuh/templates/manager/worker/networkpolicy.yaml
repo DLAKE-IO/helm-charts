@@ -19,15 +19,26 @@ spec:
         - protocol: {{ .protocol | default "TCP" }}
           port: {{ .port }}
         {{- end }}
+        {{- if .Values.wazuh.loadBalancer.enabled }}
+        {{- range .Values.wazuh.master.service.ports }}
+        - protocol: {{ .protocol | default "TCP" }}
+          port: {{ .port }}
+        {{- end }}
+        {{- if .Values.wazuh.syslog_enable }}
+        - protocol: TCP
+          port: 514
+        - protocol: UDP
+          port: 514
+        {{- end }}
+        {{- end }}
       {{- if .Values.wazuh.loadBalancer.enabled }}
+      {{- if .Values.wazuh.loadBalancer.sourceCIDRs }}
       from:
-        {{- if .Values.wazuh.loadBalancer.sourceCIDRs }}
         {{- range .Values.wazuh.loadBalancer.sourceCIDRs }}
         - ipBlock:
             cidr: {{ . }}
         {{- end }}
-        {{- end }}
-        - podSelector: {}
+      {{- end }}
       {{- end }}
     {{- if .Values.wazuh.syslog_enable }}
     - ports:

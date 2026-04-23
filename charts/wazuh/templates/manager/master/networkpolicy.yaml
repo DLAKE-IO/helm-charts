@@ -39,18 +39,28 @@ spec:
     {{- toYaml . | nindent 4 }}
     {{- end }}
     {{- if .Values.wazuh.loadBalancer.enabled }}
-    {{- if .Values.wazuh.loadBalancer.sourceCIDRs }}
     - ports:
         {{- range .Values.wazuh.master.service.ports }}
         - protocol: {{ .protocol | default "TCP" }}
           port: {{ .port }}
         {{- end }}
+        {{- range .Values.wazuh.worker.service.ports }}
+        - protocol: {{ .protocol | default "TCP" }}
+          port: {{ .port }}
+        {{- end }}
+        {{- if .Values.wazuh.syslog_enable }}
+        - protocol: TCP
+          port: 514
+        - protocol: UDP
+          port: 514
+        {{- end }}
+      {{- if .Values.wazuh.loadBalancer.sourceCIDRs }}
       from:
         {{- range .Values.wazuh.loadBalancer.sourceCIDRs }}
         - ipBlock:
             cidr: {{ . }}
         {{- end }}
-    {{- end }}
+      {{- end }}
     {{- end }}
   egress:
     # Wazuh CTI (Cyber Threat Intelligence)

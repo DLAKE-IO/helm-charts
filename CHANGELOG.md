@@ -5,6 +5,7 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ## [Unreleased]
 
 ### Fixed
+- **wazuh** version bump `2.3.2` → `2.3.3`; fix master/worker NetworkPolicy and CiliumNetworkPolicy: when `wazuh.loadBalancer.enabled=true`, all four policies now allow all LB-exposed ports (TCP 1515, 55000, 1514, 514 + UDP 514) from the configured `sourceCIDRs` (or `fromEntities: cluster` / open rule when unset) — the LB Service selector targets both master and worker pods, so both must accept all LB ports to prevent random connection drops
 - **wazuh** version bump `2.3.1` → `2.3.2`; fix worker CiliumNetworkPolicy: use `fromCIDR` when `loadBalancer.sourceCIDRs` is set, fall back to `fromEntities: [cluster]` otherwise (combining both is unsupported by Cilium)
 
 ### Changed

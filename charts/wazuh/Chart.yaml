@@ -3,13 +3,13 @@ name: wazuh
 description: Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 type: application
 appVersion: 4.14.4
-version: 2.3.2
+version: 2.3.3
 annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/category: security
   artifacthub.io/changes: |
     - kind: fixed
-      description: "Fix worker CiliumNetworkPolicy: use fromCIDR when sourceCIDRs is set, fromEntities: [cluster] otherwise (combining both is unsupported)"
+      description: "Fix master/worker NetworkPolicy and CiliumNetworkPolicy: when LoadBalancer is enabled, all four policies now allow all LB-exposed ports (TCP 1515, 55000, 1514, 514 + UDP 514) from the configured sourceCIDRs or fromEntities: cluster, matching the LB Service selector which targets both master and worker pods"
   artifacthub.io/links: |
     - name: application source
       url: https://github.com/wazuh/wazuh
