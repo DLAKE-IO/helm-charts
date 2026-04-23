@@ -59,6 +59,3 @@ dependencies:
     version: 1.19.3
     repository: https://charts.jetstack.io
     condition: cert-manager.enabled
-  version: 1.19.3
-    repository: https://charts.jetstack.io
-    condition: cert-manager.enabled
