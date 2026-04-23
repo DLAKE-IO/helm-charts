@@ -689,6 +689,72 @@ entries:
   - annotations:
       artifacthub.io/category: security
       artifacthub.io/changes: |
+        - kind: added
+          description: "Add wazuh.loadBalancer.sourceCIDRs for CIDR-scoped LB ingress enforcement (NetworkPolicy, CiliumNetworkPolicy, and loadBalancerSourceRanges)"
+      artifacthub.io/links: |
+        - name: application source
+          url: https://github.com/wazuh/wazuh
+        - name: kustomize source
+          url: https://github.com/wazuh/wazuh-kubernetes
+      artifacthub.io/prerelease: "false"
+      artifacthub.io/screenshots: |
+        - title: Home Page
+          url: https://morgoved.github.io/wazuh-helm/images/dashboard.png
+        - title: Agent Deployment
+          url: https://morgoved.github.io/wazuh-helm/images/agent-deploy.png
+        - title: Threat Hunting
+          url: https://morgoved.github.io/wazuh-helm/images/threat-hunting.png
+    apiVersion: v2
+    appVersion: 4.14.3
+    created: "2026-04-23T12:37:32.104768709Z"
+    dependencies:
+    - condition: cert-manager.enabled
+      name: cert-manager
+      repository: https://charts.jetstack.io
+      version: 1.19.3
+    description: Wazuh is a free and open source security platform that unifies XDR
+      and SIEM protection for endpoints and cloud workloads.
+    digest: cdaae31021027cceb6dee1639b5b40a4137df3a276f2178c5017150718bf2145
+    home: https://wazuh.com/
+    icon: https://morgoved.github.io/wazuh-helm/images/icon.png
+    keywords:
+    - security
+    - information
+    - threat
+    - management
+    - kubernetes
+    - wazuh
+    - opendistro
+    - elasticsearch
+    maintainers:
+    - email: morgyes@gmail.com
+      name: Morgoved
+      url: https://github.com/morgoved
+    - email: jinyi_lie@yahoo.com
+      name: Kaslie
+      url: https://github.com/Kaslie
+    - email: andre.gomes@promptlyhealth.com
+      name: Dani
+      url: https://github.com/Ca-moes
+    - name: TrueDru
+      url: https://github.com/TrueDru
+    - name: 71g3pf4c3
+      url: https://github.com/71g3pf4c3
+    - name: ShorMario
+      url: https://github.com/ShorMario
+    - name: dlake
+      url: https://github.com/dlake-io
+    name: wazuh
+    sources:
+    - https://github.com/clyso-dr/wazuh-helm
+    - https://github.com/morgoved/wazuh-helm
+    type: application
+    urls:
+    - https://github.com/DLAKE-IO/helm-charts/releases/download/wazuh-2.3.0/wazuh-2.3.0.tgz
+    version: 2.3.0
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/changes: |
         - kind: changed
           description: "Update all components to Wazuh 4.12.0"
         - kind: changed
@@ -760,4 +826,4 @@ entries:
     urls:
     - https://github.com/DLAKE-IO/helm-charts/releases/download/wazuh-2.1.0/wazuh-2.1.0.tgz
     version: 2.1.0
-generated: "2026-04-17T13:57:15.961936884Z"
+generated: "2026-04-23T12:37:32.104820727Z"
