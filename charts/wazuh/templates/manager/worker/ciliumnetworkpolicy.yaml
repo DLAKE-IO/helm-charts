@@ -17,6 +17,18 @@ spec:
             - port: {{ .port | quote }}
               protocol: {{ .protocol | default "TCP" }}
             {{- end }}
+            {{- if .Values.wazuh.loadBalancer.enabled }}
+            {{- range .Values.wazuh.master.service.ports }}
+            - port: {{ .port | quote }}
+              protocol: {{ .protocol | default "TCP" }}
+            {{- end }}
+            {{- if .Values.wazuh.syslog_enable }}
+            - port: "514"
+              protocol: TCP
+            - port: "514"
+              protocol: UDP
+            {{- end }}
+            {{- end }}
       {{- if .Values.wazuh.loadBalancer.enabled }}
       {{- if .Values.wazuh.loadBalancer.sourceCIDRs }}
       fromCIDR:
