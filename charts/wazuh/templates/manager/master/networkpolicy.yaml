@@ -68,6 +68,10 @@ spec:
         - protocol: UDP
           port: 514
         {{- end }}
+        {{- if .Values.webhookListener.enabled }}
+        - protocol: TCP
+          port: {{ .Values.webhookListener.service.containerPort }}
+        {{- end }}
       {{- if .Values.wazuh.loadBalancer.sourceCIDRs }}
       from:
         {{- range .Values.wazuh.loadBalancer.sourceCIDRs }}

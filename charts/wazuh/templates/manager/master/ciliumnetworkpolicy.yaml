@@ -70,6 +70,10 @@ spec:
             - port: "514"
               protocol: UDP
             {{- end }}
+            {{- if .Values.webhookListener.enabled }}
+            - port: {{ .Values.webhookListener.service.containerPort | quote }}
+              protocol: TCP
+            {{- end }}
       {{- if .Values.wazuh.loadBalancer.sourceCIDRs }}
       fromCIDR:
         {{- toYaml .Values.wazuh.loadBalancer.sourceCIDRs | nindent 8 }}

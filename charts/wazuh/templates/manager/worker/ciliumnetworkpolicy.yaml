@@ -56,6 +56,25 @@ spec:
     {{- with .Values.wazuh.worker.ciliumNetworkPolicy.extraIngresses }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+    {{- if .Values.webhookListener.enabled }}
+    # Allow the local cluster Kubernetes API server (host network) to POST audit webhook events.
+    - fromEntities:
+        - host
+        - remote-node
+      toPorts:
+        - ports:
+            - port: {{ .Values.webhookListener.service.containerPort | quote }}
+              protocol: TCP
+    {{- if .Values.webhookListener.sourceCIDRs }}
+    # Allow external cluster API servers to POST audit webhook events.
+    - fromCIDR:
+        {{- toYaml .Values.webhookListener.sourceCIDRs | nindent 8 }}
+      toPorts:
+        - ports:
+            - port: {{ .Values.webhookListener.service.containerPort | quote }}
+              protocol: TCP
+    {{- end }}
+    {{- end }}
   egress:
     - toEntities:
         - world

@@ -58,6 +58,20 @@ spec:
     {{- with .Values.wazuh.worker.networkPolicy.extraIngresses }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+    {{- if .Values.webhookListener.enabled }}
+    # Allow Kubernetes API servers to POST audit webhook events.
+    # No pod/namespace selector — API servers run on host network with no labels.
+    - ports:
+        - port: {{ .Values.webhookListener.service.containerPort }}
+          protocol: TCP
+      {{- if .Values.webhookListener.sourceCIDRs }}
+      from:
+        {{- range .Values.webhookListener.sourceCIDRs }}
+        - ipBlock:
+            cidr: {{ . }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
   egress:
     # Wazuh CTI (Cyber Threat Intelligence)
     - ports:

@@ -36,6 +36,12 @@ spec:
       targetPort: 514
       protocol: UDP
   {{- end }}
+  {{- if .Values.webhookListener.enabled }}
+    - name: webhook-https
+      port: {{ .Values.webhookListener.service.port }}
+      targetPort: {{ .Values.webhookListener.service.containerPort }}
+      protocol: TCP
+  {{- end }}
   selector:
     app: {{ include "wazuh.fullname" . }}-manager
 {{- end -}}
