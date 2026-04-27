@@ -12,6 +12,10 @@ metadata:
   {{- end }}
 spec:
   type: {{ .Values.webhookListener.service.type }}
+  {{- if .Values.webhookListener.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml .Values.webhookListener.service.loadBalancerSourceRanges | nindent 4 }}
+  {{- end }}
   ports:
     - port: {{ .Values.webhookListener.service.port }}
       targetPort: {{ .Values.webhookListener.service.containerPort }}

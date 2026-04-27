@@ -35,7 +35,7 @@ spec:
     {{- toYaml . | nindent 4 }}
     {{- end }}
     {{- if .Values.webhookListener.enabled }}
-    # Allow the Kubernetes API server (host network entity) to POST audit webhook events.
+    # Allow the local cluster Kubernetes API server (host network) to POST audit webhook events.
     - fromEntities:
         - host
         - remote-node
@@ -43,6 +43,15 @@ spec:
         - ports:
             - port: {{ .Values.webhookListener.service.containerPort | quote }}
               protocol: TCP
+    {{- if .Values.webhookListener.sourceCIDRs }}
+    # Allow external cluster API servers to POST audit webhook events.
+    - fromCIDR:
+        {{- toYaml .Values.webhookListener.sourceCIDRs | nindent 8 }}
+      toPorts:
+        - ports:
+            - port: {{ .Values.webhookListener.service.containerPort | quote }}
+              protocol: TCP
+    {{- end }}
     {{- end }}
     {{- if .Values.wazuh.loadBalancer.enabled }}
     - toPorts:

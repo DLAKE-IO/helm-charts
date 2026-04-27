@@ -3,13 +3,15 @@ name: wazuh
 description: Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 type: application
 appVersion: 4.14.4
-version: 2.4.1
+version: 2.5.0
 annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/category: security
   artifacthub.io/changes: |
-    - kind: fixed
-      description: "Replace Flask with stdlib http.server + ssl in webhook listener script; Flask is not present in the Wazuh manager image, causing ModuleNotFoundError on sidecar start"
+    - kind: added
+      description: "webhookListener.sourceCIDRs: CIDRs of external K8s API servers; adds a fromCIDR CiliumNetworkPolicy ingress rule so external clusters can POST audit events to the webhook listener"
+    - kind: added
+      description: "webhookListener.service.loadBalancerSourceRanges: restrict LoadBalancer ingress to specific source CIDRs when type=LoadBalancer"
   artifacthub.io/links: |
     - name: application source
       url: https://github.com/wazuh/wazuh

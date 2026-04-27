@@ -1484,8 +1484,17 @@ webhookListener:
     ## @param webhookListener.service.containerPort Port the sidecar listens on.
     ## Use a non-privileged port (>=1024). The Service maps port to containerPort.
     containerPort: 8080
+    ## @param webhookListener.service.type Kubernetes Service type. Use LoadBalancer to expose the webhook endpoint to external clusters.
     type: ClusterIP
     annotations: {}
+    ## @param webhookListener.service.loadBalancerSourceRanges Restrict LoadBalancer ingress to these source CIDRs.
+    ## Only evaluated when type=LoadBalancer. Leave empty to allow all sources.
+    loadBalancerSourceRanges: []
+
+  ## @param webhookListener.sourceCIDRs Source CIDRs for external Kubernetes API servers sending audit webhook events.
+  ## When set, the CiliumNetworkPolicy adds a fromCIDR ingress rule so traffic from external clusters reaches the sidecar.
+  ## Example: ["10.1.0.0/16", "10.2.0.0/16"]
+  sourceCIDRs: []
 
   tls:
     ## @param webhookListener.tls.existingSecret Name of a pre-existing TLS Secret.

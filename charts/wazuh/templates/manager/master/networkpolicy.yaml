@@ -39,11 +39,18 @@ spec:
     {{- toYaml . | nindent 4 }}
     {{- end }}
     {{- if .Values.webhookListener.enabled }}
-    # Open ingress on the webhook port — no from: selector.
-    # The Kubernetes API server runs on host network and has no namespace/pod labels.
+    # Allow Kubernetes API servers to POST audit webhook events.
+    # No pod/namespace selector — API servers run on host network with no labels.
     - ports:
         - port: {{ .Values.webhookListener.service.containerPort }}
           protocol: TCP
+      {{- if .Values.webhookListener.sourceCIDRs }}
+      from:
+        {{- range .Values.webhookListener.sourceCIDRs }}
+        - ipBlock:
+            cidr: {{ . }}
+        {{- end }}
+      {{- end }}
     {{- end }}
     {{- if .Values.wazuh.loadBalancer.enabled }}
     - ports:

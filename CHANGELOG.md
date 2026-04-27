@@ -12,6 +12,7 @@ All notable changes to the dlake Helm Charts repository are documented here.
 - **wazuh** version bump `2.3.0` → `2.3.1`; bump all component image tags `4.14.3` → `4.14.4`
 
 ### Added
+- **wazuh** version bump `2.4.1` → `2.5.0`; added `webhookListener.sourceCIDRs` (list of external K8s API server CIDRs — generates a `fromCIDR` CiliumNetworkPolicy ingress rule so external clusters can reach the webhook sidecar) and `webhookListener.service.loadBalancerSourceRanges` (restricts LB ingress when `type=LoadBalancer`); enables multi-cluster audit log collection with a single Wazuh deployment
 - **wazuh** version bump `2.3.3` → `2.4.0`; added `webhookListener` component: a sidecar container injected into the wazuh-master pod that receives Kubernetes API server audit webhook events over HTTPS (port 8080) and forwards them to the Wazuh manager via the analysisd Unix socket at `/var/ossec/queue/sockets/queue`; gated behind `webhookListener.enabled: false`; includes `webhookListener` Service (port 443 → 8080), cert-manager Certificate CR with 4-SAN FQDN, optional audit policy reference ConfigMap, and webhook ingress rules automatically added to the master NetworkPolicy and CiliumNetworkPolicy when both `webhookListener.enabled` and the respective NP/CNP flags are true
 
 ### Fixed
@@ -77,6 +78,10 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## wazuh
+
+### [2.5.0] — 2026-04-27
+- Added `webhookListener.sourceCIDRs`: list external K8s API server CIDRs to add a `fromCIDR` CiliumNetworkPolicy ingress rule — enables multi-cluster audit webhook collection
+- Added `webhookListener.service.loadBalancerSourceRanges`: restrict LoadBalancer ingress to specified CIDRs when `webhookListener.service.type=LoadBalancer`
 
 ### [2.4.1] — 2026-04-27
 - Fixed webhook listener sidecar: replaced Flask with Python stdlib `http.server` + `ssl` — Flask is absent from the Wazuh manager image, causing `ModuleNotFoundError` on start; zero external dependencies now required
