@@ -280,6 +280,8 @@ spec:
             - /var/ossec/framework/python/bin/python3
             - /scripts/kubernetes-webhook.py
           env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
             - name: WEBHOOK_PORT
               value: {{ .Values.webhookListener.service.containerPort | quote }}
             - name: WEBHOOK_CERT
