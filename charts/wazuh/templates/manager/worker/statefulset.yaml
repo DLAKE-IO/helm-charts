@@ -103,8 +103,28 @@ spec:
             name: {{ include "wazuh.fullname" . }}-webhook-script
       {{- end }}
       securityContext:
-        fsGroup: 101
+        fsGroup: {{ .Values.wazuh.fixPermissions.gid }}
+        {{- if .Values.wazuh.worker.fsGroupChangePolicy }}
+        fsGroupChangePolicy: {{ .Values.wazuh.worker.fsGroupChangePolicy }}
+        {{- end }}
       initContainers:
+        {{- if .Values.wazuh.fixPermissions.enabled }}
+        - name: fix-permissions
+          image: {{ .Values.wazuh.fixPermissions.image | default "alpine:3" }}
+          imagePullPolicy: {{ .Values.wazuh.images.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /data/wazuh
+              chown -R {{ .Values.wazuh.fixPermissions.uid }}:{{ .Values.wazuh.fixPermissions.gid }} /data/wazuh
+              chmod -R u+rwX,g+rwX /data/wazuh
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: {{ include "wazuh.fullname" . }}-manager-worker
+              mountPath: /data
+        {{- end }}
         - name: update-index
           image: {{ .Values.wazuh.initContainer.image }}
           imagePullPolicy: {{ .Values.wazuh.images.pullPolicy }}

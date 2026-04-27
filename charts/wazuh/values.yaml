@@ -868,6 +868,27 @@ wazuh:
         cpu: 1000m
         memory: 1Gi
 
+  ## Parameters for the fix-permissions initContainer.
+  ## @param wazuh.fixPermissions.enabled Adds a fix-permissions initContainer that chowns /data/wazuh on every pod start.
+  ## @param wazuh.fixPermissions.image Image for the fix-permissions initContainer.
+  ## @param wazuh.fixPermissions.uid Wazuh process UID. Used for chown and fsGroup. Verify with: kubectl exec wazuh-manager-master-0 -- id wazuh
+  ## @param wazuh.fixPermissions.gid Wazuh process GID. Used for chown and pod securityContext fsGroup.
+  ##
+  fixPermissions:
+    # Adds a fix-permissions initContainer that chowns /data/wazuh on every pod start.
+    # Required when PVC has stale root ownership from kubelet subPath creation or
+    # Wazuh root-entrypoint init. Set to false only if you manage PVC ownership externally.
+    # NOTE: runAsUser: 0 — incompatible with PSA 'restricted' namespace profile.
+    # NOTE: Upgrading an existing StatefulSet triggers a rolling restart (pods bounce
+    #       sequentially). Schedule during a maintenance window for production SIEM.
+    enabled: true
+    # alpine:3 is small and likely already cached on nodes running the update-index initContainer.
+    image: "alpine:3"
+    # Wazuh UID:GID — verify with: kubectl exec -n wazuh wazuh-manager-master-0 -- id wazuh
+    # Wazuh 4.x images use 999:999; older images may use 1000:101.
+    uid: 999
+    gid: 999
+
   ## Parameters for the additional initContainers.
   extraInitContainers: []
 
@@ -909,6 +930,9 @@ wazuh:
   ## @section wazuh.master configuration of the wazuh master component.
   ##
   master:
+    ## @param wazuh.master.fsGroupChangePolicy fsGroupChangePolicy for the pod securityContext. Set to "" to suppress on K8s < 1.20.
+    ##
+    fsGroupChangePolicy: "OnRootMismatch"
     ## @param wazuh.master.enabled Enable the master
     enabled: true
     ## @param wazuh.master.annotations additional annotations set on statefulset.
@@ -1060,6 +1084,9 @@ wazuh:
   ## @section wazuh.worker configuration of the wazuh worker component.
   ##
   worker:
+    ## @param wazuh.worker.fsGroupChangePolicy fsGroupChangePolicy for the pod securityContext. Set to "" to suppress on K8s < 1.20.
+    ##
+    fsGroupChangePolicy: "OnRootMismatch"
     ## @param wazuh.worker.enabled Enable the worker
     enabled: true
     ## @param wazuh.worker.replicas number of replicas used in statefulset.

@@ -1,12 +1,37 @@
 # wazuh
 
-![Version: 2.5.1](https://img.shields.io/badge/Version-2.5.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.4](https://img.shields.io/badge/AppVersion-4.14.4-informational?style=flat-square)
+![Version: 2.5.2](https://img.shields.io/badge/Version-2.5.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.4](https://img.shields.io/badge/AppVersion-4.14.4-informational?style=flat-square)
 
 Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 
 > **Upstream:** This chart is maintained at [clyso-dr/wazuh-helm](https://github.com/clyso-dr/wazuh-helm),
 > forked from [morgoved/wazuh-helm](https://github.com/morgoved/wazuh-helm).
 > The dlake distribution tracks upstream and may include additional configuration.
+
+## PVC Ownership Fix (queue/db permissions)
+
+Set `wazuh.fixPermissions.enabled: true` (default) to inject a `fix-permissions` initContainer
+that runs before any Wazuh process and chowns the full PVC tree (`/data/wazuh`) to UID 1000 / GID 101.
+
+This fixes the repeated `wazuh-db: ERROR: Couldn't create SQLite database 'queue/db/global.db'`
+caused by kubelet creating subPath directories as `root:root`. Without this fix, wazuh-db cannot
+write to `queue/db/` and the manager is effectively blind to agent sync and audit log ingest.
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `wazuh.fixPermissions.enabled` | Inject fix-permissions initContainer on every pod start | `true` |
+| `wazuh.fixPermissions.image` | Image for the initContainer (needs `sh` and `chown`) | `alpine:3` |
+| `wazuh.fixPermissions.uid` | Wazuh process UID — used for `chown` target. Verify with `kubectl exec ... -- id wazuh` | `999` |
+| `wazuh.fixPermissions.gid` | Wazuh process GID — used for `chown` target and pod `securityContext.fsGroup` | `999` |
+| `wazuh.master.fsGroupChangePolicy` | Pod securityContext fsGroupChangePolicy. Set to `""` on K8s < 1.20 | `OnRootMismatch` |
+| `wazuh.worker.fsGroupChangePolicy` | Same for worker pods | `OnRootMismatch` |
+
+**PSA note:** The fix-permissions initContainer runs as `runAsUser: 0` (root). This is incompatible
+with PSA `restricted` namespace profiles. Relax the namespace to `baseline` or manage PVC ownership
+externally and set `wazuh.fixPermissions.enabled: false`.
+
+**Upgrade note:** Adding an initContainer to an existing StatefulSet triggers a rolling restart
+(pods bounce sequentially). Schedule upgrades during a maintenance window for production SIEM deployments.
 
 ## Kubernetes Audit Webhook Listener
 

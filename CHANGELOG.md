@@ -5,6 +5,7 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ## [Unreleased]
 
 ### Fixed
+- **wazuh** version bump `2.5.1` → `2.5.2`; add `fix-permissions` initContainer (alpine:3, chown 999:999) and `fsGroupChangePolicy: OnRootMismatch` to master and worker StatefulSets; correct `fsGroup` from hardcoded `101` to `999` (actual wazuh GID in 4.x images) — fixes stale `root:root` ownership on PVC subPath dirs that caused `wazuh-db: ERROR: Couldn't create SQLite database 'queue/db/global.db'` after pod restarts; add helm template smoke test to CI for wazuh chart (previously excluded from `ct lint`)
 - **wazuh** version bump `2.3.2` → `2.3.3`; fix master/worker NetworkPolicy and CiliumNetworkPolicy: when `wazuh.loadBalancer.enabled=true`, all four policies now allow all LB-exposed ports (TCP 1515, 55000, 1514, 514 + UDP 514) from the configured `sourceCIDRs` (or `fromEntities: cluster` / open rule when unset) — the LB Service selector targets both master and worker pods, so both must accept all LB ports to prevent random connection drops
 - **wazuh** version bump `2.3.1` → `2.3.2`; fix worker CiliumNetworkPolicy: use `fromCIDR` when `loadBalancer.sourceCIDRs` is set, fall back to `fromEntities: [cluster]` otherwise (combining both is unsupported by Cilium)
 
@@ -81,6 +82,13 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## wazuh
+
+### [2.5.2] — 2026-04-27
+- Fixed: add `fix-permissions` initContainer (alpine:3, `runAsUser: 0`) to master and worker StatefulSets; mounts full PVC at `/data`, runs `mkdir -p /data/wazuh && chown -R 999:999 /data/wazuh && chmod -R u+rwX,g+rwX /data/wazuh` before any Wazuh process starts — eliminates `wazuh-db: ERROR: Couldn't create SQLite database 'queue/db/global.db'` caused by kubelet creating subPath dirs as `root:root`
+- Fixed: correct `fsGroup` in pod securityContext from hardcoded `101` to `wazuh.fixPermissions.gid` (default `999`); the previous value `101` did not match the actual wazuh process GID (999 in Wazuh 4.x images) and caused kubelet to apply the wrong group to mount points
+- Fixed: add `fsGroupChangePolicy: OnRootMismatch` to master and worker pod securityContext (K8s 1.20+; suppress via `wazuh.master.fsGroupChangePolicy: ""` / `wazuh.worker.fsGroupChangePolicy: ""`); acts as belt-and-suspenders against ownership drift on new files
+- Added: `wazuh.fixPermissions.{enabled,image,uid,gid}` values (defaults: `true`, `alpine:3`, `999`, `999`) — uid/gid control both the initContainer chown target and the pod securityContext fsGroup; verify with `kubectl exec wazuh-manager-master-0 -- id wazuh`
+- Added: helm template smoke test in CI for wazuh chart (chart was previously excluded from `ct lint`; `helm template` now validates template renders correctly on every PR that touches wazuh)
 
 ### [2.5.1] — 2026-04-27
 - Fixed: inject webhook listener sidecar into worker pods; add `webhook-https` port (443 → 8080) to `wazuh-manager-lb` when `webhookListener.enabled`; extend NP/CNP webhook ingress rules to cover worker pods — external clusters now hit any manager pod through the existing LoadBalancer

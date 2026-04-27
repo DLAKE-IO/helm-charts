@@ -106,6 +106,13 @@ jobs:
             --config .github/configs/ct.yaml \
             --lint-conf .github/configs/lintconf.yaml
 
+      - name: Validate wazuh chart template
+        if: steps.list-changed.outputs.changed == 'true'
+        run: |
+          helm dependency update charts/wazuh
+          helm template release charts/wazuh -f charts/wazuh/values.yaml > /dev/null
+          echo "✅ Wazuh chart template renders successfully"
+
       - name: Create kind cluster
         if: steps.list-changed.outputs.changed == 'true'
         uses: helm/kind-action@v1.14.0
