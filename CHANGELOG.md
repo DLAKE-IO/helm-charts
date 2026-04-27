@@ -4,6 +4,9 @@ All notable changes to the dlake Helm Charts repository are documented here.
 
 ## [Unreleased]
 
+### Added
+- **wazuh** version bump `2.3.3` → `2.4.0`; added `webhookListener` component: a sidecar container injected into the wazuh-master pod that receives Kubernetes API server audit webhook events over HTTPS (port 8080) and forwards them to the Wazuh manager via the analysisd Unix socket at `/var/ossec/queue/sockets/queue`; gated behind `webhookListener.enabled: false`; includes `webhookListener` Service (port 443 → 8080), cert-manager Certificate CR with 4-SAN FQDN, optional audit policy reference ConfigMap, and webhook ingress rules automatically added to the master NetworkPolicy and CiliumNetworkPolicy when both `webhookListener.enabled` and the respective NP/CNP flags are true
+
 ### Fixed
 - **wazuh** version bump `2.3.2` → `2.3.3`; fix master/worker NetworkPolicy and CiliumNetworkPolicy: when `wazuh.loadBalancer.enabled=true`, all four policies now allow all LB-exposed ports (TCP 1515, 55000, 1514, 514 + UDP 514) from the configured `sourceCIDRs` (or `fromEntities: cluster` / open rule when unset) — the LB Service selector targets both master and worker pods, so both must accept all LB ports to prevent random connection drops
 - **wazuh** version bump `2.3.1` → `2.3.2`; fix worker CiliumNetworkPolicy: use `fromCIDR` when `loadBalancer.sourceCIDRs` is set, fall back to `fromEntities: [cluster]` otherwise (combining both is unsupported by Cilium)
@@ -66,6 +69,12 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## wazuh
+
+### [2.4.0] — 2026-04-25
+- Added `webhookListener` sidecar component: receives Kubernetes API server audit webhook events over HTTPS and forwards to the Wazuh manager via Unix socket; gated by `webhookListener.enabled: false`
+- New values: `webhookListener.service.{port,containerPort,type,annotations}`, `webhookListener.tls.existingSecret`, `webhookListener.auditPolicy.enabled`, `webhookListener.{resources,livenessProbe,readinessProbe,extraEnvVars,podAnnotations}`
+- New templates: `templates/webhook-listener/configmap-script.yaml`, `certificate.yaml`, `service.yaml`, `configmap-audit-policy.yaml`
+- Modified: `templates/manager/master/statefulset.yaml` (sidecar + volumes); `templates/manager/master/networkpolicy.yaml` (webhook ingress when `webhookListener.enabled`); `templates/manager/master/ciliumnetworkpolicy.yaml` (webhook ingress from `host`/`remote-node` entities)
 
 ### [2.3.2] — 2026-04-23
 - Fixed worker CiliumNetworkPolicy: mutually exclusive `fromCIDR` (when `loadBalancer.sourceCIDRs` is set) vs `fromEntities: [cluster]` (otherwise) — combining both is unsupported by Cilium

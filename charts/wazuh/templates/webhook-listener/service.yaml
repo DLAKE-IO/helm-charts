@@ -1,0 +1,24 @@
+{{- if .Values.webhookListener.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "wazuh.fullname" . }}-webhook-listener
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "wazuh.fullname" . }}-webhook-listener
+  {{- with .Values.webhookListener.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.webhookListener.service.type }}
+  ports:
+    - port: {{ .Values.webhookListener.service.port }}
+      targetPort: {{ .Values.webhookListener.service.containerPort }}
+      protocol: TCP
+      name: https
+  # The sidecar runs inside the wazuh-master pod — select master pod labels.
+  selector:
+    app: {{ include "wazuh.fullname" . }}-manager
+    node-type: master
+{{- end }}

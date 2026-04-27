@@ -1,0 +1,8 @@
+# CI values: webhook listener enabled with cert-manager TLS
+certificates:
+  enabled: true
+webhookListener:
+  enabled: true
+  service:
+    port: 443
+    containerPort: 8080

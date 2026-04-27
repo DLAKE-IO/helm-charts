@@ -1467,3 +1467,52 @@ agent:
   ##    image: alpine
   ##    command: ["/bin/sh", "-c", "sleep 3600"]
   extraContainers: []
+
+## Parameters for the Wazuh Kubernetes audit webhook listener.
+## When enabled, injects a sidecar container into the wazuh-master pod that receives
+## Kubernetes API server audit webhook events over HTTPS and forwards them to the
+## Wazuh manager via the Unix socket at /var/ossec/queue/sockets/queue.
+## The Kubernetes API server must be configured separately with
+## --audit-webhook-config-file pointing to this Service.
+webhookListener:
+  ## @param webhookListener.enabled Enable the webhook listener sidecar.
+  enabled: false
+
+  service:
+    ## @param webhookListener.service.port Service port exposed to the K8s API server.
+    port: 443
+    ## @param webhookListener.service.containerPort Port the sidecar listens on.
+    ## Use a non-privileged port (>=1024). The Service maps port to containerPort.
+    containerPort: 8080
+    type: ClusterIP
+    annotations: {}
+
+  tls:
+    ## @param webhookListener.tls.existingSecret Name of a pre-existing TLS Secret.
+    ## When set, the sidecar uses this Secret instead of the cert-manager Certificate.
+    ## Required when certificates.enabled=false. Secret must contain tls.crt and tls.key.
+    existingSecret: ""
+
+  ## @param webhookListener.auditPolicy.enabled Render the audit policy ConfigMap.
+  ## Disabled by default — opt in when you are ready to apply it to the API server.
+  auditPolicy:
+    enabled: false
+
+  ## @param webhookListener.podAnnotations Extra annotations for the master pod (applied via master StatefulSet).
+  podAnnotations: {}
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+  ## @param webhookListener.livenessProbe Optional liveness probe config.
+  livenessProbe: {}
+  ## @param webhookListener.readinessProbe Optional readiness probe config.
+  readinessProbe: {}
+
+  ## @param webhookListener.extraEnvVars Extra environment variables for the sidecar container.
+  extraEnvVars: []

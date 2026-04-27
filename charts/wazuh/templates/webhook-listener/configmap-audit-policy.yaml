@@ -1,0 +1,40 @@
+{{- if and .Values.webhookListener.enabled .Values.webhookListener.auditPolicy.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "wazuh.fullname" . }}-audit-policy
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "wazuh.fullname" . }}-webhook-listener
+  annotations:
+    helm.sh/note: "This policy is for reference only. Apply it to your API server audit configuration."
+data:
+  audit-policy.yaml: |
+    apiVersion: audit.k8s.io/v1
+    kind: Policy
+    rules:
+      # Log secret, configmap, and token changes at RequestResponse level
+      - level: RequestResponse
+        resources:
+          - group: ""
+            resources: ["secrets", "configmaps"]
+      # Log pod exec/attach at RequestResponse
+      - level: RequestResponse
+        verbs: ["create"]
+        resources:
+          - group: ""
+            resources: ["pods/exec", "pods/attach", "pods/portforward"]
+      # Log metadata for scoped resource types only — avoid the high-volume catch-all.
+      # Tune this list to your environment before applying to production.
+      # A catch-all Metadata rule can generate enormous volume in active clusters.
+      - level: Metadata
+        omitStages:
+          - RequestReceived
+        resources:
+          - group: ""
+            resources: ["pods", "services", "endpoints", "persistentvolumeclaims"]
+          - group: "apps"
+            resources: ["deployments", "statefulsets", "daemonsets"]
+          - group: "rbac.authorization.k8s.io"
+            resources: ["roles", "rolebindings", "clusterroles", "clusterrolebindings"]
+{{- end }}

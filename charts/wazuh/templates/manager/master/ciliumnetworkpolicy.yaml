@@ -34,6 +34,16 @@ spec:
     {{- with .Values.wazuh.master.ciliumNetworkPolicy.extraIngresses }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+    {{- if .Values.webhookListener.enabled }}
+    # Allow the Kubernetes API server (host network entity) to POST audit webhook events.
+    - fromEntities:
+        - host
+        - remote-node
+      toPorts:
+        - ports:
+            - port: {{ .Values.webhookListener.service.containerPort | quote }}
+              protocol: TCP
+    {{- end }}
     {{- if .Values.wazuh.loadBalancer.enabled }}
     - toPorts:
         - ports:

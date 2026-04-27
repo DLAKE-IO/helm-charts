@@ -81,6 +81,14 @@ spec:
       {{- with .Values.wazuh.master.additionalVolumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.webhookListener.enabled }}
+        - name: wazuh-webhook-tls
+          secret:
+            secretName: {{ .Values.webhookListener.tls.existingSecret | default (printf "%s-webhook-listener-tls" (include "wazuh.fullname" .)) }}
+        - name: wazuh-webhook-script
+          configMap:
+            name: {{ include "wazuh.fullname" . }}-webhook-script
+      {{- end }}
       securityContext:
         fsGroup: 101
       initContainers:
@@ -264,6 +272,49 @@ spec:
           {{- with .Values.wazuh.master.additionalEnv }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
+      {{- if .Values.webhookListener.enabled }}
+        - name: wazuh-webhook-listener
+          image: "{{ .Values.wazuh.images.repository }}:{{ .Values.wazuh.images.tag }}"
+          imagePullPolicy: {{ .Values.wazuh.images.pullPolicy }}
+          command:
+            - /var/ossec/framework/python/bin/python3
+            - /scripts/kubernetes-webhook.py
+          env:
+            - name: WEBHOOK_PORT
+              value: {{ .Values.webhookListener.service.containerPort | quote }}
+            - name: WEBHOOK_CERT
+              value: /certs/tls.crt
+            - name: WEBHOOK_CERT_KEY
+              value: /certs/tls.key
+            {{- with .Values.webhookListener.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: https
+              containerPort: {{ .Values.webhookListener.service.containerPort }}
+          {{- with .Values.webhookListener.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.webhookListener.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.webhookListener.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: wazuh-webhook-tls
+              mountPath: /certs
+              readOnly: true
+            - name: wazuh-webhook-script
+              mountPath: /scripts
+              readOnly: true
+            - name: {{ include "wazuh.fullname" . }}-manager-master
+              mountPath: /var/ossec/queue/sockets
+              subPath: wazuh/var/ossec/queue/sockets
+      {{- end }}
   volumeClaimTemplates:
     - apiVersion: v1
       kind: PersistentVolumeClaim
