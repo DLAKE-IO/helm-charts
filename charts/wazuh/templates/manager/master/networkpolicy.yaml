@@ -38,6 +38,13 @@ spec:
     {{- with .Values.wazuh.master.networkPolicy.extraIngresses }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+    {{- if .Values.webhookListener.enabled }}
+    # Open ingress on the webhook port — no from: selector.
+    # The Kubernetes API server runs on host network and has no namespace/pod labels.
+    - ports:
+        - port: {{ .Values.webhookListener.service.containerPort }}
+          protocol: TCP
+    {{- end }}
     {{- if .Values.wazuh.loadBalancer.enabled }}
     - ports:
         {{- range .Values.wazuh.master.service.ports }}

@@ -1,0 +1,20 @@
+# CI values: webhook listener with all optional features enabled
+# Tests: existingSecret path (no Certificate CR), auditPolicy ConfigMap,
+# master NetworkPolicy + CiliumNetworkPolicy with webhook ingress rule.
+certificates:
+  enabled: true
+wazuh:
+  master:
+    networkPolicy:
+      enabled: true
+    ciliumNetworkPolicy:
+      enabled: true
+webhookListener:
+  enabled: true
+  service:
+    port: 443
+    containerPort: 8080
+  tls:
+    existingSecret: "dummy-tls-secret"
+  auditPolicy:
+    enabled: true

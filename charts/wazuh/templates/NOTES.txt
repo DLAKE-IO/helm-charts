@@ -15,3 +15,26 @@ Retrieve the dashboard URL:
 
 Default credentials are stored in the dashboard Secret.
 Review README.md for full configuration documentation.
+{{- if .Values.webhookListener.enabled }}
+
+WEBHOOK LISTENER (Kubernetes audit log collection):
+  The Wazuh audit webhook listener sidecar is deployed in the manager-master pod.
+  To complete setup:
+
+  1. Configure your Kubernetes API server with:
+       --audit-policy-file=/path/to/audit-policy.yaml
+       --audit-webhook-config-file=/path/to/webhook-kubeconfig.yaml
+
+  2. Your reference audit policy (if enabled) is in ConfigMap:
+       {{ include "wazuh.fullname" . }}-audit-policy
+
+  3. Create a kubeconfig pointing to the webhook listener Service:
+       server: https://{{ include "wazuh.fullname" . }}-webhook-listener.{{ .Release.Namespace }}.svc.cluster.local
+
+  4. Extract the CA cert from the TLS Secret for your webhook kubeconfig:
+       kubectl get secret {{ .Values.webhookListener.tls.existingSecret | default (printf "%s-webhook-listener-tls" (include "wazuh.fullname" .)) }} \
+         -n {{ .Release.Namespace }} \
+         -o jsonpath='{.data.ca\.crt}' | base64 -d > /tmp/wazuh-webhook-ca.crt
+     Place the base64-encoded value under clusters[0].cluster.certificate-authority-data
+     in your webhook kubeconfig.
+{{- end }}
