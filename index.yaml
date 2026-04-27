@@ -690,6 +690,72 @@ entries:
       artifacthub.io/category: security
       artifacthub.io/changes: |
         - kind: fixed
+          description: "Add fix-permissions initContainer and fsGroupChangePolicy to resolve stale root ownership on PVC subPath mounts causing wazuh-db permission denied errors after pod restart"
+      artifacthub.io/links: |
+        - name: application source
+          url: https://github.com/wazuh/wazuh
+        - name: kustomize source
+          url: https://github.com/wazuh/wazuh-kubernetes
+      artifacthub.io/prerelease: "false"
+      artifacthub.io/screenshots: |
+        - title: Home Page
+          url: https://morgoved.github.io/wazuh-helm/images/dashboard.png
+        - title: Agent Deployment
+          url: https://morgoved.github.io/wazuh-helm/images/agent-deploy.png
+        - title: Threat Hunting
+          url: https://morgoved.github.io/wazuh-helm/images/threat-hunting.png
+    apiVersion: v2
+    appVersion: 4.14.4
+    created: "2026-04-27T20:38:47.638338522Z"
+    dependencies:
+    - condition: cert-manager.enabled
+      name: cert-manager
+      repository: https://charts.jetstack.io
+      version: 1.19.3
+    description: Wazuh is a free and open source security platform that unifies XDR
+      and SIEM protection for endpoints and cloud workloads.
+    digest: e336459e970935badb61ccdd9d3002289a193896cc3e154ac8855a3d3fd2fc2f
+    home: https://wazuh.com/
+    icon: https://morgoved.github.io/wazuh-helm/images/icon.png
+    keywords:
+    - security
+    - information
+    - threat
+    - management
+    - kubernetes
+    - wazuh
+    - opendistro
+    - elasticsearch
+    maintainers:
+    - email: morgyes@gmail.com
+      name: Morgoved
+      url: https://github.com/morgoved
+    - email: jinyi_lie@yahoo.com
+      name: Kaslie
+      url: https://github.com/Kaslie
+    - email: andre.gomes@promptlyhealth.com
+      name: Dani
+      url: https://github.com/Ca-moes
+    - name: TrueDru
+      url: https://github.com/TrueDru
+    - name: 71g3pf4c3
+      url: https://github.com/71g3pf4c3
+    - name: ShorMario
+      url: https://github.com/ShorMario
+    - name: dlake
+      url: https://github.com/dlake-io
+    name: wazuh
+    sources:
+    - https://github.com/clyso-dr/wazuh-helm
+    - https://github.com/morgoved/wazuh-helm
+    type: application
+    urls:
+    - https://github.com/DLAKE-IO/helm-charts/releases/download/wazuh-2.5.2/wazuh-2.5.2.tgz
+    version: 2.5.2
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/changes: |
+        - kind: fixed
           description: "Inject webhook listener sidecar into both master and worker pods; add webhook port to wazuh-manager-lb when webhookListener.enabled so external clusters reach any manager pod through the existing LoadBalancer"
       artifacthub.io/links: |
         - name: application source
@@ -1090,4 +1156,4 @@ entries:
     urls:
     - https://github.com/DLAKE-IO/helm-charts/releases/download/wazuh-2.1.0/wazuh-2.1.0.tgz
     version: 2.1.0
-generated: "2026-04-27T16:26:45.906821756Z"
+generated: "2026-04-27T20:38:47.638387105Z"
