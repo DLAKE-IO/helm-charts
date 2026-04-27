@@ -15,12 +15,13 @@ data:
 
     import json
     import os
+    import ssl
+    from http.server import HTTPServer, BaseHTTPRequestHandler
     from socket import socket, AF_UNIX, SOCK_DGRAM
-    from flask import Flask, request
 
     PORT     = int(os.getenv('WEBHOOK_PORT', '8080'))
-    CERT     = os.getenv('WEBHOOK_CERT', '/var/ossec/integrations/kubernetes-webhook/server.crt')
-    CERT_KEY = os.getenv('WEBHOOK_CERT_KEY', '/var/ossec/integrations/kubernetes-webhook/server.key')
+    CERT     = os.getenv('WEBHOOK_CERT', '/certs/tls.crt')
+    CERT_KEY = os.getenv('WEBHOOK_CERT_KEY', '/certs/tls.key')
 
     socket_addr = '/var/ossec/queue/sockets/queue'
 
@@ -30,20 +31,28 @@ data:
         sock.connect(socket_addr)
         sock.send(string.encode())
         sock.close()
-        return True
 
-    app = Flask(__name__)
-    context = (CERT, CERT_KEY)
+    class WebhookHandler(BaseHTTPRequestHandler):
+        def do_POST(self):
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(content_length)
+            try:
+                data = json.loads(body)
+                send_event(data)
+                self.send_response(200)
+            except Exception as e:
+                print('Error: {0}'.format(e))
+                self.send_response(500)
+            self.end_headers()
 
-    @app.route('/', methods=['POST'])
-    def webhook():
-        if request.method == 'POST':
-            if send_event(request.json):
-                print("Request sent to Wazuh")
-            else:
-                print("Failed to send request to Wazuh")
-        return "Webhook received!"
+        def log_message(self, format, *args):
+            print(format % args)
 
     if __name__ == '__main__':
-        app.run(host='0.0.0.0', port=PORT, ssl_context=context)
+        httpd = HTTPServer(('0.0.0.0', PORT), WebhookHandler)
+        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        ctx.load_cert_chain(CERT, CERT_KEY)
+        httpd.socket = ctx.wrap_socket(httpd.socket, server_side=True)
+        print('Listening on 0.0.0.0:{0}'.format(PORT))
+        httpd.serve_forever()
 {{- end }}
