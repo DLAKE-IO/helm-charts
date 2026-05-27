@@ -5,6 +5,7 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ## [Unreleased]
 
 ### Added
+- **wazuh** version bump `2.6.0` → `2.7.0`; add `wazuh.emailNotification.*` values block; parameterize SMTP/email settings in `_ossec_conf.tpl` primary `<global>` block — fixes `wazuh-maild` not starting when email config was injected via `extraConf` second `<global>` (startup script reads first `<email_notification>` only; analysisd reads all blocks — split-brain caused `mail:true` in alerts with no emails delivered)
 - **wazuh** version bump `2.5.2` → `2.6.0`; wire `wazuh.localRules` values key to the manager ConfigMap — operators can now inject custom rules via values instead of forking the chart; fixes broken stub that called a non-existent helper template
 
 ### Fixed
@@ -85,6 +86,10 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## wazuh
+
+### [2.7.0] — 2026-05-27
+- Added: `wazuh.emailNotification.*` values block (`enabled`, `smtpServer`, `emailFrom`, `emailTo[]`, `maxPerHour`, `logSource`, `alertLevel`); replaced hardcoded SMTP lines in `_ossec_conf.tpl` `<global>` block with template values
+- Fixed: `wazuh-maild` not starting when email config was supplied via `extraConf` second `<global>` block — `wazuh-control` startup script reads only the first `<email_notification>` tag; `analysisd` reads all blocks; the mismatch caused `mail:true` in `alerts.json` with zero emails delivered; setting values in the primary `<global>` block fixes both paths
 
 ### [2.6.0] — 2026-05-27
 - Added: wire `wazuh.localRules` values key to manager ConfigMap (`configmap.yaml`); operators can now override `local_rules.xml` via values — set `wazuh.localRules` to any XML string to inject custom rules without forking the chart

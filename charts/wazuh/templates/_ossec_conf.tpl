@@ -7,12 +7,14 @@
     <alerts_log>yes</alerts_log>
     <logall>no</logall>
     <logall_json>no</logall_json>
-    <email_notification>no</email_notification>
-    <smtp_server>smtp.example.wazuh.com</smtp_server>
-    <email_from>ossecm@example.wazuh.com</email_from>
-    <email_to>recipient@example.wazuh.com</email_to>
-    <email_maxperhour>12</email_maxperhour>
-    <email_log_source>alerts.log</email_log_source>
+    <email_notification>{{ if $root.Values.wazuh.emailNotification.enabled }}yes{{ else }}no{{ end }}</email_notification>
+    <smtp_server>{{ $root.Values.wazuh.emailNotification.smtpServer | default "smtp.example.wazuh.com" }}</smtp_server>
+    <email_from>{{ $root.Values.wazuh.emailNotification.emailFrom | default "ossecm@example.wazuh.com" }}</email_from>
+    {{- range $root.Values.wazuh.emailNotification.emailTo }}
+    <email_to>{{ . }}</email_to>
+    {{- end }}
+    <email_maxperhour>{{ $root.Values.wazuh.emailNotification.maxPerHour | default 12 }}</email_maxperhour>
+    <email_log_source>{{ $root.Values.wazuh.emailNotification.logSource | default "alerts.log" }}</email_log_source>
     <queue_size>131072</queue_size>
     <agents_disconnection_time>20s</agents_disconnection_time>
     <agents_disconnection_alert_time>100s</agents_disconnection_alert_time>
@@ -20,7 +22,7 @@
 
   <alerts>
     <log_alert_level>3</log_alert_level>
-    <email_alert_level>12</email_alert_level>
+    <email_alert_level>{{ $root.Values.wazuh.emailNotification.alertLevel | default 12 }}</email_alert_level>
   </alerts>
 
   <logging>

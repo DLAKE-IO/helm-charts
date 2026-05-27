@@ -892,6 +892,24 @@ wazuh:
   ## Parameters for the additional initContainers.
   extraInitContainers: []
 
+  ## @param wazuh.emailNotification.enabled Enable SMTP email alerts from the Wazuh manager.
+  ## @param wazuh.emailNotification.smtpServer SMTP relay hostname or IP. Must accept unauthenticated connections from the manager pod.
+  ## @param wazuh.emailNotification.emailFrom From address used in alert emails.
+  ## @param wazuh.emailNotification.emailTo List of recipient addresses. Wazuh supports multiple <email_to> entries.
+  ## @param wazuh.emailNotification.maxPerHour Maximum emails sent per hour (rate-limit).
+  ## @param wazuh.emailNotification.logSource Source log file for email alerts.
+  ## @param wazuh.emailNotification.alertLevel Minimum rule level that triggers email. Rules with <options>alert_by_email</options> bypass this threshold.
+  ##
+  emailNotification:
+    enabled: false
+    smtpServer: "smtp.example.wazuh.com"
+    emailFrom: "ossecm@example.wazuh.com"
+    emailTo:
+      - "recipient@example.wazuh.com"
+    maxPerHour: 12
+    logSource: "alerts.log"
+    alertLevel: 12
+
   ## @param wazuh.localDecoder Configuration of the local decoder.
   ##
   localDecoder: |

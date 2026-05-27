@@ -24,7 +24,7 @@ helm pull oci://ghcr.io/dlake-io/charts/<chart-name> --version <version>
 | [cryptgeon](charts/cryptgeon/) | 2.10.0 | 2.8.2 | A Helm chart to install cryptgeon |
 | [ocsinventory](charts/ocsinventory/) | 1.3.3 | 2.12.3 | Open Computers and Software Inventory Next Generation is an assets management and deployment solution. |
 | [pingvin-share](charts/pingvin-share/) | 1.6.2 | v1.6.1 | A Helm chart to install Pingvin Share |
-| [wazuh](charts/wazuh/) | 2.6.0 | 4.14.4 | Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads. |
+| [wazuh](charts/wazuh/) | 2.7.0 | 4.14.4 | Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads. |
 <!-- END_CHARTS_TABLE -->
 
 > The table above is automatically updated on every release by `scripts/update-readme.py`.

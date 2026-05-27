@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 2.6.0](https://img.shields.io/badge/Version-2.6.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.4](https://img.shields.io/badge/AppVersion-4.14.4-informational?style=flat-square)
+![Version: 2.7.0](https://img.shields.io/badge/Version-2.7.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.4](https://img.shields.io/badge/AppVersion-4.14.4-informational?style=flat-square)
 
 Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 
@@ -71,6 +71,48 @@ API servers under `webhookListener.sourceCIDRs`. This adds a `fromCIDR`
 CiliumNetworkPolicy ingress rule alongside the default `fromEntities: [host, remote-node]`
 rule for the local cluster. Point each external cluster's `--audit-webhook-config-file`
 at the LoadBalancer's external IP/hostname on port 443.
+
+## Email / SMTP Notifications
+
+Configure SMTP email alerts via `wazuh.emailNotification.*`. These values are rendered
+directly into the primary `<global>` block in `ossec.conf`, which ensures `wazuh-control`
+starts `wazuh-maild` on pod startup.
+
+**Note:** Do not use `wazuh.master.extraConf` for SMTP settings. A second `<global>` block
+via `extraConf` is parsed by `analysisd` (alerts get `"mail":true`) but not by `wazuh-control`
+(the startup script reads only the first `<email_notification>` tag), so `wazuh-maild` never
+starts and no emails are sent.
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `wazuh.emailNotification.enabled` | Enable SMTP email alerts (`wazuh-maild` started only when `true`) | `false` |
+| `wazuh.emailNotification.smtpServer` | SMTP relay hostname or IP. Must accept unauthenticated connections. | `smtp.example.wazuh.com` |
+| `wazuh.emailNotification.emailFrom` | From address in alert emails | `ossecm@example.wazuh.com` |
+| `wazuh.emailNotification.emailTo` | List of recipient addresses (supports multiple `<email_to>` entries) | `["recipient@example.wazuh.com"]` |
+| `wazuh.emailNotification.maxPerHour` | Maximum emails per hour (rate-limit) | `12` |
+| `wazuh.emailNotification.logSource` | Source log file for email alerts | `alerts.log` |
+| `wazuh.emailNotification.alertLevel` | Minimum rule level triggering email. Rules with `<options>alert_by_email</options>` bypass this. | `12` |
+
+Example:
+
+```yaml
+wazuh:
+  emailNotification:
+    enabled: true
+    smtpServer: "relaycorp.service.consul"
+    emailFrom: "wazuh@d-lake.fr"
+    emailTo:
+      - "tech@d-lake.fr"
+    maxPerHour: 12
+    logSource: "alerts.log"
+    alertLevel: 8
+```
+
+After `helm upgrade`, verify `wazuh-maild` is running:
+
+```bash
+kubectl exec -n wazuh wazuh-manager-master-0 -- ps aux | grep wazuh-maild
+```
 
 ## Custom Rules (local_rules.xml)
 
