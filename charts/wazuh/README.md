@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 2.5.2](https://img.shields.io/badge/Version-2.5.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.4](https://img.shields.io/badge/AppVersion-4.14.4-informational?style=flat-square)
+![Version: 2.6.0](https://img.shields.io/badge/Version-2.6.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.4](https://img.shields.io/badge/AppVersion-4.14.4-informational?style=flat-square)
 
 Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 
@@ -71,4 +71,31 @@ API servers under `webhookListener.sourceCIDRs`. This adds a `fromCIDR`
 CiliumNetworkPolicy ingress rule alongside the default `fromEntities: [host, remote-node]`
 rule for the local cluster. Point each external cluster's `--audit-webhook-config-file`
 at the LoadBalancer's external IP/hostname on port 443.
+
+## Custom Rules (local_rules.xml)
+
+Set `wazuh.localRules` to inject custom rules into the manager's `local_rules.xml` without
+forking the chart. The value is written verbatim to the ConfigMap and mounted at
+`/wazuh-config-mount/etc/rules/local_rules.xml` on the master pod.
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `wazuh.localRules` | XML content for `local_rules.xml` on the manager | empty `<group>` |
+
+Example — trigger email alert on SSH brute force (requires SMTP configured via `wazuh.master.extraConf`):
+
+```yaml
+wazuh:
+  localRules: |
+    <group name="custom_email_override,">
+      <rule id="100200" level="8">
+        <if_sid>5758</if_sid>
+        <description>SSH brute force detected (email enabled)</description>
+        <options>alert_by_email</options>
+      </rule>
+    </group>
+```
+
+Use rule IDs in the `100000–109999` range (reserved for local rules). The `<options>alert_by_email</options>`
+directive forces email for this rule regardless of `<email_alert_level>` in the global config.
 

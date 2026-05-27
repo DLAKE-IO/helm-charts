@@ -3,13 +3,13 @@ name: wazuh
 description: Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 type: application
 appVersion: 4.14.4
-version: 2.5.2
+version: 2.6.0
 annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/category: security
   artifacthub.io/changes: |
-    - kind: fixed
-      description: "Add fix-permissions initContainer and fsGroupChangePolicy to resolve stale root ownership on PVC subPath mounts causing wazuh-db permission denied errors after pod restart"
+    - kind: added
+      description: "Wire wazuh.localRules values key to configmap — operators can now inject custom rules via values instead of forking the chart"
   artifacthub.io/links: |
     - name: application source
       url: https://github.com/wazuh/wazuh

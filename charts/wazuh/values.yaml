@@ -896,10 +896,13 @@ wazuh:
   ##
   localDecoder: |
     {{ include "wazuh.localDecoder" . }}
-  ## @param wazuh.localRules Configuration of the local rules.
+  ## @param wazuh.localRules Custom local rules injected into local_rules.xml on the manager.
   ##
   localRules: |
-    {{ include "wazuh.localRules" . }}
+    <!-- Local rules -->
+    <!-- Copyright (C) 2015, Wazuh Inc. -->
+    <group name="local,">
+    </group>
   ## @param wazuh.internalOptions Configuration of the internal option.
   ##
   internalOptions: |
