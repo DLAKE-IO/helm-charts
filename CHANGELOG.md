@@ -4,6 +4,9 @@ All notable changes to the dlake Helm Charts repository are documented here.
 
 ## [Unreleased]
 
+### Fixed
+- **wazuh** version bump `2.7.0` → `2.7.1`; add `matchPattern: "*"` DNS proxy rule to both DNS egress entries (`kube-dns` and `coredns`) in the shared `wazuh.ciliumNetworkPolicy.dnsEgress` helper — without this rule Cilium's DNS proxy intercepts port-53 traffic but drops all FQDN responses (policy-mode `dnsProxy` rejects queries with no matching `rules.dns` entry); all four CNPs (master, worker, indexer, dashboard) inherit the fix
+
 ### Added
 - **wazuh** version bump `2.6.0` → `2.7.0`; add `wazuh.emailNotification.*` values block; parameterize SMTP/email settings in `_ossec_conf.tpl` primary `<global>` block — fixes `wazuh-maild` not starting when email config was injected via `extraConf` second `<global>` (startup script reads first `<email_notification>` only; analysisd reads all blocks — split-brain caused `mail:true` in alerts with no emails delivered)
 - **wazuh** version bump `2.5.2` → `2.6.0`; wire `wazuh.localRules` values key to the manager ConfigMap — operators can now inject custom rules via values instead of forking the chart; fixes broken stub that called a non-existent helper template
@@ -86,6 +89,9 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## wazuh
+
+### [2.7.1] — 2026-05-28
+- Fixed: add `matchPattern: "*"` DNS proxy rule to both `kube-dns` and `coredns` egress entries in the shared `wazuh.ciliumNetworkPolicy.dnsEgress` helper; without this rule Cilium's DNS proxy intercepts port-53 traffic but rejects all FQDN responses (no matching `rules.dns` policy entry), breaking DNS resolution for all four CNP-enabled components
 
 ### [2.7.0] — 2026-05-27
 - Added: `wazuh.emailNotification.*` values block (`enabled`, `smtpServer`, `emailFrom`, `emailTo[]`, `maxPerHour`, `logSource`, `alertLevel`); replaced hardcoded SMTP lines in `_ossec_conf.tpl` `<global>` block with template values

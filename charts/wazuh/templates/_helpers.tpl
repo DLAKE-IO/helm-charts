@@ -211,6 +211,9 @@ namespaceSelector kubernetes.io/metadata.name restriction in standard NetworkPol
           protocol: UDP
         - port: "53"
           protocol: TCP
+      rules:
+        dns:
+          - matchPattern: "*"
 - toEndpoints:
     - matchLabels:
         k8s:io.kubernetes.pod.namespace: kube-system
@@ -221,4 +224,7 @@ namespaceSelector kubernetes.io/metadata.name restriction in standard NetworkPol
           protocol: UDP
         - port: "53"
           protocol: TCP
+      rules:
+        dns:
+          - matchPattern: "*"
 {{- end }}
