@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 2.7.1](https://img.shields.io/badge/Version-2.7.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.4](https://img.shields.io/badge/AppVersion-4.14.4-informational?style=flat-square)
+![Version: 2.7.2](https://img.shields.io/badge/Version-2.7.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.5](https://img.shields.io/badge/AppVersion-4.14.5-informational?style=flat-square)
 
 Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 
@@ -99,10 +99,10 @@ Example:
 wazuh:
   emailNotification:
     enabled: true
-    smtpServer: "relaycorp.service.consul"
-    emailFrom: "wazuh@d-lake.fr"
+    smtpServer: "relay.example.net"
+    emailFrom: "wazuh@example.net"
     emailTo:
-      - "tech@d-lake.fr"
+      - "foo@example.net"
     maxPerHour: 12
     logSource: "alerts.log"
     alertLevel: 8
@@ -140,4 +140,3 @@ wazuh:
 
 Use rule IDs in the `100000–109999` range (reserved for local rules). The `<options>alert_by_email</options>`
 directive forces email for this rule regardless of `<email_alert_level>` in the global config.
-

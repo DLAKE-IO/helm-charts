@@ -2,14 +2,14 @@ apiVersion: v2
 name: wazuh
 description: Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 type: application
-appVersion: 4.14.4
-version: 2.7.1
+appVersion: 4.14.5
+version: 2.7.2
 annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/category: security
   artifacthub.io/changes: |
-    - kind: fixed
-      description: "Add matchPattern: \"*\" DNS proxy rule to CNP dnsEgress helper so Cilium DNS proxy passes all FQDN lookups"
+    - kind: changed
+      description: "Bump all component image tags 4.14.4 → 4.14.5"
   artifacthub.io/links: |
     - name: application source
       url: https://github.com/wazuh/wazuh

@@ -4,6 +4,9 @@ All notable changes to the dlake Helm Charts repository are documented here.
 
 ## [Unreleased]
 
+### Changed
+- **wazuh** version bump `2.7.1` → `2.7.2`; bump all component image tags `4.14.4` → `4.14.5` (indexer, dashboard, manager, agent)
+
 ### Fixed
 - **wazuh** version bump `2.7.0` → `2.7.1`; add `matchPattern: "*"` DNS proxy rule to both DNS egress entries (`kube-dns` and `coredns`) in the shared `wazuh.ciliumNetworkPolicy.dnsEgress` helper — without this rule Cilium's DNS proxy intercepts port-53 traffic but drops all FQDN responses (policy-mode `dnsProxy` rejects queries with no matching `rules.dns` entry); all four CNPs (master, worker, indexer, dashboard) inherit the fix
 
@@ -89,6 +92,9 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## wazuh
+
+### [2.7.2] — 2026-05-28
+- Changed: bump all component image tags `4.14.4` → `4.14.5`; bump `appVersion` to `4.14.5`
 
 ### [2.7.1] — 2026-05-28
 - Fixed: add `matchPattern: "*"` DNS proxy rule to both `kube-dns` and `coredns` egress entries in the shared `wazuh.ciliumNetworkPolicy.dnsEgress` helper; without this rule Cilium's DNS proxy intercepts port-53 traffic but rejects all FQDN responses (no matching `rules.dns` policy entry), breaking DNS resolution for all four CNP-enabled components
