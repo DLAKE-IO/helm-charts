@@ -4,6 +4,9 @@ All notable changes to the dlake Helm Charts repository are documented here.
 
 ## [Unreleased]
 
+### Added
+- **pingvin-share** version bump `1.6.3` → `1.7.0`; add Gateway API support — new `httpRoute.*` values and `templates/httproute.yaml` create an `HTTPRoute` (`gateway.networking.k8s.io/v1`) attaching to a pre-existing Gateway via `parentRefs` (chart does not create the Gateway; TLS stays on the Gateway listener); `ingress.*` unchanged, `ingress.enabled` and `httpRoute.enabled` toggle independently; template `fail`s if `httpRoute.enabled` and a `parentRefs[].name` is empty (would render a CRD-invalid route that still passes `helm lint`)
+
 ### Fixed
 - **pingvin-share** version bump `1.6.2` → `1.6.3`; add `caddy-config` (`/.config`) and `caddy-data` (`/.local`) emptyDir volumes — fixes Caddy errors when `readOnlyRootFilesystem: true` is set (Caddy needs writable dirs for config autosave and TLS storage locks)
 
@@ -270,6 +273,12 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## pingvin-share
+
+### [1.7.0] — 2026-07-07
+- Added Gateway API support: new `templates/httproute.yaml` (gated on `httpRoute.enabled`) renders an `HTTPRoute` (`gateway.networking.k8s.io/v1`) that attaches to a pre-existing Gateway via `httpRoute.parentRefs`; the chart does not create the Gateway and TLS is terminated at the Gateway listener
+- Added `httpRoute.*` values (`enabled`, `parentRefs`, `hostnames`, `paths`, `annotations`) mirroring the `ingress.*` UX; existing `ingress.*` values unchanged and both toggle independently
+- Added `httpRoute` block to `values.schema.json`; template `fail`s when `httpRoute.enabled` and any `parentRefs[].name` is empty (guards against a CRD-invalid HTTPRoute that would still pass `helm lint`)
+- Added a "Networking: Ingress or Gateway API" section to the chart README documenting the Gateway API CRD prerequisite and a Cilium example
 
 ### [1.6.3] — 2026-07-07
 - Fixed Caddy errors under `readOnlyRootFilesystem: true`; added `caddy-config` emptyDir at `/.config` and `caddy-data` emptyDir at `/.local` so Caddy can write config autosave and TLS storage lock files

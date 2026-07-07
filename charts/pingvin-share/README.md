@@ -1,6 +1,6 @@
 A Helm chart to install Pingvin Share
 
-![Version: 1.6.3](https://img.shields.io/badge/Version-1.6.3-informational?style=flat-square)
+![Version: 1.7.0](https://img.shields.io/badge/Version-1.7.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 ![AppVersion: v1.6.1](https://img.shields.io/badge/AppVersion-v1.6.1-informational?style=flat-square)
 
@@ -44,6 +44,33 @@ helm uninstall pingvin-share
 |------------|------|---------|
 | oci://registry-1.docker.io/bitnamicharts | common | 2.x.x |
 
+## Networking: Ingress or Gateway API
+
+This chart exposes the app through either a Kubernetes `Ingress` (default) or a
+Gateway API `HTTPRoute`. They toggle independently via `ingress.enabled` and
+`httpRoute.enabled`.
+
+Gateway API support creates only an `HTTPRoute` (`gateway.networking.k8s.io/v1`)
+that attaches to a **pre-existing** Gateway via `httpRoute.parentRefs`; the chart
+does not create the Gateway. TLS is terminated at the Gateway listener, so
+`httpRoute` has no TLS block. Prerequisites:
+
+- Gateway API CRDs installed in the cluster.
+- A Gateway owned by the cluster admin (e.g. `gatewayClassName: cilium` for
+  Cilium 1.15+), whose listener `allowedRoutes.namespaces` permits the release
+  namespace.
+
+```yaml
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: my-gateway
+      namespace: gateway-system
+      sectionName: https
+  hostnames:
+    - share.example.com
+```
+
 ## Values
 
 | Key | Type | Default | Description |
@@ -56,6 +83,12 @@ helm uninstall pingvin-share
 | extraVolumeMounts | list | `[]` |  |
 | extraVolumes | list | `[]` |  |
 | fullnameOverride | string | `""` |  |
+| httpRoute.annotations | object | `{}` |  |
+| httpRoute.enabled | bool | `false` |  |
+| httpRoute.hostnames | list | `[]` |  |
+| httpRoute.parentRefs[0].name | string | `""` |  |
+| httpRoute.paths[0].type | string | `"PathPrefix"` |  |
+| httpRoute.paths[0].value | string | `"/"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"stonith404/pingvin-share"` |  |
 | image.tag | string | `""` |  |

@@ -37,6 +37,33 @@ helm uninstall pingvin-share
 ```
 {{ template "chart.requirementsSection" . }}
 
+## Networking: Ingress or Gateway API
+
+This chart exposes the app through either a Kubernetes `Ingress` (default) or a
+Gateway API `HTTPRoute`. They toggle independently via `ingress.enabled` and
+`httpRoute.enabled`.
+
+Gateway API support creates only an `HTTPRoute` (`gateway.networking.k8s.io/v1`)
+that attaches to a **pre-existing** Gateway via `httpRoute.parentRefs`; the chart
+does not create the Gateway. TLS is terminated at the Gateway listener, so
+`httpRoute` has no TLS block. Prerequisites:
+
+- Gateway API CRDs installed in the cluster.
+- A Gateway owned by the cluster admin (e.g. `gatewayClassName: cilium` for
+  Cilium 1.15+), whose listener `allowedRoutes.namespaces` permits the release
+  namespace.
+
+```yaml
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: my-gateway
+      namespace: gateway-system
+      sectionName: https
+  hostnames:
+    - share.example.com
+```
+
 {{ template "chart.valuesSection" . }}
 
 {{ template "helm-docs.versionFooter" . }}
