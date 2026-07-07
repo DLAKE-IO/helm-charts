@@ -4,6 +4,9 @@ All notable changes to the dlake Helm Charts repository are documented here.
 
 ## [Unreleased]
 
+### Fixed
+- **pingvin-share** version bump `1.6.2` → `1.6.3`; add `caddy-config` (`/.config`) and `caddy-data` (`/.local`) emptyDir volumes — fixes Caddy errors when `readOnlyRootFilesystem: true` is set (Caddy needs writable dirs for config autosave and TLS storage locks)
+
 ### Changed
 - **wazuh** version bump `2.7.1` → `2.7.2`; bump all component image tags `4.14.4` → `4.14.5` (indexer, dashboard, manager, agent)
 
@@ -268,6 +271,9 @@ All notable changes to the dlake Helm Charts repository are documented here.
 
 ## pingvin-share
 
+### [1.6.3] — 2026-07-07
+- Fixed Caddy errors under `readOnlyRootFilesystem: true`; added `caddy-config` emptyDir at `/.config` and `caddy-data` emptyDir at `/.local` so Caddy can write config autosave and TLS storage lock files
+
 ### [1.6.2] — 2026-02-26
 - Added maintainers block
 - Added `values.schema.json` for values validation (enforces `replicaCount: 1`)
@@ -276,14 +282,6 @@ All notable changes to the dlake Helm Charts repository are documented here.
 
 ### [1.6.1]
 - Initial chart version tracked in this repository
-alidation (enforces `replicaCount: 1`)
-- Added Artifact Hub annotations
-- Added `ci/default-values.yaml` for install testing
-
-### [1.6.1]
-- Initial chart version tracked in this repository
-.3.2]
-- MariaDB dependency via OCI registry
 
 ### [1.3.x]
 - Added Prometheus ServiceMonitor support for Apache exporter

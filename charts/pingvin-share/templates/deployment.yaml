@@ -38,6 +38,10 @@ spec:
           emptyDir: {}
         - name: node-home
           emptyDir: {}
+        - name: caddy-config
+          emptyDir: {}
+        - name: caddy-data
+          emptyDir: {}
         - name: frontend-cache
           emptyDir:
             medium: Memory
@@ -91,6 +95,10 @@ spec:
               name: run-nginx
             - name: node-home
               mountPath: /home/node
+            - name: caddy-config
+              mountPath: /.config
+            - name: caddy-data
+              mountPath: /.local
             - name: frontend-cache
               mountPath: /opt/app/frontend/.next/cache
             - name: data
