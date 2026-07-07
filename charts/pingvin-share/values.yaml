@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: stonith404/pingvin-share
+  repository: smp46/pingvin-share-x
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -15,7 +15,6 @@ nameOverride: ""
 fullnameOverride: ""
 
 pingvin-share:
-
   backend:
     # The URL of the SQLite database.
     databaseUrl: "file:../data/pingvin-share.db?connection_limit=1"
@@ -77,10 +76,10 @@ podAnnotations: {}
 podSecurityContext:
   fsGroup: 2000
 
-securityContext: 
+securityContext:
   capabilities:
     drop:
-    - ALL
+      - ALL
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   runAsNonRoot: true
