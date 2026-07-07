@@ -604,6 +604,28 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: v1.6.1
+    created: "2026-07-07T15:30:56.644971021Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/bitnamicharts
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: A Helm chart to install Pingvin Share
+    digest: b44f7c5c768e567ce4693ddc1937e4bdaa0ffa334d3ee49bf6fea7d610860252
+    maintainers:
+    - email: 5606292+drustan@users.noreply.github.com
+      name: Drustan
+    name: pingvin-share
+    type: application
+    urls:
+    - https://github.com/DLAKE-IO/helm-charts/releases/download/pingvin-share-1.6.3/pingvin-share-1.6.3.tgz
+    version: 1.6.3
+  - annotations:
+      artifacthub.io/category: storage
+      artifacthub.io/prerelease: "false"
+    apiVersion: v2
+    appVersion: v1.6.1
     created: "2026-02-26T11:09:31.655775301Z"
     dependencies:
     - name: common
@@ -1420,4 +1442,4 @@ entries:
     urls:
     - https://github.com/DLAKE-IO/helm-charts/releases/download/wazuh-2.1.0/wazuh-2.1.0.tgz
     version: 2.1.0
-generated: "2026-05-28T15:17:05.886437308Z"
+generated: "2026-07-07T15:30:56.645056471Z"
