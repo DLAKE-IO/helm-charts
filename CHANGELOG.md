@@ -5,6 +5,7 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ## [Unreleased]
 
 ### Added
+- **cryptgeon** version bump `2.10.0` → `2.11.0`; add Gateway API HTTPRoute support + HTTP→HTTPS redirect (port of the pingvin-share 1.8.0 pattern) — new `templates/httproute.yaml` and `templates/httproute-redirect.yaml`, new `httpRoute.*` values (incl. `httpsRedirect`), `values.schema.json` block with `statusCode` enum; HTTPRoute references a pre-existing Gateway via `parentRefs`, redirect is a secondary `<fullname>-http-redirect` route on the HTTP listener (on by default, loop-safe, skip+warn when no HTTP listener named); `ingress.*` unchanged, both toggle independently
 - **pingvin-share** version bump `1.7.0` → `1.8.0`; add HTTP→HTTPS redirect for Gateway API — new `httpRoute.httpsRedirect.*` values and `templates/httproute-redirect.yaml` render a secondary HTTPRoute `<fullname>-http-redirect` on the Gateway's HTTP (`:80`) listener with a `RequestRedirect` filter (`scheme: https`, `statusCode` default 301); on by default, scoped under `httpRoute.enabled`; reuses the app `parentRefs` with `httpsRedirect.sectionName` swapped for the HTTP listener; template `fail`s if the app route has no `sectionName` or if the redirect and app listeners collide (HTTPS→HTTPS loop); skipped with a NOTES warning when no HTTP listener is named
 - **pingvin-share** version bump `1.6.3` → `1.7.0`; add Gateway API support — new `httpRoute.*` values and `templates/httproute.yaml` create an `HTTPRoute` (`gateway.networking.k8s.io/v1`) attaching to a pre-existing Gateway via `parentRefs` (chart does not create the Gateway; TLS stays on the Gateway listener); `ingress.*` unchanged, `ingress.enabled` and `httpRoute.enabled` toggle independently; template `fail`s if `httpRoute.enabled` and a `parentRefs[].name` is empty (would render a CRD-invalid route that still passes `helm lint`)
 
@@ -225,6 +226,13 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## cryptgeon
+
+### [2.11.0] — 2026-07-08
+- Added Gateway API support: new `templates/httproute.yaml` (gated on `httpRoute.enabled`) renders an `HTTPRoute` (`gateway.networking.k8s.io/v1`) attaching to a pre-existing Gateway via `httpRoute.parentRefs`; the chart does not create the Gateway and TLS is terminated at the Gateway listener
+- Added HTTP→HTTPS redirect: new `templates/httproute-redirect.yaml` renders a secondary HTTPRoute `<fullname>-http-redirect` on the Gateway's HTTP (`:80`) listener with a `RequestRedirect` filter (`scheme: https`, `statusCode` default 301), reusing the app hostnames; on by default under `httpRoute.enabled`, reuses the app `parentRefs` with `httpsRedirect.sectionName` swapped to the HTTP listener
+- Added `httpRoute.*` values (`enabled`, `parentRefs`, `hostnames`, `paths`, `annotations`, `httpsRedirect`) and a `httpRoute` block in `values.schema.json` with `statusCode` constrained to the CRD enum `[301, 302, 303, 307, 308]`; `ingress.*` unchanged and both toggle independently
+- Added loop-safety guards: the template `fail`s if the app route omits `parentRefs[].sectionName` or if the redirect and app `sectionName` collide (HTTPS→HTTPS loop); when no HTTP listener is named the redirect is skipped with a NOTES.txt warning
+- Ported from the pingvin-share 1.8.0 pattern; documented in the chart README "Networking" section
 
 ### [2.10.0] — 2026-03-06
 

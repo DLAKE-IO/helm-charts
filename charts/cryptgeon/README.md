@@ -1,6 +1,6 @@
 # cryptgeon
 
-![Version: 2.10.0](https://img.shields.io/badge/Version-2.10.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.8.2](https://img.shields.io/badge/AppVersion-2.8.2-informational?style=flat-square)
+![Version: 2.11.0](https://img.shields.io/badge/Version-2.11.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.8.2](https://img.shields.io/badge/AppVersion-2.8.2-informational?style=flat-square)
 
 A Helm chart to install cryptgeon
 
@@ -43,6 +43,44 @@ helm uninstall cryptgeon
 |------------|------|---------|
 | https://charts.bitnami.com/bitnami | redis | 20.x.x |
 
+## Networking: Ingress or Gateway API
+
+This chart exposes the app through either a Kubernetes `Ingress` (default) or a
+Gateway API `HTTPRoute`. They toggle independently via `ingress.enabled` and
+`httpRoute.enabled`.
+
+Gateway API support creates only an `HTTPRoute` (`gateway.networking.k8s.io/v1`)
+that attaches to a **pre-existing** Gateway via `httpRoute.parentRefs`; the chart
+does not create the Gateway. TLS is terminated at the Gateway listener, so
+`httpRoute` has no TLS block. Prerequisites:
+
+- Gateway API CRDs installed in the cluster.
+- A Gateway owned by the cluster admin (e.g. `gatewayClassName: cilium` for
+  Cilium 1.15+), whose listener `allowedRoutes.namespaces` permits the release
+  namespace.
+
+`httpRoute.httpsRedirect` (on by default) additionally creates a second HTTPRoute
+`<release>-http-redirect` on the Gateway's HTTP (`:80`) listener that redirects to
+HTTPS with a `RequestRedirect` filter (status 301). Name the HTTP listener via
+`httpsRedirect.sectionName` and pin the app route's HTTPS listener via
+`parentRefs[].sectionName` — the two must differ or the chart refuses to render
+(a shared listener would loop). If no HTTP listener is named, the redirect is
+skipped (with a warning). Set `httpsRedirect.enabled: false` to turn it off.
+
+```yaml
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: my-gateway
+      namespace: gateway-system
+      sectionName: https        # app traffic: HTTPS listener
+  hostnames:
+    - notes.example.com
+  httpsRedirect:
+    enabled: true
+    sectionName: http           # HTTP (:80) listener -> 301 to HTTPS
+```
+
 ## Values
 
 | Key | Type | Default | Description |
@@ -66,6 +104,15 @@ helm uninstall cryptgeon
 | extraVolumeMounts | list | `[]` |  |
 | extraVolumes | list | `[]` |  |
 | fullnameOverride | string | `""` |  |
+| httpRoute.annotations | object | `{}` |  |
+| httpRoute.enabled | bool | `false` |  |
+| httpRoute.hostnames | list | `[]` |  |
+| httpRoute.httpsRedirect.enabled | bool | `true` |  |
+| httpRoute.httpsRedirect.sectionName | string | `""` |  |
+| httpRoute.httpsRedirect.statusCode | int | `301` |  |
+| httpRoute.parentRefs[0].name | string | `""` |  |
+| httpRoute.paths[0].type | string | `"PathPrefix"` |  |
+| httpRoute.paths[0].value | string | `"/"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"cupcakearmy/cryptgeon"` |  |
 | image.tag | string | `""` |  |

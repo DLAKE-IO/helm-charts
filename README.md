@@ -21,7 +21,7 @@ helm pull oci://ghcr.io/dlake-io/charts/<chart-name> --version <version>
 | Chart | Version | App Version | Description |
 |-------|---------|-------------|-------------|
 | [bookstack](charts/bookstack/) | 2.5.2 | 25.12 | BookStack is a simple, self-hosted, easy-to-use platform for organising and storing information. |
-| [cryptgeon](charts/cryptgeon/) | 2.10.0 | 2.8.2 | A Helm chart to install cryptgeon |
+| [cryptgeon](charts/cryptgeon/) | 2.11.0 | 2.8.2 | A Helm chart to install cryptgeon |
 | [ocsinventory](charts/ocsinventory/) | 1.3.3 | 2.12.3 | Open Computers and Software Inventory Next Generation is an assets management and deployment solution. |
 | [pingvin-share](charts/pingvin-share/) | 1.8.0 | v1.6.1 | A Helm chart to install Pingvin Share |
 | [wazuh](charts/wazuh/) | 2.7.2 | 4.14.5 | Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads. |
@@ -45,7 +45,7 @@ See [charts/bookstack/README.md](charts/bookstack/README.md) for full documentat
 
 ### cryptgeon
 
-![Version: 2.10.0](https://img.shields.io/badge/Version-2.10.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.8.2](https://img.shields.io/badge/AppVersion-2.8.2-informational?style=flat-square)
+![Version: 2.11.0](https://img.shields.io/badge/Version-2.11.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.8.2](https://img.shields.io/badge/AppVersion-2.8.2-informational?style=flat-square)
 
 A Helm chart to install cryptgeon — a secure, encrypted note and file sharing service.
 

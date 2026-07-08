@@ -2,7 +2,7 @@ apiVersion: v2
 name: cryptgeon
 description: A Helm chart to install cryptgeon
 type: application
-version: 2.10.0
+version: 2.11.0
 appVersion: "2.8.2"
 maintainers:
   - name: Drustan
