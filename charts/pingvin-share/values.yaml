@@ -178,6 +178,7 @@ httpRoute:
     - name: ""            # REQUIRED when enabled: the Gateway's name
       # namespace: ""     # omit if the Gateway is in the release namespace
       # sectionName: ""   # the listener to bind, e.g. "https"
+      #                   # REQUIRED when httpsRedirect is enabled (the HTTPS listener)
   ## Hostnames this route answers for (route-level, not per-path).
   hostnames: []
     # - share.example.com
@@ -187,6 +188,16 @@ httpRoute:
       value: /
   ## Extra annotations on the HTTPRoute object.
   annotations: {}
+  ## HTTP -> HTTPS redirect: a secondary HTTPRoute on the HTTP (:80) listener
+  ## carrying a RequestRedirect filter. On by default; only acts when
+  ## httpRoute.enabled AND an HTTP listener is identified below. When enabled,
+  ## the app route above MUST pin its HTTPS listener via parentRefs[].sectionName
+  ## (an unpinned route binds all listeners incl. :80 and would loop).
+  httpsRedirect:
+    enabled: true
+    sectionName: ""             # the HTTP (:80) listener on the same Gateway
+    statusCode: 301
+    # parentRefs: []            # optional: override to a different Gateway/listener
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

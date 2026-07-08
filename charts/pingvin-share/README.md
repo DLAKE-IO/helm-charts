@@ -1,6 +1,6 @@
 A Helm chart to install Pingvin Share
 
-![Version: 1.7.0](https://img.shields.io/badge/Version-1.7.0-informational?style=flat-square)
+![Version: 1.8.0](https://img.shields.io/badge/Version-1.8.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 ![AppVersion: v1.6.1](https://img.shields.io/badge/AppVersion-v1.6.1-informational?style=flat-square)
 
@@ -71,6 +71,30 @@ httpRoute:
     - share.example.com
 ```
 
+### HTTP→HTTPS redirect
+
+`httpRoute.httpsRedirect` (on by default) creates a second HTTPRoute
+`<release>-http-redirect` on the Gateway's HTTP (`:80`) listener that redirects
+to HTTPS with a `RequestRedirect` filter (status 301). Name the HTTP listener via
+`httpsRedirect.sectionName` and pin the app route's HTTPS listener via
+`parentRefs[].sectionName` — the two must differ or the chart refuses to render
+(a shared listener would loop). If no HTTP listener is named, the redirect is
+skipped (with a warning). Set `httpsRedirect.enabled: false` to turn it off.
+
+```yaml
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: my-gateway
+      namespace: gateway-system
+      sectionName: https        # app traffic: HTTPS listener
+  hostnames:
+    - share.example.com
+  httpsRedirect:
+    enabled: true
+    sectionName: http           # HTTP (:80) listener -> 301 to HTTPS
+```
+
 ## Values
 
 | Key | Type | Default | Description |
@@ -86,6 +110,9 @@ httpRoute:
 | httpRoute.annotations | object | `{}` |  |
 | httpRoute.enabled | bool | `false` |  |
 | httpRoute.hostnames | list | `[]` |  |
+| httpRoute.httpsRedirect.enabled | bool | `true` |  |
+| httpRoute.httpsRedirect.sectionName | string | `""` |  |
+| httpRoute.httpsRedirect.statusCode | int | `301` |  |
 | httpRoute.parentRefs[0].name | string | `""` |  |
 | httpRoute.paths[0].type | string | `"PathPrefix"` |  |
 | httpRoute.paths[0].value | string | `"/"` |  |

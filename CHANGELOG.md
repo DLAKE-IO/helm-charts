@@ -5,6 +5,7 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ## [Unreleased]
 
 ### Added
+- **pingvin-share** version bump `1.7.0` → `1.8.0`; add HTTP→HTTPS redirect for Gateway API — new `httpRoute.httpsRedirect.*` values and `templates/httproute-redirect.yaml` render a secondary HTTPRoute `<fullname>-http-redirect` on the Gateway's HTTP (`:80`) listener with a `RequestRedirect` filter (`scheme: https`, `statusCode` default 301); on by default, scoped under `httpRoute.enabled`; reuses the app `parentRefs` with `httpsRedirect.sectionName` swapped for the HTTP listener; template `fail`s if the app route has no `sectionName` or if the redirect and app listeners collide (HTTPS→HTTPS loop); skipped with a NOTES warning when no HTTP listener is named
 - **pingvin-share** version bump `1.6.3` → `1.7.0`; add Gateway API support — new `httpRoute.*` values and `templates/httproute.yaml` create an `HTTPRoute` (`gateway.networking.k8s.io/v1`) attaching to a pre-existing Gateway via `parentRefs` (chart does not create the Gateway; TLS stays on the Gateway listener); `ingress.*` unchanged, `ingress.enabled` and `httpRoute.enabled` toggle independently; template `fail`s if `httpRoute.enabled` and a `parentRefs[].name` is empty (would render a CRD-invalid route that still passes `helm lint`)
 
 ### Fixed
@@ -273,6 +274,12 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## pingvin-share
+
+### [1.8.0] — 2026-07-08
+- Added HTTP→HTTPS redirect for Gateway API: new `templates/httproute-redirect.yaml` renders a secondary HTTPRoute `<fullname>-http-redirect` on the Gateway's HTTP (`:80`) listener with a `RequestRedirect` filter (`scheme: https`, `statusCode` default 301), reusing the app hostnames
+- Added `httpRoute.httpsRedirect.*` values (`enabled` default true, `sectionName`, `statusCode`, optional `parentRefs`); on by default but scoped under `httpRoute.enabled`; reuses the app `parentRefs` with `sectionName` swapped to the HTTP listener
+- Added loop-safety guards: the template `fail`s if the app route omits `parentRefs[].sectionName` (would bind all listeners incl. `:80`) or if the redirect and app `sectionName` collide (HTTPS→HTTPS loop); when no HTTP listener is named the redirect is skipped with a NOTES.txt warning
+- Added `httpsRedirect` block to `values.schema.json` with `statusCode` constrained to the CRD enum `[301, 302, 303, 307, 308]`; documented the redirect in the chart README "Networking" section
 
 ### [1.7.0] — 2026-07-07
 - Added Gateway API support: new `templates/httproute.yaml` (gated on `httpRoute.enabled`) renders an `HTTPRoute` (`gateway.networking.k8s.io/v1`) that attaches to a pre-existing Gateway via `httpRoute.parentRefs`; the chart does not create the Gateway and TLS is terminated at the Gateway listener

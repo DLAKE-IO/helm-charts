@@ -64,6 +64,30 @@ httpRoute:
     - share.example.com
 ```
 
+### HTTP→HTTPS redirect
+
+`httpRoute.httpsRedirect` (on by default) creates a second HTTPRoute
+`<release>-http-redirect` on the Gateway's HTTP (`:80`) listener that redirects
+to HTTPS with a `RequestRedirect` filter (status 301). Name the HTTP listener via
+`httpsRedirect.sectionName` and pin the app route's HTTPS listener via
+`parentRefs[].sectionName` — the two must differ or the chart refuses to render
+(a shared listener would loop). If no HTTP listener is named, the redirect is
+skipped (with a warning). Set `httpsRedirect.enabled: false` to turn it off.
+
+```yaml
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: my-gateway
+      namespace: gateway-system
+      sectionName: https        # app traffic: HTTPS listener
+  hostnames:
+    - share.example.com
+  httpsRedirect:
+    enabled: true
+    sectionName: http           # HTTP (:80) listener -> 301 to HTTPS
+```
+
 {{ template "chart.valuesSection" . }}
 
 {{ template "helm-docs.versionFooter" . }}

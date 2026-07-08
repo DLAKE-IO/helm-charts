@@ -2,7 +2,7 @@ apiVersion: v2
 name: pingvin-share
 description: A Helm chart to install Pingvin Share
 type: application
-version: 1.7.0
+version: 1.8.0
 appVersion: "v1.6.1"
 maintainers:
   - name: Drustan
