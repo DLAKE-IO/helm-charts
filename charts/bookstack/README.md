@@ -1,6 +1,6 @@
 # bookstack
 
-![Version: 2.5.2](https://img.shields.io/badge/Version-2.5.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 25.12](https://img.shields.io/badge/AppVersion-25.12-informational?style=flat-square)
+![Version: 2.6.0](https://img.shields.io/badge/Version-2.6.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 25.12](https://img.shields.io/badge/AppVersion-25.12-informational?style=flat-square)
 
 BookStack is a simple, self-hosted, easy-to-use platform for organising and storing information.
 **Homepage:** <https://www.bookstackapp.com/>
@@ -21,6 +21,52 @@ BookStack is a simple, self-hosted, easy-to-use platform for organising and stor
 |------------|------|---------|
 | oci://registry-1.docker.io/bitnamicharts | mariadb | 23.x.x |
 | oci://registry-1.docker.io/bitnamicharts | valkey | 5.x.x |
+
+## Networking: Ingress or Gateway API
+
+This chart exposes the app through either a Kubernetes `Ingress` (default) or a
+Gateway API `HTTPRoute`. They toggle independently via `ingress.enabled` and
+`httpRoute.enabled`.
+
+Gateway API support creates only an `HTTPRoute` (`gateway.networking.k8s.io/v1`)
+that attaches to a **pre-existing** Gateway via `httpRoute.parentRefs`; the chart
+does not create the Gateway. TLS is terminated at the Gateway listener, so
+`httpRoute` has no TLS block. Prerequisites:
+
+- Gateway API CRDs installed in the cluster.
+- A Gateway owned by the cluster admin (e.g. `gatewayClassName: cilium` for
+  Cilium 1.15+), whose listener `allowedRoutes.namespaces` permits the release
+  namespace.
+
+`httpRoute.httpsRedirect` (on by default) additionally creates a second HTTPRoute
+`<release>-http-redirect` on the Gateway's HTTP (`:80`) listener that redirects to
+HTTPS with a `RequestRedirect` filter (status 301). Name the HTTP listener via
+`httpsRedirect.sectionName` and pin the app route's HTTPS listener via
+`parentRefs[].sectionName` — the two must differ or the chart refuses to render
+(a shared listener would loop). If no HTTP listener is named, the redirect is
+skipped (with a warning). Set `httpsRedirect.enabled: false` to turn it off.
+
+> **Warning — `networkPolicy.enabled` + `httpRoute.enabled`:** the chart's
+> NetworkPolicy restricts pod ingress to the configured pod/namespace selectors.
+> Cilium delivers Gateway API traffic through its Envoy proxy (the special
+> `ingress` entity), which plain NetworkPolicy selectors cannot match — so
+> Gateway-routed requests may be **silently dropped**. Use a
+> CiliumNetworkPolicy with `fromEntities: [ingress]` instead, or disable
+> `networkPolicy` when routing through the Gateway.
+
+```yaml
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: my-gateway
+      namespace: gateway-system
+      sectionName: https        # app traffic: HTTPS listener
+  hostnames:
+    - bookstack.example.local
+  httpsRedirect:
+    enabled: true
+    sectionName: http           # HTTP (:80) listener -> 301 to HTTPS
+```
 
 ## Values
 
@@ -53,6 +99,14 @@ BookStack is a simple, self-hosted, easy-to-use platform for organising and stor
 | extraVolumeMounts | list | `[{"mountPath":"/tmp","name":"tmp"},{"mountPath":"/run","name":"run"},{"mountPath":"/var/www/bookstack/bootstrap/cache","name":"bootstrap-cache"},{"mountPath":"/var/www/bookstack/storage/logs","name":"storage-logs"},{"mountPath":"/var/www/bookstack/storage/framework/views","name":"storage-framework-views"}]` | Extra volume mounts appended to the BookStack container |
 | extraVolumes | list | `[{"emptyDir":{},"name":"tmp"},{"emptyDir":{},"name":"run"},{"emptyDir":{},"name":"bootstrap-cache"},{"emptyDir":{},"name":"storage-logs"},{"emptyDir":{},"name":"storage-framework-views"}]` | Extra volumes appended to the pod spec |
 | fullnameOverride | string | `""` | Override the full name of the release |
+| httpRoute.annotations | object | `{}` | Extra annotations on the HTTPRoute object |
+| httpRoute.enabled | bool | `false` | Enable Gateway API HTTPRoute |
+| httpRoute.hostnames | list | `[]` | Hostnames this route answers for (route-level, not per-path) |
+| httpRoute.httpsRedirect.enabled | bool | `true` | Enable the HTTP -> HTTPS redirect: a secondary HTTPRoute on the HTTP (:80) listener carrying a RequestRedirect filter. Only acts when httpRoute.enabled AND an HTTP listener is identified via sectionName |
+| httpRoute.httpsRedirect.sectionName | string | `""` | The HTTP (:80) listener on the same Gateway |
+| httpRoute.httpsRedirect.statusCode | int | `301` | Redirect status code (301, 302, 303, 307 or 308) |
+| httpRoute.parentRefs | list | `[{"name":""}]` | The existing Gateway(s) this route attaches to. name is REQUIRED when enabled; sectionName (the HTTPS listener) is REQUIRED when httpsRedirect is enabled (an unpinned route binds all listeners incl. :80 and would loop) |
+| httpRoute.paths | list | `[{"type":"PathPrefix","value":"/"}]` | Path matches; the backendRef to the app service is implicit |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"solidnerd/bookstack"` | BookStack image repository |
 | image.tag | string | `""` | Overrides the image tag (defaults to chart appVersion) |

@@ -8,4 +8,50 @@
 
 {{ template "chart.requirementsSection" . }}
 
+## Networking: Ingress or Gateway API
+
+This chart exposes the app through either a Kubernetes `Ingress` (default) or a
+Gateway API `HTTPRoute`. They toggle independently via `ingress.enabled` and
+`httpRoute.enabled`.
+
+Gateway API support creates only an `HTTPRoute` (`gateway.networking.k8s.io/v1`)
+that attaches to a **pre-existing** Gateway via `httpRoute.parentRefs`; the chart
+does not create the Gateway. TLS is terminated at the Gateway listener, so
+`httpRoute` has no TLS block. Prerequisites:
+
+- Gateway API CRDs installed in the cluster.
+- A Gateway owned by the cluster admin (e.g. `gatewayClassName: cilium` for
+  Cilium 1.15+), whose listener `allowedRoutes.namespaces` permits the release
+  namespace.
+
+`httpRoute.httpsRedirect` (on by default) additionally creates a second HTTPRoute
+`<release>-http-redirect` on the Gateway's HTTP (`:80`) listener that redirects to
+HTTPS with a `RequestRedirect` filter (status 301). Name the HTTP listener via
+`httpsRedirect.sectionName` and pin the app route's HTTPS listener via
+`parentRefs[].sectionName` — the two must differ or the chart refuses to render
+(a shared listener would loop). If no HTTP listener is named, the redirect is
+skipped (with a warning). Set `httpsRedirect.enabled: false` to turn it off.
+
+> **Warning — `networkPolicy.enabled` + `httpRoute.enabled`:** the chart's
+> NetworkPolicy restricts pod ingress to the configured pod/namespace selectors.
+> Cilium delivers Gateway API traffic through its Envoy proxy (the special
+> `ingress` entity), which plain NetworkPolicy selectors cannot match — so
+> Gateway-routed requests may be **silently dropped**. Use a
+> CiliumNetworkPolicy with `fromEntities: [ingress]` instead, or disable
+> `networkPolicy` when routing through the Gateway.
+
+```yaml
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: my-gateway
+      namespace: gateway-system
+      sectionName: https        # app traffic: HTTPS listener
+  hostnames:
+    - bookstack.example.local
+  httpsRedirect:
+    enabled: true
+    sectionName: http           # HTTP (:80) listener -> 301 to HTTPS
+```
+
 {{ template "chart.valuesSection" . }}{{ template "helm-docs.versionFooter" . }}

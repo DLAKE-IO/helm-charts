@@ -1,0 +1,46 @@
+{{- if and .Values.httpRoute.enabled .Values.httpRoute.httpsRedirect.enabled -}}
+{{- $redir := .Values.httpRoute.httpsRedirect -}}
+{{- $parentRefs := list -}}
+{{- if $redir.parentRefs -}}
+  {{- /* Explicit override: operator owns listener/loop correctness. */ -}}
+  {{- $parentRefs = $redir.parentRefs -}}
+{{- else if $redir.sectionName -}}
+  {{- /* Reuse the app parentRefs, swapping sectionName to the HTTP listener. */ -}}
+  {{- range .Values.httpRoute.parentRefs -}}
+    {{- if not .sectionName -}}
+    {{ fail "httpRoute.parentRefs[].sectionName (the HTTPS listener) is required when httpRoute.httpsRedirect is enabled — an unnamed app route attaches to ALL listeners incl. :80 and would loop against the redirect" }}
+    {{- end -}}
+    {{- if eq .sectionName $redir.sectionName -}}
+    {{ fail "httpRoute.httpsRedirect.sectionName must differ from the app route's sectionName — the same listener causes an HTTPS->HTTPS redirect loop" }}
+    {{- end -}}
+    {{- $ref := deepCopy . -}}
+    {{- $_ := set $ref "sectionName" $redir.sectionName -}}
+    {{- $parentRefs = append $parentRefs $ref -}}
+  {{- end -}}
+{{- end -}}
+{{- if $parentRefs -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "bookstack.fullname" . }}-http-redirect
+  labels:
+    {{- include "bookstack.labels" . | nindent 4 }}
+  {{- with .Values.httpRoute.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    {{- toYaml $parentRefs | nindent 4 }}
+  {{- with .Values.httpRoute.hostnames }}
+  hostnames:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: {{ $redir.statusCode | default 302 }}
+{{- end }}
+{{- end }}

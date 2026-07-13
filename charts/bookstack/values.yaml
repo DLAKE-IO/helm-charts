@@ -96,6 +96,41 @@ ingress:
   #    hosts:
   #      - bookstack.example.local
 
+## Gateway API HTTPRoute (alternative to ingress). Requires the Gateway API
+## CRDs and a pre-existing Gateway owned by the cluster admin. TLS is terminated
+## at the Gateway listener, not here. ingress and httpRoute toggle independently.
+## NOTE: if networkPolicy.enabled is true, Gateway traffic may be dropped — see
+## the chart README "Networking" section.
+httpRoute:
+  # -- Enable Gateway API HTTPRoute
+  enabled: false
+  # -- The existing Gateway(s) this route attaches to. name is REQUIRED when
+  # enabled; sectionName (the HTTPS listener) is REQUIRED when httpsRedirect
+  # is enabled (an unpinned route binds all listeners incl. :80 and would loop)
+  parentRefs:
+    - name: ""
+      # namespace: ""     # omit if the Gateway is in the release namespace
+      # sectionName: ""   # the listener to bind, e.g. "https"
+  # -- Hostnames this route answers for (route-level, not per-path)
+  hostnames: []
+    # - bookstack.example.local
+  # -- Path matches; the backendRef to the app service is implicit
+  paths:
+    - type: PathPrefix
+      value: /
+  # -- Extra annotations on the HTTPRoute object
+  annotations: {}
+  httpsRedirect:
+    # -- Enable the HTTP -> HTTPS redirect: a secondary HTTPRoute on the HTTP
+    # (:80) listener carrying a RequestRedirect filter. Only acts when
+    # httpRoute.enabled AND an HTTP listener is identified via sectionName
+    enabled: true
+    # -- The HTTP (:80) listener on the same Gateway
+    sectionName: ""
+    # -- Redirect status code (301, 302, 303, 307 or 308)
+    statusCode: 301
+    # parentRefs: []      # optional: override to a different Gateway/listener
+
 # -- Resource limits and requests
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

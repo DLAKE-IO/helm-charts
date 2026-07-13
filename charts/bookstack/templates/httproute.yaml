@@ -1,0 +1,32 @@
+{{- if .Values.httpRoute.enabled -}}
+{{- range $i, $ref := .Values.httpRoute.parentRefs }}
+{{- if not $ref.name }}{{ fail (printf "httpRoute.parentRefs[%d].name is required when httpRoute.enabled=true" $i) }}{{- end }}
+{{- end }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "bookstack.fullname" . }}
+  labels:
+    {{- include "bookstack.labels" . | nindent 4 }}
+  {{- with .Values.httpRoute.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    {{- toYaml .Values.httpRoute.parentRefs | nindent 4 }}
+  {{- with .Values.httpRoute.hostnames }}
+  hostnames:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    - matches:
+        {{- range .Values.httpRoute.paths }}
+        - path:
+            type: {{ .type }}
+            value: {{ .value }}
+        {{- end }}
+      backendRefs:
+        - name: {{ include "bookstack.fullname" . }}
+          port: {{ .Values.service.port }}
+{{- end }}

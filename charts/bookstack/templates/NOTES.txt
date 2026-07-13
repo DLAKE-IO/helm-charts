@@ -9,6 +9,13 @@
    http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ $.Values.ingress.path }}
 {{- end }}
 
+{{- else if .Values.httpRoute.enabled }}
+
+1. BookStack is available at:
+{{- range .Values.httpRoute.hostnames }}
+   https://{{ . }}
+{{- end }}
+
 {{- else }}
 
 1. Get the application URL by running these commands:
@@ -74,6 +81,35 @@
    - View logs:      kubectl logs -f -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "bookstack.name" . }}
    - Get pod status: kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "bookstack.name" . }}
    - Describe pod:   kubectl describe pod -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "bookstack.name" . }}
+
+{{- if and .Values.ingress.enabled .Values.httpRoute.enabled }}
+
+NOTE: both ingress.enabled and httpRoute.enabled are true — this app is exposed
+through BOTH an Ingress and a Gateway API HTTPRoute.
+{{- end }}
+{{- if and .Values.httpRoute.enabled .Values.httpRoute.httpsRedirect.enabled }}
+{{- if or .Values.httpRoute.httpsRedirect.sectionName .Values.httpRoute.httpsRedirect.parentRefs }}
+
+HTTP->HTTPS redirect is active (HTTPRoute {{ include "bookstack.fullname" . }}-http-redirect).
+{{- if not .Values.httpRoute.hostnames }}
+NOTE: httpRoute.hostnames is empty, so the redirect applies to ALL hosts on the
+HTTP listener. Set httpRoute.hostnames if the Gateway is shared.
+{{- end }}
+{{- else }}
+
+WARNING: httpRoute.httpsRedirect.enabled is true but no HTTP listener was named.
+Set httpRoute.httpsRedirect.sectionName to your Gateway's HTTP (:80) listener,
+or the redirect will not be created.
+{{- end }}
+{{- end }}
+{{- if and .Values.httpRoute.enabled .Values.networkPolicy.enabled }}
+
+WARNING: networkPolicy.enabled restricts pod ingress to the configured
+pod/namespace selectors. Gateway API traffic arrives via the Cilium proxy
+("ingress" entity), which these selectors cannot match — Gateway-routed
+requests may be dropped. Consider a CiliumNetworkPolicy with
+fromEntities: [ingress], or disable networkPolicy when using httpRoute.
+{{- end }}
 
 For more information and documentation, visit:
 - BookStack Documentation: https://www.bookstackapp.com/docs/
