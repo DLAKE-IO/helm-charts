@@ -14,6 +14,7 @@ All notable changes to the dlake Helm Charts repository are documented here.
 - **pingvin-share** version bump `1.6.2` → `1.6.3`; add `caddy-config` (`/.config`) and `caddy-data` (`/.local`) emptyDir volumes — fixes Caddy errors when `readOnlyRootFilesystem: true` is set (Caddy needs writable dirs for config autosave and TLS storage locks)
 
 ### Changed
+- **wazuh** version bump `2.7.2` → `2.7.3`; bump all component image tags `4.14.5` → `4.14.7` (indexer, dashboard, manager, agent); bump `appVersion` to `4.14.7`
 - **wazuh** version bump `2.7.1` → `2.7.2`; bump all component image tags `4.14.4` → `4.14.5` (indexer, dashboard, manager, agent)
 
 ### Fixed
@@ -101,6 +102,10 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## wazuh
+
+### [2.7.3] — 2026-08-19
+- Changed: bump all component image tags `4.14.5` → `4.14.7` (indexer, dashboard, manager, agent); bump `appVersion` to `4.14.7`
+- Note: the agent image `kinseii/wazuh-agent` publishes only `latest` and `4.14.1` upstream — tag `4.14.7` does not exist on Docker Hub, so `agent.enabled: true` deployments must override `agent.images.repository`/`agent.images.tag` with a reachable image
 
 ### [2.7.2] — 2026-05-28
 - Changed: bump all component image tags `4.14.4` → `4.14.5`; bump `appVersion` to `4.14.5`
