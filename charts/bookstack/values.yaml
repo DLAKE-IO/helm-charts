@@ -184,7 +184,7 @@ tolerations: []
 affinity: {}
 
 app:
-  # -- Laravel APP_KEY (required). Generate with: php artisan key:generate --show
+  # -- Laravel APP_KEY (required). Generate with `php artisan key:generate`, adding the `--show` flag to print it
   # @default -- "" (must be provided)
   key: ""
   # -- Application URL (required). Must match ingress host or service URL
@@ -258,6 +258,29 @@ extraEnvFrom: []
 #     name: my-config
 # - secretRef:
 #     name: my-secret
+
+##
+## BookStack hacks — https://www.bookstackapp.com/hacks/
+## Each entry is installed as a BookStack theme system module (BookStack v26.03+),
+## mounted read-only at /var/www/bookstack/themes/helm-hacks/modules/<name>/.
+## The chart sets APP_THEME=helm-hacks and generates bookstack-module.json.
+## `files` keys by hack code-block type:
+##   Head HTML            -> head/<any-name>.html
+##   Logical Theme System -> functions.php
+##   Visual Theme System  -> views/<path shown on the hack page>
+## See the chart README section "BookStack hacks" for a complete example.
+##
+# -- BookStack hacks to install, keyed by module folder name (`[A-Za-z0-9][A-Za-z0-9._-]*`).
+# Each entry: `files` (required map of module-relative path -> file content),
+# `description` (optional string), `enabled` (optional, default true)
+# @default -- `{}` (no hacks; APP_THEME is not set)
+hacks: {}
+#  wysiwyg-docx-import:
+#    description: Drag and drop .docx files into the WYSIWYG editor
+#    files:
+#      head/content.html: |
+#        <script src="https://cdn.jsdelivr.net/npm/mammoth@1.13.0/mammoth.browser.min.js" ...></script>
+#        <script type="module">...</script>
 
 ##
 ## External database configuration
@@ -348,7 +371,7 @@ externalValkey:
 ##
 valkey:
   # -- Enable the Valkey subchart for PHP session (and optionally cache) storage.
-  # When true, SESSION_DRIVER is automatically set to "redis".
+  # When true, SESSION_DRIVER and CACHE_DRIVER are automatically set to "redis".
   enabled: true
   # -- Valkey deployment architecture. Use "standalone" (single pod) for BookStack
   # session storage; "replication" would deploy an unnecessary primary+replica cluster.
@@ -516,8 +539,8 @@ oidc:
   autoInitiate: "false"
 
   ## User identity mapping
-  # -- Claim(s) to use for user display names. Use '|' to concatenate multiple claims
-  # Examples: "name", "given_name|family_name", "preferred_username"
+  # -- Claim(s) to use for user display names. Use '\|' to concatenate multiple claims
+  # Examples: "name", "given_name\|family_name", "preferred_username"
   # @default -- "name"
   displayNameClaims: "name"
   # -- Claim to use for unique user identification (advanced use only)

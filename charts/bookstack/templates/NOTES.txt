@@ -76,6 +76,14 @@
 {{- else }}
    - Authentication: Standard (email/password)
 {{- end }}
+{{- if include "bookstack.hacks.enabled" . }}
+   - Hacks (theme modules in themes/{{ include "bookstack.hacks.themeName" . }}/modules/):
+{{- range $name, $hack := .Values.hacks }}
+{{- if dig "enabled" true $hack }}
+     - {{ $name }}
+{{- end }}
+{{- end }}
+{{- end }}
 
 4. Useful Commands:
    - View logs:      kubectl logs -f -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "bookstack.name" . }}

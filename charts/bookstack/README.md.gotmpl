@@ -2,7 +2,10 @@
 
 {{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}{{ template "chart.appVersionBadge" . }}
 
-{{ template "chart.description" . }}{{ template "chart.homepageSection" . }}
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
 {{ template "chart.maintainersSection" . }}
 {{ template "chart.sourcesSection" . }}
 
@@ -52,6 +55,118 @@ httpRoute:
   httpsRedirect:
     enabled: true
     sectionName: http           # HTTP (:80) listener -> 301 to HTTPS
+```
+
+## BookStack hacks
+
+[BookStack hacks](https://www.bookstackapp.com/hacks/) are enabled through the
+`hacks` value, with no template changes per hack. Each `hacks` entry becomes a
+[theme system module](https://www.bookstackapp.com/hacks/applying/#theme-system-modules).
+Modules require BookStack v26.03+; the chart default is v26.09.
+
+- Files are rendered into ConfigMap `<fullname>-hacks` and mounted read-only at
+  `/var/www/bookstack/themes/helm-hacks/modules/<name>/`. `bookstack-module.json`
+  is generated from the entry name, `description` and a content hash; do not
+  supply it in `files`.
+- The chart sets `APP_THEME=helm-hacks`; do not also set `APP_THEME` via
+  `env`/`extraEnv`, or mount your own theme alongside `hacks`.
+- Changing hack files rolls the Deployment (`checksum/hacks` pod annotation).
+- Disable a hack with `enabled: false`; remove it by deleting the entry.
+- Hacks are unsupported upstream customizations: re-test them after BookStack
+  upgrades. If `image.tag` is pinned below v26.03, modules are mounted but ignored.
+- The total ConfigMap size limit is 1 MiB.
+
+Map each code block on the hack page to a `files` key:
+
+|Hack page code block|`files` key|
+|---|---|
+|Head HTML (`head.html`)|`head/<any-name>.html`|
+|Logical Theme System (`functions.php`)|`functions.php`|
+|Visual Theme System (`<path>`)|`views/<path>`|
+|`lang/…`, `icons/…`, `public/…`|same path|
+
+Example: [WYSIWYG Docx Import](https://www.bookstackapp.com/hacks/wysiwyg-docx-import/)
+(drag and drop `.docx` files into the WYSIWYG page editor):
+
+```yaml
+hacks:
+  wysiwyg-docx-import:
+    description: Import .docx files into the WYSIWYG editor via drag and drop (bookstackapp.com/hacks)
+    files:
+      head/content.html: |
+        <script src="https://cdn.jsdelivr.net/npm/mammoth@1.13.0/mammoth.browser.min.js"
+                integrity="sha256-kpFKNwjP3x5iy1U9GFan/tqyHag9jugoRd4viXs2jKs="
+                crossorigin="anonymous"
+                defer></script>
+
+        <script type="module">
+            // Convert the given "file" instance to HTML, providing it back via the given callback
+            function convertAndInsertDocx(file, callback) {
+                // Use a FileReader to handle conversion via an ArrayBuffer
+                const reader = new FileReader();
+                reader.onload = async function(loadEvent) {
+                    // Get and convert the ArrayBuffer version of the file
+                    const arrayBuffer = loadEvent.target.result;
+                    const {value: html, messages} = await window.mammoth.convertToHtml({arrayBuffer});
+                    // If warnings exist from conversion, log them to the browser console then
+                    // show a warning alert via BookStack's event system.
+                    if (messages.length > 0) {
+                        console.error(messages);
+                        window.$events.emit('warning', `${messages.length} warnings logged to browser console during conversion`);
+                    }
+                    // Once we have our converted HTML, provide it to the callback function
+                    callback(html);
+                }
+                reader.readAsArrayBuffer(file);
+            }
+
+            // For each of the files in the drop event, pass them, alongside the editor instance
+            // to our "convertAndInsertDocx" function above before providing the results to the given callback.
+            function runCallbackForEachDocFileInEvent(event, callback) {
+                const files = event?.dataTransfer?.files || [];
+                let handledDocxFiles = false;
+                for (const file of files) {
+                    if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' && window.mammoth) {
+                        convertAndInsertDocx(file, html => callback(html));
+                        handledDocxFiles = true;
+                    }
+                }
+                return handledDocxFiles;
+            }
+
+            // Listen to BookStack emitted WYSIWYG (TinyMCE) editor setup event
+            window.addEventListener('editor-tinymce::setup', event => {
+                // Get a reference to the editor and listen to file "drop" events
+                const editor = event.detail.editor;
+                editor.on('drop', event => {
+                    // For any docx files, insert the resulting HTML content into the editor
+                    runCallbackForEachDocFileInEvent(event, html => editor.insertContent(html));
+                });
+            });
+
+            // Listen to BookStack emitted new-WYSIWYG editor setup event
+            window.addEventListener('editor-wysiwyg::post-init', event => {
+                const {usage, api} = event.detail;
+                // Check that it's the page editor which is being loaded
+                if (usage !== 'page-editor') {
+                    return;
+                }
+
+                // Add a custom drop listener for the editor area
+                const editorArea = document.querySelector('.editor-content-area');
+                if (!editorArea) {
+                    return;
+                }
+
+                editorArea.addEventListener('drop', event => {
+                    const htmlWasInserted = runCallbackForEachDocFileInEvent(event, html => api.content.insertHtml(html));
+                    if (htmlWasInserted) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                });
+            });
+        </script>
 ```
 
 {{ template "chart.valuesSection" . }}{{ template "helm-docs.versionFooter" . }}

@@ -21,9 +21,14 @@ spec:
     metadata:
       labels:
         {{- include "bookstack.selectorLabels" . | nindent 8 }}
-      {{- with .Values.podAnnotations }}
+      {{- if or .Values.podAnnotations (include "bookstack.hacks.enabled" .) }}
       annotations:
+        {{- if include "bookstack.hacks.enabled" . }}
+        checksum/hacks: {{ include (print $.Template.BasePath "/hacks-configmap.yaml") . | sha256sum }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}
     spec:
       {{- with .Values.imagePullSecrets }}
@@ -119,6 +124,10 @@ spec:
                   key: app-key
             - name: APP_URL
               value: {{ required "value app.url is required" .Values.app.url }}
+          {{- if include "bookstack.hacks.enabled" . }}
+            - name: APP_THEME
+              value: {{ include "bookstack.hacks.themeName" . | quote }}
+          {{- end }}
           {{- if or .Values.externalDatabase.tlsCert .Values.externalDatabase.existingTlsSecret }}
             - name: MYSQL_ATTR_SSL_CA
               value: /etc/mysql/mysql.cert
@@ -196,6 +205,11 @@ spec:
           - name: storage-framework-sessions
             mountPath: /var/www/bookstack/storage/framework/sessions
           {{- end }}
+          {{- if include "bookstack.hacks.enabled" . }}
+          - name: hacks
+            mountPath: /var/www/bookstack/themes/{{ include "bookstack.hacks.themeName" . }}
+            readOnly: true
+          {{- end }}
           {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 10 }}
           {{- end }}
@@ -240,6 +254,22 @@ spec:
           emptyDir: {}
         - name: storage-framework-sessions
           emptyDir: {}
+        {{- end }}
+        {{- if include "bookstack.hacks.enabled" . }}
+        - name: hacks
+          configMap:
+            name: {{ include "bookstack.fullname" . }}-hacks
+            items:
+            {{- range $name, $hack := .Values.hacks }}
+            {{- if dig "enabled" true $hack }}
+              - key: {{ include "bookstack.hacks.fileKey" (list $name "bookstack-module.json") | quote }}
+                path: {{ printf "modules/%s/bookstack-module.json" $name | quote }}
+              {{- range $path, $_ := $hack.files }}
+              - key: {{ include "bookstack.hacks.fileKey" (list $name $path) | quote }}
+                path: {{ printf "modules/%s/%s" $name $path | quote }}
+              {{- end }}
+            {{- end }}
+            {{- end }}
         {{- end }}
         {{- with .Values.extraVolumes }}
           {{- toYaml . | nindent 8 }}

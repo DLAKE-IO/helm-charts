@@ -81,6 +81,34 @@ Use as: {{- if include "bookstack.redis.enabled" . }}
 {{- end -}}
 
 {{/*
+Theme folder name (APP_THEME) that hosts chart-managed hack modules.
+*/}}
+{{- define "bookstack.hacks.themeName" -}}
+helm-hacks
+{{- end -}}
+
+{{/*
+Returns a non-empty string when at least one .Values.hacks entry is enabled
+(entries are enabled unless they set enabled: false).
+Use as: {{- if include "bookstack.hacks.enabled" . }}
+*/}}
+{{- define "bookstack.hacks.enabled" -}}
+{{- range $name, $hack := .Values.hacks -}}
+{{- if dig "enabled" true $hack -}}true{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+ConfigMap data key for one hack file. ConfigMap keys cannot contain "/", so the
+"<hack>/<path>" pair is hashed into a stable key. Always render it with | quote
+(an all-digit or "1e5"-like hash would otherwise parse as a YAML number).
+Usage: {{ include "bookstack.hacks.fileKey" (list $name $path) | quote }}
+*/}}
+{{- define "bookstack.hacks.fileKey" -}}
+{{- printf "%s/%s" (index . 0) (index . 1) | sha256sum | trunc 16 -}}
+{{- end -}}
+
+{{/*
 Common labels
 */}}
 {{- define "bookstack.labels" -}}
