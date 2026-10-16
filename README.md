@@ -22,9 +22,9 @@ helm pull oci://ghcr.io/dlake-io/charts/<chart-name> --version <version>
 |-------|---------|-------------|-------------|
 | [bookstack](charts/bookstack/) | 2.7.0 | 26.9 | BookStack is a simple, self-hosted, easy-to-use platform for organising and storing information. |
 | [cryptgeon](charts/cryptgeon/) | 2.11.0 | 2.8.2 | A Helm chart to install cryptgeon |
-| [ocsinventory](charts/ocsinventory/) | 1.3.3 | 2.12.3 | Open Computers and Software Inventory Next Generation is an assets management and deployment solution. |
+| [ocsinventory](charts/ocsinventory/) | 1.3.4 | 2.12.3 | Open Computers and Software Inventory Next Generation is an assets management and deployment solution. |
 | [pingvin-share](charts/pingvin-share/) | 1.8.0 | v1.6.1 | A Helm chart to install Pingvin Share |
-| [wazuh](charts/wazuh/) | 2.7.3 | 4.14.7 | Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads. |
+| [wazuh](charts/wazuh/) | 2.7.4 | 4.14.7 | Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads. |
 <!-- END_CHARTS_TABLE -->
 
 > The table above is automatically updated on every release by `scripts/update-readme.py`.
@@ -57,7 +57,7 @@ See [charts/cryptgeon/README.md](charts/cryptgeon/README.md) for full documentat
 
 ### ocsinventory
 
-![Version: 1.3.3](https://img.shields.io/badge/Version-1.3.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.12.3](https://img.shields.io/badge/AppVersion-2.12.3-informational?style=flat-square)
+![Version: 1.3.4](https://img.shields.io/badge/Version-1.3.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.12.3](https://img.shields.io/badge/AppVersion-2.12.3-informational?style=flat-square)
 
 Open Computers and Software Inventory Next Generation is an assets management and deployment solution.
 
@@ -77,7 +77,7 @@ See [charts/pingvin-share/README.md](charts/pingvin-share/README.md) for full do
 
 ### wazuh
 
-![Version: 2.7.3](https://img.shields.io/badge/Version-2.7.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.7](https://img.shields.io/badge/AppVersion-4.14.7-informational?style=flat-square)
+![Version: 2.7.4](https://img.shields.io/badge/Version-2.7.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.7](https://img.shields.io/badge/AppVersion-4.14.7-informational?style=flat-square)
 
 Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 
