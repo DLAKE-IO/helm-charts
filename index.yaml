@@ -6,6 +6,36 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: "26.9"
+    created: "2026-10-22T14:51:23.714593575Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 23.x.x
+    - condition: valkey.enabled
+      name: valkey
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 5.x.x
+    description: BookStack is a simple, self-hosted, easy-to-use platform for organising
+      and storing information.
+    digest: a7878ace1bd5e68c19ef760ec651cd71b968f1ff2ce5faa63e577b6b89394111
+    home: https://www.bookstackapp.com/
+    icon: https://media.githubusercontent.com/media/BookStackApp/website/master/static/images/logo.png
+    maintainers:
+    - email: 5606292+drustan@users.noreply.github.com
+      name: Tristan
+    name: bookstack
+    sources:
+    - https://github.com/BookStackApp/BookStack
+    type: application
+    urls:
+    - https://github.com/DLAKE-IO/helm-charts/releases/download/bookstack-2.8.0/bookstack-2.8.0.tgz
+    version: 2.8.0
+  - annotations:
+      artifacthub.io/category: web
+      artifacthub.io/prerelease: "false"
+    apiVersion: v2
+    appVersion: "26.9"
     created: "2026-10-16T13:19:38.001745384Z"
     dependencies:
     - condition: mariadb.enabled
@@ -1734,4 +1764,4 @@ entries:
     urls:
     - https://github.com/DLAKE-IO/helm-charts/releases/download/wazuh-2.1.0/wazuh-2.1.0.tgz
     version: 2.1.0
-generated: "2026-10-16T13:19:38.539528987Z"
+generated: "2026-10-22T14:51:23.714697791Z"
