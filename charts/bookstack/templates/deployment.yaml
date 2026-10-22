@@ -38,6 +38,67 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       serviceAccountName: {{ include "bookstack.serviceAccountName" . }}
+      {{- range $name, $module := .Values.modules }}
+      {{- if and (dig "enabled" true $module) (hasKey $.Values.hacks $name) (dig "enabled" true (index $.Values.hacks $name)) }}
+      {{- fail (printf "modules.%s: name collides with hacks.%s; module folder names must be unique" $name $name) }}
+      {{- end }}
+      {{- end }}
+      {{- if include "bookstack.modules.enabled" . }}
+      initContainers:
+        - name: install-modules
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          {{- /*
+            Module name/URL/checksum are passed as positional arguments, never
+            spliced into the script. The script must not contain "$(": Kubernetes
+            expands $(VAR) references in command.
+          */}}
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              install_module() {
+                name="$1"; url="$2"; sum="$3"
+                work="/modules/.work-$name"
+                rm -rf "$work" "/modules/$name"
+                mkdir -p "$work/unpacked"
+                echo "Installing module $name from $url"
+                curl -fsSL --retry 3 --max-filesize 52428800 -o "$work/module.zip" "$url"
+                echo "$sum  $work/module.zip" | sha256sum -c -
+                unzip -q "$work/module.zip" -d "$work/unpacked"
+                if [ -f "$work/unpacked/bookstack-module.json" ]; then
+                  src="$work/unpacked"
+                else
+                  set -- "$work"/unpacked/*/bookstack-module.json
+                  if [ "$#" -ne 1 ] || [ ! -f "$1" ]; then
+                    echo "ERROR: module $name: bookstack-module.json not found at ZIP root or in a single top-level folder" >&2
+                    return 1
+                  fi
+                  src="${1%/bookstack-module.json}"
+                fi
+                mv "$src" "/modules/$name"
+                rm -rf "$work"
+              }
+              while [ "$#" -ge 3 ]; do
+                install_module "$1" "$2" "$3"
+                shift 3
+              done
+            - install-modules
+            {{- range $name, $module := .Values.modules }}
+            {{- if dig "enabled" true $module }}
+            - {{ $name | quote }}
+            - {{ $module.url | quote }}
+            - {{ $module.sha256 | lower | quote }}
+            {{- end }}
+            {{- end }}
+          volumeMounts:
+            - name: theme-modules
+              mountPath: /modules
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -124,7 +185,7 @@ spec:
                   key: app-key
             - name: APP_URL
               value: {{ required "value app.url is required" .Values.app.url }}
-          {{- if include "bookstack.hacks.enabled" . }}
+          {{- if or (include "bookstack.hacks.enabled" .) (include "bookstack.modules.enabled" .) }}
             - name: APP_THEME
               value: {{ include "bookstack.hacks.themeName" . | quote }}
           {{- end }}
@@ -205,10 +266,21 @@ spec:
           - name: storage-framework-sessions
             mountPath: /var/www/bookstack/storage/framework/sessions
           {{- end }}
-          {{- if include "bookstack.hacks.enabled" . }}
+          {{- range $name, $hack := .Values.hacks }}
+          {{- if dig "enabled" true $hack }}
           - name: hacks
-            mountPath: /var/www/bookstack/themes/{{ include "bookstack.hacks.themeName" . }}
+            mountPath: {{ printf "/var/www/bookstack/themes/%s/modules/%s" (include "bookstack.hacks.themeName" $) $name | quote }}
+            subPath: {{ $name | quote }}
             readOnly: true
+          {{- end }}
+          {{- end }}
+          {{- range $name, $module := .Values.modules }}
+          {{- if dig "enabled" true $module }}
+          - name: theme-modules
+            mountPath: {{ printf "/var/www/bookstack/themes/%s/modules/%s" (include "bookstack.hacks.themeName" $) $name | quote }}
+            subPath: {{ $name | quote }}
+            readOnly: true
+          {{- end }}
           {{- end }}
           {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 10 }}
@@ -263,13 +335,17 @@ spec:
             {{- range $name, $hack := .Values.hacks }}
             {{- if dig "enabled" true $hack }}
               - key: {{ include "bookstack.hacks.fileKey" (list $name "bookstack-module.json") | quote }}
-                path: {{ printf "modules/%s/bookstack-module.json" $name | quote }}
+                path: {{ printf "%s/bookstack-module.json" $name | quote }}
               {{- range $path, $_ := $hack.files }}
               - key: {{ include "bookstack.hacks.fileKey" (list $name $path) | quote }}
-                path: {{ printf "modules/%s/%s" $name $path | quote }}
+                path: {{ printf "%s/%s" $name $path | quote }}
               {{- end }}
             {{- end }}
             {{- end }}
+        {{- end }}
+        {{- if include "bookstack.modules.enabled" . }}
+        - name: theme-modules
+          emptyDir: {}
         {{- end }}
         {{- with .Values.extraVolumes }}
           {{- toYaml . | nindent 8 }}

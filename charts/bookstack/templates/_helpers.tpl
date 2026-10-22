@@ -99,6 +99,17 @@ Use as: {{- if include "bookstack.hacks.enabled" . }}
 {{- end -}}
 
 {{/*
+Returns a non-empty string when at least one .Values.modules entry is enabled
+(entries are enabled unless they set enabled: false).
+Use as: {{- if include "bookstack.modules.enabled" . }}
+*/}}
+{{- define "bookstack.modules.enabled" -}}
+{{- range $name, $module := .Values.modules -}}
+{{- if dig "enabled" true $module -}}true{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 ConfigMap data key for one hack file. ConfigMap keys cannot contain "/", so the
 "<hack>/<path>" pair is hashed into a stable key. Always render it with | quote
 (an all-digit or "1e5"-like hash would otherwise parse as a YAML number).

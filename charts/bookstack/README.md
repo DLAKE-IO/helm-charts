@@ -1,6 +1,6 @@
 # bookstack
 
-![Version: 2.7.0](https://img.shields.io/badge/Version-2.7.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 26.9](https://img.shields.io/badge/AppVersion-26.9-informational?style=flat-square)
+![Version: 2.8.0](https://img.shields.io/badge/Version-2.8.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 26.9](https://img.shields.io/badge/AppVersion-26.9-informational?style=flat-square)
 
 BookStack is a simple, self-hosted, easy-to-use platform for organising and storing information.
 
@@ -85,7 +85,8 @@ Modules require BookStack v26.03+; the chart default is v26.09.
 - Disable a hack with `enabled: false`; remove it by deleting the entry.
 - Hacks are unsupported upstream customizations: re-test them after BookStack
   upgrades. If `image.tag` is pinned below v26.03, modules are mounted but ignored.
-- The total ConfigMap size limit is 1 MiB.
+- The total ConfigMap size limit is 1 MiB. For larger modules use
+  [`modules`](#external-modules).
 
 Map each code block on the hack page to a `files` key:
 
@@ -180,6 +181,57 @@ hacks:
         </script>
 ```
 
+## External modules
+
+Released theme modules that are too large for the `hacks` ConfigMap are
+installed from their ZIP URL through the `modules` value. An init container
+(`install-modules`, same image as BookStack) downloads each ZIP with `curl`,
+verifies its SHA-256, extracts it into an `emptyDir` and the module is mounted
+read-only at `/var/www/bookstack/themes/helm-hacks/modules/<name>/`, next to the
+hacks. The ZIP may hold `bookstack-module.json` at its root or inside a single
+top-level folder; the size limit is 50 MB (same as BookStack).
+
+Example: [File Attachment Preview](https://github.com/pronomix-gmbh/bookstack_file_attachment_preview)
+(in-browser preview of file attachments):
+
+```yaml
+modules:
+  file-attachment-preview:
+    url: https://github.com/pronomix-gmbh/bookstack_file_attachment_preview/releases/download/v1.3.0/file-attachment-preview.zip
+    sha256: de0a97f1767f6082a059b597d1d4bd61c7dbb0df817e2fc0eb79161fa566a284
+```
+
+- `url` and `sha256` are required. Get the checksum from the release asset's
+  `digest` field in the GitHub API
+  (`https://api.github.com/repos/<owner>/<repo>/releases/tags/<tag>`), or with
+  `curl -sL <url> | sha256sum`. A mismatch keeps the pod in
+  `Init:Error`/`Init:CrashLoopBackOff`; see
+  `kubectl logs <pod> -c install-modules`.
+- Modules run arbitrary PHP inside BookStack; only install modules you trust.
+- The ZIP is downloaded on every pod start, so the pod needs HTTPS egress to the
+  download host, including GitHub's redirect targets
+  (`release-assets.githubusercontent.com` / `objects.githubusercontent.com`).
+  With `networkPolicy.enabled: true` add an egress rule, for example:
+
+  ```yaml
+  networkPolicy:
+    egress:
+      extraRules:
+        - to:
+            - ipBlock:
+                cidr: 0.0.0.0/0
+          ports:
+            - protocol: TCP
+              port: 443
+  ```
+
+- Air-gapped or proxied clusters: point `url` at an internal HTTP(S) mirror;
+  the init container does not receive `extraEnv` (no proxy variables).
+- Module names must not collide with `hacks` keys (rendering fails). The chart
+  sets `APP_THEME=helm-hacks` when either `hacks` or `modules` is used.
+- Changing a module entry rolls the Deployment (the init container arguments
+  change). Disable a module with `enabled: false`.
+
 ## Values
 
 | Key | Type | Default | Description |
@@ -249,6 +301,7 @@ hacks:
 | mariadb.primary.persistence.enabled | bool | `false` | Enable persistence for MariaDB |
 | mariadb.primary.persistence.size | string | `"8Gi"` | Size of MariaDB PVC |
 | mariadb.primary.persistence.storageClass | string | `""` (use cluster default) | Storage class for MariaDB PVC |
+| modules | object | `{}` (no modules) | External theme modules to install, keyed by module folder name (`[A-Za-z0-9][A-Za-z0-9._-]*`, must not match a `hacks` key). Each entry: `url` (required, http(s) URL of the module ZIP), `sha256` (required, hex SHA-256 of the ZIP), `enabled` (optional, default true) |
 | nameOverride | string | `""` | Override the name of the chart |
 | networkPolicy.egress.extraRules | list | `[]` | Additional egress rules |
 | networkPolicy.enabled | bool | `false` | Enable NetworkPolicy |

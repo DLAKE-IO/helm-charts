@@ -283,6 +283,23 @@ hacks: {}
 #        <script type="module">...</script>
 
 ##
+## External BookStack theme modules — downloaded at pod start (BookStack v26.03+)
+## For modules too large for the `hacks` ConfigMap (1 MiB limit). An init container
+## (same image as BookStack) downloads each ZIP with curl, verifies its SHA-256,
+## extracts it and mounts it read-only at
+## /var/www/bookstack/themes/helm-hacks/modules/<name>/. The pod needs HTTPS egress
+## to the download host on every start (see README "External modules").
+##
+# -- External theme modules to install, keyed by module folder name (`[A-Za-z0-9][A-Za-z0-9._-]*`, must not match a `hacks` key).
+# Each entry: `url` (required, http(s) URL of the module ZIP), `sha256` (required, hex SHA-256 of the ZIP),
+# `enabled` (optional, default true)
+# @default -- `{}` (no modules)
+modules: {}
+#  file-attachment-preview:
+#    url: https://github.com/pronomix-gmbh/bookstack_file_attachment_preview/releases/download/v1.3.0/file-attachment-preview.zip
+#    sha256: de0a97f1767f6082a059b597d1d4bd61c7dbb0df817e2fc0eb79161fa566a284
+
+##
 ## External database configuration
 ##
 externalDatabase:

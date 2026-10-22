@@ -2,7 +2,7 @@
 # Used by chart-testing (ct install) to validate the chart installs correctly.
 
 app:
-  key: "base64:Y2hhcnQtdGVzdGluZy1jaS1rZXktZm9yLXRlc3Rpbmctb25seQ=="
+  key: "base64:Y2hhcnQtdGVzdGluZy1jaS1rZXktb25seS0zMmJ5dGU="
   url: "http://bookstack.ci.local"
 
 mariadb:

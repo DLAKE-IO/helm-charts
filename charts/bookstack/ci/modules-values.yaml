@@ -1,0 +1,39 @@
+# CI test values: installs the File Attachment Preview module via `modules`
+# alongside a small hack, verifying both mount side by side in the helm-hacks theme.
+# Used by chart-testing (ct install) to validate the chart installs correctly.
+
+app:
+  key: "base64:Y2hhcnQtdGVzdGluZy1jaS1rZXktb25seS0zMmJ5dGU="
+  url: "http://bookstack.ci.local"
+
+mariadb:
+  enabled: true
+  auth:
+    rootPassword: "ci-root-password"
+    database: "bookstack"
+    username: "bookstack"
+    password: "ci-bookstack-password"
+  primary:
+    persistence:
+      enabled: false
+
+persistence:
+  uploads:
+    enabled: false
+  storage:
+    enabled: false
+
+rbac:
+  create: false
+
+hacks:
+  ci-head-marker:
+    description: CI marker hack (verifies hacks and modules mount side by side)
+    files:
+      head/marker.html: |
+        <meta name="helm-ci-hack" content="ok">
+
+modules:
+  file-attachment-preview:
+    url: https://github.com/pronomix-gmbh/bookstack_file_attachment_preview/releases/download/v1.3.0/file-attachment-preview.zip
+    sha256: de0a97f1767f6082a059b597d1d4bd61c7dbb0df817e2fc0eb79161fa566a284
