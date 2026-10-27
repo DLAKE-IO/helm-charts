@@ -38,7 +38,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            - name: REDIS
+            - name: CACHE
               {{- if .Values.valkey.enabled }}
               value: {{ printf "redis://%s-primary" (include "cryptgeon.valkey.fullname" .) | quote }}
               {{- else }}
@@ -79,11 +79,11 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /api/live/
-              port: {{ .Values.service.port }}
+              path: /
+              port: http
           readinessProbe:
             httpGet:
-              path: /
+              path: /healthz
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

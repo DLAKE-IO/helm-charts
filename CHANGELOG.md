@@ -4,6 +4,9 @@ All notable changes to the dlake Helm Charts repository are documented here.
 
 ## [Unreleased]
 
+### Breaking
+- **cryptgeon** version bump `2.11.0` → `3.0.0`; requires cryptgeon v3: cache URL passed as `CACHE` instead of `REDIS`, liveness probe `/api/live/` → `/`, readiness probe `/` → `/healthz`, appVersion `2.8.2` → `3.0.0-rc.4`; v2 notes are not readable by v3
+
 ### Added
 - **bookstack** version bump `2.7.0` → `2.8.0`; add `modules` value — released theme module ZIPs (`url` + required `sha256`, optional `enabled`) are downloaded by a new `install-modules` init container (same image as BookStack), checksum-verified, extracted into an `emptyDir` and mounted read-only at `themes/helm-hacks/modules/<name>/`, for modules too large for the 1 MiB hacks ConfigMap; `APP_THEME=helm-hacks` is set when hacks or modules are used; module names colliding with `hacks` keys fail rendering; hacks are now mounted per module folder (`subPath`) at unchanged paths; pods need HTTPS egress to the download host (with `networkPolicy.enabled` add an `egress.extraRules` entry); new `ci/modules-values.yaml` installs File Attachment Preview v1.3.0 next to a hack
 - **bookstack** version bump `2.6.0` → `2.7.0`; add `hacks` value — each entry is rendered into ConfigMap `<fullname>-hacks` and mounted read-only as a BookStack theme system module under `themes/helm-hacks/modules/<name>/`, with `APP_THEME=helm-hacks` set automatically and `bookstack-module.json` generated (content-hashed version); hack file changes roll the Deployment via `checksum/hacks`; bump `appVersion` `25.12` → `26.9` (theme modules require BookStack v26.03+); new `ci/hacks-values.yaml` installs the WYSIWYG Docx Import hack
@@ -268,6 +271,21 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## cryptgeon
+
+### [3.0.0] — 2026-10-27
+
+**Breaking changes:**
+- Requires cryptgeon v3 images; chart 3.x does not work with v2 images — stay on chart 2.x to run cryptgeon v2
+- Cache URL is passed as `CACHE` instead of `REDIS` (v3 reads only `CACHE` and otherwise panics at startup with `cannot reach cache`)
+- cryptgeon v3 cannot read v2 notes, so existing note links stop working; flush the cache before upgrading — the bundled Valkey is not restarted by `helm upgrade`, so flush it as well as any `externalValkey` instance (see the chart README "Upgrading from 2.x")
+
+**Changes:**
+- `appVersion` `2.8.2` → `3.0.0-rc.4`; default image is now `cupcakearmy/cryptgeon:3.0.0-rc.4` (no final `3.0.0` image is published yet)
+- Liveness probe `/api/live/` → `/` on the named `http` port; `/` does not touch the cache, so a Valkey outage no longer restarts pods
+- Readiness probe `/` → `/healthz`; pods leave the Service while the cache is unreachable (503)
+- `cryptgeon.verbosity` / `VERBOSITY` kept; cryptgeon v3 ignores it
+- Chart README regenerated: Requirements and Values tables now list the Valkey subchart and `valkey.*` / `externalValkey.*` values instead of the stale `redis.*` rows; new "Upgrading from 2.x" section
+- `values.yaml`: replaced tab separators in `cryptgeon.theme_*` with spaces so `ct lint` (yamllint) parses the file; defaults unchanged
 
 ### [2.11.0] — 2026-07-08
 - Added Gateway API support: new `templates/httproute.yaml` (gated on `httpRoute.enabled`) renders an `HTTPRoute` (`gateway.networking.k8s.io/v1`) attaching to a pre-existing Gateway via `httpRoute.parentRefs`; the chart does not create the Gateway and TLS is terminated at the Gateway listener

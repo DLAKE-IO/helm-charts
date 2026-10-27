@@ -28,13 +28,13 @@ cryptgeon:
   # Verbosity level for the backend. Possible values are: error, warn, info, debug, trace
   verbosity: "warn"
   # Custom image for replacing the logo. Must be publicly reachable
-  theme_image:	""
+  theme_image: ""
   # Custom text for replacing the description below the logo
-  theme_text:	""
+  theme_text: ""
   # Custom text the page title
-  theme_page_title:	""
+  theme_page_title: ""
   # Custom url for the favicon. Must be publicly reachable
-  theme_favicon:	""
+  theme_favicon: ""
 
 ## @param extraVolumes Optionally specify extra list of additional volumes for cryptgeon pods
 ##
