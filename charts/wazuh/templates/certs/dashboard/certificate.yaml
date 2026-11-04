@@ -15,6 +15,11 @@ spec:
   renewBefore: {{ .Values.certificates.renewBefore }}
   isCA: false
   commonName: {{ include "wazuh.fullname" . }}-dashboard
+  {{- if include "wazuh.dashboard.backendTLSPolicy.enabled" . }}
+  {{- $svc := printf "%s-dashboard" (include "wazuh.fullname" .) }}
+  dnsNames:
+    {{- toYaml (uniq (list $svc (printf "%s.%s.svc" $svc .Release.Namespace) (include "wazuh.dashboard.backendTLSPolicy.hostname" .))) | nindent 4 }}
+  {{- end }}
   subject:
     organizations:
       - {{ .Values.certificates.subject.organization }}

@@ -626,7 +626,7 @@ dashboard:
       url: ""
       logoutUrl: ""
       ## @param dashboard.sso.oidc.baseRedirectUrl OpenID Connect base redirect URL
-      ## default to dashboard.ingress.host
+      ## default to dashboard.httpRoute.hostnames[0] when only httpRoute is enabled, else dashboard.ingress.host
       ## else Required
       baseRedirectUrl: ""
       scope: "openid profile email address phone"
@@ -698,7 +698,7 @@ dashboard:
       ## @param dashboard.sso.saml.spEntityId SAML SP entity ID
       spEntityId: "wazuh-saml"
       ## @param dashboard.sso.saml.kibanaUrl Dashboard/Kibana URL for SAML SP configuration
-      ## default to dashboard.ingress.host
+      ## default to dashboard.httpRoute.hostnames[0] when only httpRoute is enabled, else dashboard.ingress.host
       ## else Required
       kibanaUrl: ""
       order: 1
@@ -749,6 +749,57 @@ dashboard:
     ## exposed.
     ##
     host: "wazuh.example.com"
+
+  ## Gateway API HTTPRoute for the dashboard (alternative to ingress). Requires the Gateway API
+  ## CRDs and a pre-existing Gateway owned by the cluster admin; the chart does not create the
+  ## Gateway. Client TLS is terminated at the Gateway listener. ingress and httpRoute toggle independently.
+  ## @param dashboard.httpRoute.enabled Enable the Gateway API HTTPRoute for the dashboard.
+  ## @param dashboard.httpRoute.parentRefs Existing Gateway(s) the route attaches to. name is REQUIRED when enabled;
+  ## sectionName (the HTTPS listener) is REQUIRED when the HTTPS redirect is active (an unpinned route binds
+  ## all listeners incl. :80 and would loop).
+  ## @param dashboard.httpRoute.hostnames Hostnames the route answers for. When dashboard.ingress is disabled,
+  ## hostnames[0] is the default for dashboard.sso.oidc.baseRedirectUrl and dashboard.sso.saml.kibanaUrl.
+  ## @param dashboard.httpRoute.paths Path matches; the backendRef to the dashboard Service is implicit.
+  ## @param dashboard.httpRoute.annotations Extra annotations on the HTTPRoute objects.
+  ##
+  httpRoute:
+    enabled: false
+    parentRefs:
+      - name: ""
+        # namespace: ""     # omit if the Gateway is in the release namespace
+        # sectionName: ""   # the listener to bind, e.g. "https"
+    hostnames: []
+      # - wazuh.example.com
+    paths:
+      - type: PathPrefix
+        value: /
+    annotations: {}
+    ## @param dashboard.httpRoute.httpsRedirect.enabled Create a secondary HTTPRoute on the Gateway's HTTP (:80)
+    ## listener that redirects to HTTPS. Only acts when httpsRedirect.sectionName (or httpsRedirect.parentRefs) is set.
+    ## @param dashboard.httpRoute.httpsRedirect.sectionName The HTTP (:80) listener on the same Gateway.
+    ## @param dashboard.httpRoute.httpsRedirect.statusCode Redirect status code (301, 302, 303, 307 or 308).
+    ##
+    httpsRedirect:
+      enabled: true
+      sectionName: ""
+      statusCode: 301
+      # parentRefs: []      # optional: override to a different Gateway/listener
+    ## BackendTLSPolicy (gateway.networking.k8s.io/v1, Gateway API >= v1.4) so the Gateway connects to the
+    ## dashboard over HTTPS. Rendered only when dashboard.httpRoute.enabled AND dashboard.enable_ssl are true.
+    ## @param dashboard.httpRoute.backendTLSPolicy.enabled Render the BackendTLSPolicy when dashboard.enable_ssl is true.
+    ## @param dashboard.httpRoute.backendTLSPolicy.hostname SNI and verified certificate name. Defaults to
+    ## <fullname>-dashboard.<namespace>.svc; the chart adds it to the dashboard Certificate dnsNames.
+    ## @param dashboard.httpRoute.backendTLSPolicy.caCertificateRefs ConfigMap(s) in the release namespace holding
+    ## the CA under key ca.crt (group defaults to "", kind to ConfigMap).
+    ## @param dashboard.httpRoute.backendTLSPolicy.wellKnownCACertificates "System" to trust system CAs instead.
+    ## Exactly one of caCertificateRefs / wellKnownCACertificates is REQUIRED when the policy is rendered.
+    ##
+    backendTLSPolicy:
+      enabled: true
+      hostname: ""
+      caCertificateRefs: []
+        # - name: wazuh-dashboard-ca
+      wellKnownCACertificates: ""
 
   ## Extra configuration for the dashboard
   ## @param dashboard.extraSpec This section is less prioritized than the others

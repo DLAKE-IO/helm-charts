@@ -8,9 +8,48 @@ Components deployed:
 Retrieve the dashboard URL:
 {{- if .Values.dashboard.ingress.enabled }}
   Dashboard: https://{{ .Values.dashboard.ingress.host }}
+{{- else if .Values.dashboard.httpRoute.enabled }}
+{{- range .Values.dashboard.httpRoute.hostnames }}
+  Dashboard: https://{{ . }}
+{{- else }}
+  Dashboard: via Gateway API HTTPRoute {{ include "wazuh.fullname" $ }}-dashboard (no hostnames set; answers for every host on the Gateway listener)
+{{- end }}
 {{- else }}
   kubectl port-forward svc/{{ include "wazuh.fullname" . }}-dashboard {{ .Values.dashboard.service.httpPort }}:{{ .Values.dashboard.service.httpPort }}
   Dashboard: http://localhost:{{ .Values.dashboard.service.httpPort }}
+{{- end }}
+{{- if and .Values.dashboard.ingress.enabled .Values.dashboard.httpRoute.enabled }}
+
+NOTE: both dashboard.ingress.enabled and dashboard.httpRoute.enabled are true — the dashboard
+is exposed through BOTH an Ingress and a Gateway API HTTPRoute.
+{{- end }}
+{{- if and .Values.dashboard.httpRoute.enabled .Values.dashboard.httpRoute.httpsRedirect.enabled }}
+{{- if or .Values.dashboard.httpRoute.httpsRedirect.sectionName .Values.dashboard.httpRoute.httpsRedirect.parentRefs }}
+
+HTTP->HTTPS redirect is active (HTTPRoute {{ include "wazuh.fullname" . }}-dashboard-http-redirect).
+{{- if not .Values.dashboard.httpRoute.hostnames }}
+NOTE: dashboard.httpRoute.hostnames is empty, so the redirect applies to ALL hosts on the
+HTTP listener. Set dashboard.httpRoute.hostnames if the Gateway is shared.
+{{- end }}
+{{- else }}
+
+WARNING: dashboard.httpRoute.httpsRedirect.enabled is true but no HTTP listener was named.
+Set dashboard.httpRoute.httpsRedirect.sectionName to your Gateway's HTTP (:80) listener,
+or the redirect will not be created.
+{{- end }}
+{{- end }}
+{{- if include "wazuh.dashboard.backendTLSPolicy.enabled" . }}
+
+Backend TLS: dashboard.enable_ssl is true, so BackendTLSPolicy {{ include "wazuh.fullname" . }}-dashboard makes
+the Gateway connect to the dashboard over HTTPS (verified name: {{ include "wazuh.dashboard.backendTLSPolicy.hostname" . }}).
+{{- if .Values.dashboard.httpRoute.backendTLSPolicy.caCertificateRefs }}
+The referenced CA ConfigMap(s) must exist in namespace {{ .Release.Namespace }} with key ca.crt,
+otherwise the Gateway returns 5xx (see README "Backend TLS").
+{{- end }}
+{{- else if and .Values.dashboard.httpRoute.enabled .Values.dashboard.enable_ssl }}
+
+WARNING: dashboard.enable_ssl is true but dashboard.httpRoute.backendTLSPolicy.enabled is false —
+the Gateway sends plain HTTP to the HTTPS dashboard unless you attach your own BackendTLSPolicy.
 {{- end }}
 
 Default credentials are stored in the dashboard Secret.

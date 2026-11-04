@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 2.7.4](https://img.shields.io/badge/Version-2.7.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.7](https://img.shields.io/badge/AppVersion-4.14.7-informational?style=flat-square)
+![Version: 2.8.0](https://img.shields.io/badge/Version-2.8.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.7](https://img.shields.io/badge/AppVersion-4.14.7-informational?style=flat-square)
 
 Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 
@@ -31,6 +31,105 @@ Wazuh is a free and open source security platform that unifies XDR and SIEM prot
 | Repository | Name | Version |
 |------------|------|---------|
 | https://charts.jetstack.io | cert-manager | 1.19.3 |
+
+## Dashboard: Ingress or Gateway API
+
+The dashboard is exposed through a Kubernetes `Ingress` (`dashboard.ingress.*`) or a
+Gateway API `HTTPRoute` (`dashboard.httpRoute.*`). They toggle independently via
+`dashboard.ingress.enabled` and `dashboard.httpRoute.enabled`.
+
+Gateway API support creates only an `HTTPRoute` `<fullname>-dashboard`
+(`gateway.networking.k8s.io/v1`) that attaches to a **pre-existing** Gateway via
+`dashboard.httpRoute.parentRefs`; the chart does not create the Gateway. Client TLS is
+terminated at the Gateway listener, so `httpRoute` has no TLS block. Prerequisites:
+
+- Gateway API CRDs installed in the cluster (v1.4+ when `dashboard.enable_ssl: true`,
+  for `BackendTLSPolicy` `gateway.networking.k8s.io/v1`).
+- A Gateway owned by the cluster admin (e.g. `gatewayClassName: cilium`), whose listener
+  `allowedRoutes.namespaces` permits the release namespace.
+
+`dashboard.httpRoute.httpsRedirect` (on by default) additionally creates a second HTTPRoute
+`<fullname>-dashboard-http-redirect` on the Gateway's HTTP (`:80`) listener that redirects to
+HTTPS with a `RequestRedirect` filter (status 301). Name the HTTP listener via
+`httpsRedirect.sectionName` and pin the app route's HTTPS listener via
+`parentRefs[].sectionName` — the two must differ or the chart refuses to render
+(a shared listener would loop). If no HTTP listener is named, the redirect is
+skipped (with a warning in the install NOTES). Set `httpsRedirect.enabled: false` to turn it off.
+
+**Network policies:** the dashboard NetworkPolicy and CiliumNetworkPolicy already accept
+`dashboard.service.httpPort` from any source, so Gateway-proxied traffic is not dropped.
+
+**SSO:** when `dashboard.httpRoute.enabled` is true, `dashboard.ingress.enabled` is false and
+`dashboard.httpRoute.hostnames` is set, `hostnames[0]` is the default for
+`dashboard.sso.oidc.baseRedirectUrl` and for `dashboard.sso.saml.kibanaUrl` (`https://<host>`).
+Otherwise both fall back to `dashboard.ingress.host`. Explicit values always win.
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `dashboard.httpRoute.enabled` | Render the dashboard HTTPRoute | `false` |
+| `dashboard.httpRoute.parentRefs` | Existing Gateway(s) to attach to. `name` is required; `sectionName` (the HTTPS listener) is required while the redirect is active | `[{"name":""}]` |
+| `dashboard.httpRoute.hostnames` | Hostnames the route answers for; `hostnames[0]` feeds the SSO defaults (see above) | `[]` |
+| `dashboard.httpRoute.paths` | Path matches; the backendRef to the dashboard Service is implicit | `[{"type":"PathPrefix","value":"/"}]` |
+| `dashboard.httpRoute.annotations` | Extra annotations on both HTTPRoute objects | `{}` |
+| `dashboard.httpRoute.httpsRedirect.enabled` | Create the HTTP->HTTPS redirect route (only when `sectionName` or `httpsRedirect.parentRefs` is set) | `true` |
+| `dashboard.httpRoute.httpsRedirect.sectionName` | The Gateway's HTTP (`:80`) listener. Optional `httpsRedirect.parentRefs` overrides the redirect's parentRefs entirely | `""` |
+| `dashboard.httpRoute.httpsRedirect.statusCode` | Redirect status code: 301, 302, 303, 307 or 308 | `301` |
+| `dashboard.httpRoute.backendTLSPolicy.enabled` | Render the BackendTLSPolicy when `dashboard.enable_ssl` is true | `true` |
+| `dashboard.httpRoute.backendTLSPolicy.hostname` | SNI and verified certificate name; defaults to `<fullname>-dashboard.<namespace>.svc` | `""` |
+| `dashboard.httpRoute.backendTLSPolicy.caCertificateRefs` | ConfigMap(s) in the release namespace holding the CA under key `ca.crt` (`group` defaults to `""`, `kind` to `ConfigMap`) | `[]` |
+| `dashboard.httpRoute.backendTLSPolicy.wellKnownCACertificates` | `System` to trust the Gateway's system CAs instead of `caCertificateRefs` | `""` |
+
+```yaml
+dashboard:
+  httpRoute:
+    enabled: true
+    parentRefs:
+      - name: my-gateway
+        namespace: gateway-system
+        sectionName: https        # app traffic: HTTPS listener
+    hostnames:
+      - wazuh.example.com
+    httpsRedirect:
+      sectionName: http           # HTTP (:80) listener -> 301 to HTTPS
+```
+
+### Backend TLS (dashboard.enable_ssl: true)
+
+When the dashboard serves HTTPS (`dashboard.enable_ssl: true`) and `dashboard.httpRoute.enabled`
+is true, the chart renders a `BackendTLSPolicy` `<fullname>-dashboard` targeting the dashboard
+Service port `dashboard`, so the Gateway connects to the dashboard over TLS.
+
+- The verified name (also sent as SNI) is `dashboard.httpRoute.backendTLSPolicy.hostname`,
+  default `<fullname>-dashboard.<namespace>.svc`.
+- With `certificates.enabled: true`, the chart adds `dnsNames` (`<fullname>-dashboard`,
+  `<fullname>-dashboard.<namespace>.svc` and the configured hostname) to the dashboard
+  Certificate. This reissues the `dashboard-tls` Secret and rolls the dashboard once.
+- With your own `dashboard-tls` Secret (`certificates.enabled: false`), its SAN must match
+  `backendTLSPolicy.hostname`.
+- Rendering fails until `caCertificateRefs` or `wellKnownCACertificates: System` is set; the two
+  are mutually exclusive.
+- The CA ConfigMap must live in the release namespace with key `ca.crt`. It can be created after
+  install, because only its name is referenced. Until it exists, the Gateway reports
+  `ResolvedRefs=False` on the policy and returns 5xx.
+
+Copy the chart CA into a ConfigMap:
+
+```bash
+kubectl -n <namespace> create configmap wazuh-dashboard-ca \
+  --from-literal=ca.crt="$(kubectl -n <namespace> get secret dashboard-tls -o jsonpath='{.data.ca\.crt}' | base64 -d)"
+```
+
+The chart's self-signed root CA is valid for 10 years (87600h), so leaf certificate rotation does
+not require re-copying. Then set:
+
+```yaml
+dashboard:
+  enable_ssl: true
+  httpRoute:
+    backendTLSPolicy:
+      caCertificateRefs:
+        - name: wazuh-dashboard-ca
+```
 
 ## PVC Ownership Fix (queue/db permissions)
 
@@ -289,6 +388,19 @@ directive forces email for this rule regardless of `<email_alert_level>` in the 
 | dashboard.extraSpec.container | object | `{}` |  |
 | dashboard.extraSpec.deployment | object | `{}` |  |
 | dashboard.extraSpec.pod | object | `{}` |  |
+| dashboard.httpRoute.annotations | object | `{}` |  |
+| dashboard.httpRoute.backendTLSPolicy.caCertificateRefs | list | `[]` |  |
+| dashboard.httpRoute.backendTLSPolicy.enabled | bool | `true` |  |
+| dashboard.httpRoute.backendTLSPolicy.hostname | string | `""` |  |
+| dashboard.httpRoute.backendTLSPolicy.wellKnownCACertificates | string | `""` |  |
+| dashboard.httpRoute.enabled | bool | `false` |  |
+| dashboard.httpRoute.hostnames | list | `[]` |  |
+| dashboard.httpRoute.httpsRedirect.enabled | bool | `true` |  |
+| dashboard.httpRoute.httpsRedirect.sectionName | string | `""` |  |
+| dashboard.httpRoute.httpsRedirect.statusCode | int | `301` |  |
+| dashboard.httpRoute.parentRefs[0].name | string | `""` |  |
+| dashboard.httpRoute.paths[0].type | string | `"PathPrefix"` |  |
+| dashboard.httpRoute.paths[0].value | string | `"/"` |  |
 | dashboard.images.pullPolicy | string | `"IfNotPresent"` |  |
 | dashboard.images.repository | string | `"wazuh/wazuh-dashboard"` |  |
 | dashboard.images.tag | string | `"4.14.7"` |  |

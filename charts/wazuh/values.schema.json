@@ -4,7 +4,39 @@
   "properties": {
     "wazuh": { "type": "object" },
     "indexer": { "type": "object" },
-    "dashboard": { "type": "object" },
+    "dashboard": {
+      "type": "object",
+      "properties": {
+        "httpRoute": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "parentRefs": { "type": "array" },
+            "hostnames": { "type": "array" },
+            "paths": { "type": "array" },
+            "annotations": { "type": "object" },
+            "httpsRedirect": {
+              "type": "object",
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "sectionName": { "type": "string" },
+                "statusCode": { "type": "integer", "enum": [301, 302, 303, 307, 308] },
+                "parentRefs": { "type": "array" }
+              }
+            },
+            "backendTLSPolicy": {
+              "type": "object",
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "hostname": { "type": "string" },
+                "caCertificateRefs": { "type": "array" },
+                "wellKnownCACertificates": { "type": "string", "enum": ["", "System"] }
+              }
+            }
+          }
+        }
+      }
+    },
     "agent": { "type": "object" },
     "cert-manager": { "type": "object" }
   },

@@ -1,0 +1,35 @@
+{{- if include "wazuh.dashboard.backendTLSPolicy.enabled" . }}
+{{- $btls := .Values.dashboard.httpRoute.backendTLSPolicy }}
+{{- if and $btls.caCertificateRefs $btls.wellKnownCACertificates }}
+{{- fail "dashboard.httpRoute.backendTLSPolicy: set either caCertificateRefs or wellKnownCACertificates, not both" }}
+{{- end }}
+{{- if not (or $btls.caCertificateRefs $btls.wellKnownCACertificates) }}
+{{- fail "dashboard.httpRoute.backendTLSPolicy.caCertificateRefs (a ConfigMap with key ca.crt) or wellKnownCACertificates is required when dashboard.httpRoute.enabled and dashboard.enable_ssl are true — see the chart README section \"Backend TLS\"" }}
+{{- end }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: BackendTLSPolicy
+metadata:
+  name: {{ include "wazuh.fullname" . }}-dashboard
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "wazuh.fullname" . }}-dashboard
+spec:
+  targetRefs:
+    - group: ""
+      kind: Service
+      name: {{ include "wazuh.fullname" . }}-dashboard
+      sectionName: dashboard
+  validation:
+    hostname: {{ include "wazuh.dashboard.backendTLSPolicy.hostname" . }}
+    {{- with $btls.caCertificateRefs }}
+    caCertificateRefs:
+      {{- range $i, $ref := . }}
+      - group: {{ $ref.group | default "" | quote }}
+        kind: {{ $ref.kind | default "ConfigMap" }}
+        name: {{ required (printf "dashboard.httpRoute.backendTLSPolicy.caCertificateRefs[%d].name is required" $i) $ref.name }}
+      {{- end }}
+    {{- end }}
+    {{- with $btls.wellKnownCACertificates }}
+    wellKnownCACertificates: {{ . }}
+    {{- end }}
+{{- end }}

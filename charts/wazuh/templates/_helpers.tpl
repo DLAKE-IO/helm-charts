@@ -70,6 +70,35 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 {{- end -}}
 
+{{/*
+Public dashboard hostname for SSO URL defaults: httpRoute.hostnames[0] when the dashboard is
+exposed only through Gateway API, otherwise dashboard.ingress.host.
+*/}}
+{{- define "wazuh.dashboard.host" -}}
+{{- $route := .Values.dashboard.httpRoute -}}
+{{- if and $route.enabled (not .Values.dashboard.ingress.enabled) $route.hostnames -}}
+{{- first $route.hostnames -}}
+{{- else -}}
+{{- .Values.dashboard.ingress.host -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Non-empty when a BackendTLSPolicy must be rendered (dashboard serves HTTPS behind the HTTPRoute).
+*/}}
+{{- define "wazuh.dashboard.backendTLSPolicy.enabled" -}}
+{{- if and .Values.dashboard.enabled .Values.dashboard.httpRoute.enabled .Values.dashboard.enable_ssl .Values.dashboard.httpRoute.backendTLSPolicy.enabled -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+SNI / verified certificate name the Gateway uses towards the dashboard.
+*/}}
+{{- define "wazuh.dashboard.backendTLSPolicy.hostname" -}}
+{{- .Values.dashboard.httpRoute.backendTLSPolicy.hostname | default (printf "%s-dashboard.%s.svc" (include "wazuh.fullname" .) .Release.Namespace) -}}
+{{- end -}}
+
 {{- define "wazuh.dashboard.config"}}
 server.host: 0.0.0.0
 server.port: {{ .Values.dashboard.service.httpPort }}
@@ -107,7 +136,7 @@ opensearch_security.auth.multiple_auth_enabled: {{ gt ($authType | len) 1 }}
 opensearch_security.auth.type: {{ $authType | toJson }}
 
 {{- if .Values.dashboard.sso.oidc.enabled }}
-{{- $baseRedirectUrl := .Values.dashboard.sso.oidc.baseRedirectUrl | default .Values.dashboard.ingress.host }}
+{{- $baseRedirectUrl := .Values.dashboard.sso.oidc.baseRedirectUrl | default (include "wazuh.dashboard.host" .) }}
 opensearch_security.openid.connect_url: {{ required "dashboard.sso.oidc.url is required" .Values.dashboard.sso.oidc.url }}
 opensearch_security.openid.logout_url: {{ required "dashboard.sso.oidc.logoutUrl is required" .Values.dashboard.sso.oidc.logoutUrl }}
 opensearch_security.openid.base_redirect_url: {{ required "dashboard.sso.oidc.baseRedirectUrl is required" $baseRedirectUrl }}
