@@ -476,6 +476,41 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: 2.12.3
+    created: "2026-11-04T16:01:25.216602393Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 20.x.x
+    description: Open Computers and Software Inventory Next Generation is an assets
+      management and deployment solution.
+    digest: 55732cfbc9a4f54a9aa267ac3b357934afea205efab6ea7f9013f7f1f02b1ea8
+    home: https://ocsinventory-ng.org/
+    icon: https://ocsinventory-ng.org/wp-content/uploads/2019/04/cropped-AUTOCOLLANT-01-1-192x192.png
+    keywords:
+    - ocsinventory
+    - assets
+    - management
+    - deployment
+    - inventory
+    - http
+    - web
+    maintainers:
+    - email: 5606292+drustan@users.noreply.github.com
+      name: Drustan
+    name: ocsinventory
+    sources:
+    - http://wiki.ocsinventory-ng.org
+    - https://github.com/OCSInventory-NG/OCSInventory-Docker-Image
+    type: application
+    urls:
+    - https://github.com/DLAKE-IO/helm-charts/releases/download/ocsinventory-1.4.0/ocsinventory-1.4.0.tgz
+    version: 1.4.0
+  - annotations:
+      artifacthub.io/category: monitoring-logging
+      artifacthub.io/prerelease: "false"
+    apiVersion: v2
+    appVersion: 2.12.3
     created: "2026-10-16T13:19:38.278994943Z"
     dependencies:
     - condition: mariadb.enabled
@@ -1785,4 +1820,4 @@ entries:
     urls:
     - https://github.com/DLAKE-IO/helm-charts/releases/download/wazuh-2.1.0/wazuh-2.1.0.tgz
     version: 2.1.0
-generated: "2026-10-27T10:07:27.935628207Z"
+generated: "2026-11-04T16:01:25.216703302Z"
