@@ -24,6 +24,7 @@ All notable changes to the dlake Helm Charts repository are documented here.
 - **pingvin-share** version bump `1.6.2` → `1.6.3`; add `caddy-config` (`/.config`) and `caddy-data` (`/.local`) emptyDir volumes — fixes Caddy errors when `readOnlyRootFilesystem: true` is set (Caddy needs writable dirs for config autosave and TLS storage locks)
 
 ### Changed
+- **wazuh** version bump `2.8.0` → `2.8.1`; bump indexer, dashboard and manager image tags `4.14.7` → `4.14.9` (the manager tag also drives the webhook listener sidecars); bump `appVersion` to `4.14.9`; pin `agent.images.tag` to `4.14.1` — `kinseii/wazuh-agent` publishes no `4.14.7` or `4.14.9` tag, so the default `agent.enabled: true` install can pull its image again
 - **wazuh** version bump `2.7.2` → `2.7.3`; bump all component image tags `4.14.5` → `4.14.7` (indexer, dashboard, manager, agent); bump `appVersion` to `4.14.7`
 - **wazuh** version bump `2.7.1` → `2.7.2`; bump all component image tags `4.14.4` → `4.14.5` (indexer, dashboard, manager, agent)
 
@@ -112,6 +113,10 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## wazuh
+
+### [2.8.1] — 2026-11-04
+- Changed: bump indexer, dashboard and manager image tags `4.14.7` → `4.14.9`; bump `appVersion` to `4.14.9`. Upstream 4.14.8 and 4.14.9 are fix and hardening releases; no configuration changes are required
+- Fixed: `agent.images.tag` defaults to `4.14.1`, the newest tag `kinseii/wazuh-agent` publishes on Docker Hub; the previous default `4.14.7` did not exist, so the agent DaemonSet could not pull its image. Agents older than the manager are supported; override `agent.images.tag` to pin a different tag
 
 ### [2.8.0] — 2026-11-04
 - Added `dashboard.httpRoute.*`: Gateway API `HTTPRoute` `<fullname>-dashboard` to the dashboard Service, attached to a pre-existing Gateway via `parentRefs` (`name` required); `dashboard.ingress` and `dashboard.httpRoute` toggle independently

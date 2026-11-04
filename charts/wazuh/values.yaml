@@ -99,7 +99,7 @@ indexer:
     ## @param indexer.images.tag Tag of the image.
     ## @param indexer.images.pullPolicy pullPolicy of the image.
     ##
-    tag: "4.14.7"
+    tag: "4.14.9"
     pullPolicy: IfNotPresent
     ## Parameter to set the imagePullSecret
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -451,7 +451,7 @@ dashboard:
     ## @param dashboard.images.pullPolicy pullPolicy of the image.
     ## @param dashboard.images.updateStrategy updateStrategy of the image.
     ##
-    tag: "4.14.7"
+    tag: "4.14.9"
     pullPolicy: IfNotPresent
     updateStrategy: OnDelete
   ## Parameters to configure the resources allocated to the dashboard.
@@ -836,7 +836,7 @@ wazuh:
   ##
   images:
     repository: wazuh/wazuh-manager
-    tag: "4.14.7"
+    tag: "4.14.9"
     pullPolicy: IfNotPresent
     imagePullSecrets:
       enabled: false
@@ -1374,7 +1374,9 @@ agent:
   ##
   images:
     repository: kinseii/wazuh-agent
-    tag: "4.14.7"
+    ## kinseii/wazuh-agent publishes no tag newer than 4.14.1 (checked 2026-11-04); a 4.14.1 agent
+    ## works with a newer manager. Check Docker Hub before bumping this with the other component tags.
+    tag: "4.14.1"
     pullPolicy: IfNotPresent
 
   ## Parameters to configure securityContext of the pod.

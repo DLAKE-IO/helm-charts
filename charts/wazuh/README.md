@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 2.8.0](https://img.shields.io/badge/Version-2.8.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.7](https://img.shields.io/badge/AppVersion-4.14.7-informational?style=flat-square)
+![Version: 2.8.1](https://img.shields.io/badge/Version-2.8.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
 
 Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 
@@ -287,7 +287,7 @@ directive forces email for this rule regardless of `<email_alert_level>` in the 
 | agent.extraSpec.pod | object | `{}` |  |
 | agent.images.pullPolicy | string | `"IfNotPresent"` |  |
 | agent.images.repository | string | `"kinseii/wazuh-agent"` |  |
-| agent.images.tag | string | `"4.14.7"` |  |
+| agent.images.tag | string | `"4.14.1"` |  |
 | agent.joinManager.agentsEvents | string | `"1514"` |  |
 | agent.joinManager.apiPort | string | `"55000"` |  |
 | agent.joinManager.managerHost | string | `""` |  |
@@ -403,7 +403,7 @@ directive forces email for this rule regardless of `<email_alert_level>` in the 
 | dashboard.httpRoute.paths[0].value | string | `"/"` |  |
 | dashboard.images.pullPolicy | string | `"IfNotPresent"` |  |
 | dashboard.images.repository | string | `"wazuh/wazuh-dashboard"` |  |
-| dashboard.images.tag | string | `"4.14.7"` |  |
+| dashboard.images.tag | string | `"4.14.9"` |  |
 | dashboard.images.updateStrategy | string | `"OnDelete"` |  |
 | dashboard.ingress.annotations | object | `{}` |  |
 | dashboard.ingress.className | string | `""` |  |
@@ -526,7 +526,7 @@ directive forces email for this rule regardless of `<email_alert_level>` in the 
 | indexer.images.imagePullSecrets.secret | object | `{}` |  |
 | indexer.images.pullPolicy | string | `"IfNotPresent"` |  |
 | indexer.images.repository | string | `"wazuh/wazuh-indexer"` |  |
-| indexer.images.tag | string | `"4.14.7"` |  |
+| indexer.images.tag | string | `"4.14.9"` |  |
 | indexer.initContainers | list | `[]` |  |
 | indexer.job.annotations | object | `{}` |  |
 | indexer.job.resources | object | `{}` |  |
@@ -636,7 +636,7 @@ directive forces email for this rule regardless of `<email_alert_level>` in the 
 | wazuh.images.imagePullSecrets.secret | object | `{}` |  |
 | wazuh.images.pullPolicy | string | `"IfNotPresent"` |  |
 | wazuh.images.repository | string | `"wazuh/wazuh-manager"` |  |
-| wazuh.images.tag | string | `"4.14.7"` |  |
+| wazuh.images.tag | string | `"4.14.9"` |  |
 | wazuh.initContainer.image | string | `"alpine"` |  |
 | wazuh.initContainer.resources.limits.cpu | string | `"1000m"` |  |
 | wazuh.initContainer.resources.limits.memory | string | `"1Gi"` |  |
