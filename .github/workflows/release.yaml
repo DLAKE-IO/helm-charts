@@ -66,6 +66,9 @@ jobs:
         with:
           charts_dir: charts
           config: "./.github/configs/cr.yaml"
+          # Re-runs after a partial failure must not die on the already-created
+          # GitHub release; cr index then still adds the existing asset to index.yaml.
+          skip_existing: true
         env:
           CR_TOKEN: "${{ secrets.CR_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}"
 
@@ -77,13 +80,15 @@ jobs:
         run: |
           shopt -s nullglob
           released_charts=""
+          # OCI repository names must be lowercase; the owner is "DLAKE-IO".
+          oci_repo="oci://ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/charts"
           rm -f .oci-digests
 
           for pkg in .cr-release-packages/*.tgz; do
             chart_name=$(basename "${pkg}" .tgz)
             echo "📦 Publishing ${chart_name} to GHCR..."
 
-            output=$(helm push "${pkg}" "oci://ghcr.io/${{ github.repository_owner }}/charts" 2>&1)
+            output=$(helm push "${pkg}" "${oci_repo}" 2>&1)
             echo "$output"
 
             # helm push outputs:
@@ -167,7 +172,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "2. **GitHub Container Registry (OCI)**" >> $GITHUB_STEP_SUMMARY
           echo "   \`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "   helm pull oci://ghcr.io/${{ github.repository_owner }}/charts/<chart-name> --version <version>" >> $GITHUB_STEP_SUMMARY
+          echo "   helm pull oci://ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/charts/<chart-name> --version <version>" >> $GITHUB_STEP_SUMMARY
           echo "   \`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### ✅ Security" >> $GITHUB_STEP_SUMMARY
