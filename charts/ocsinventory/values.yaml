@@ -97,14 +97,14 @@ ingress:
   className: ""
   labels: {}
   annotations: {}
-    #kubernetes.io/ingress.class: nginx
-    #nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    #nginx.ingress.kubernetes.io/proxy-body-size: 200M
-    #nginx.ingress.kubernetes.io/proxy-connect-timeout: 300s
-    #nginx.ingress.kubernetes.io/proxy-send-timeout: 300s
-    #nginx.ingress.kubernetes.io/proxy-read-timeout: 300s
-    #cert-manager.io/cluster-issuer: ""
-    #nginx.ingress.kubernetes.io/app-root: /ocsreports/
+    # kubernetes.io/ingress.class: nginx
+    # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # nginx.ingress.kubernetes.io/proxy-body-size: 200M
+    # nginx.ingress.kubernetes.io/proxy-connect-timeout: 300s
+    # nginx.ingress.kubernetes.io/proxy-send-timeout: 300s
+    # nginx.ingress.kubernetes.io/proxy-read-timeout: 300s
+    # cert-manager.io/cluster-issuer: ""
+    # nginx.ingress.kubernetes.io/app-root: /ocsreports/
     # nginx.ingress.kubernetes.io/whitelist-source-range: ""
   hosts:
     - host: chart-example.local
@@ -124,6 +124,39 @@ ingress:
       - "/ocsapi"
       - "/ocsinventory"
 
+## Gateway API HTTPRoute (alternative to ingress). Requires the Gateway API
+## CRDs and a pre-existing Gateway owned by the cluster admin. TLS is terminated
+## at the Gateway listener, not here. ingress and httpRoute toggle independently;
+## ingress.enabled defaults to true, set it to false for Gateway-only exposure.
+## ingress.basicauth is NOT applied to the HTTPRoute.
+httpRoute:
+  enabled: false
+  ## The existing Gateway(s) this route attaches to.
+  parentRefs:
+    - name: ""            # REQUIRED when enabled: the Gateway's name
+      # namespace: ""     # omit if the Gateway is in the release namespace
+      # sectionName: ""   # the listener to bind, e.g. "https"
+      #                   # REQUIRED when httpsRedirect is enabled (the HTTPS listener)
+  ## Hostnames this route answers for (route-level, not per-path).
+  hostnames: []
+    # - ocs.example.com
+  ## Path matches; the backendRef to the app service (port 80) is implicit.
+  paths:
+    - type: PathPrefix
+      value: /
+  ## Extra annotations on the HTTPRoute object.
+  annotations: {}
+  ## HTTP -> HTTPS redirect: a secondary HTTPRoute on the HTTP (:80) listener
+  ## carrying a RequestRedirect filter. On by default; only acts when
+  ## httpRoute.enabled AND an HTTP listener is identified below. When enabled,
+  ## the app route above MUST pin its HTTPS listener via parentRefs[].sectionName
+  ## (an unpinned route binds all listeners incl. :80 and would loop).
+  httpsRedirect:
+    enabled: true
+    sectionName: ""             # the HTTP (:80) listener on the same Gateway
+    statusCode: 301
+    # parentRefs: []            # optional: override to a different Gateway/listener
+
 ## Ressources limits and requests for the container
 ## https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 #
@@ -136,20 +169,20 @@ resources:
     memory: 256Mi
 
 metrics:
+  enabled: false
+  image:
+    repository: "docker.io/bitnami/apache-exporter"
+    tag: "1.0.9-debian-12-r5"
+    pullPolicy: IfNotPresent
+  serviceMonitor:
     enabled: false
-    image: 
-      repository: "docker.io/bitnami/apache-exporter"
-      tag: "1.0.9-debian-12-r5"
-      pullPolicy: IfNotPresent
-    serviceMonitor:
-      enabled: false
-      labels:
-         prometheus: prometheus
-         release: tobedefined
-    resources:
-      limits:
-        cpu: 200m
-        memory: 256Mi
-      requests:
-        cpu: 100m
-        memory: 100Mi
+    labels:
+      prometheus: prometheus
+      release: tobedefined
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
