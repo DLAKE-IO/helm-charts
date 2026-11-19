@@ -28,14 +28,6 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       volumes:
-        - name: var-lib-nginx
-          emptyDir: {}
-        - name: var-lib-nginx-logs
-          emptyDir: {}
-        - name: var-lib-nginx-tmp
-          emptyDir: {}
-        - name: run-nginx
-          emptyDir: {}
         - name: node-home
           emptyDir: {}
         - name: caddy-config
@@ -85,14 +77,6 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - mountPath: "/var/lib/nginx"
-              name: var-lib-nginx
-            - mountPath: "/var/lib/nginx/logs"
-              name: var-lib-nginx-logs
-            - mountPath: "/var/lib/nginx/tmp"
-              name: var-lib-nginx-tmp
-            - mountPath: "/run/nginx"
-              name: run-nginx
             - name: node-home
               mountPath: /home/node
             - name: caddy-config

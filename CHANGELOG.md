@@ -5,6 +5,7 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ## [Unreleased]
 
 ### Breaking
+- **pingvin-share** version bump `1.8.0` → `2.0.0`; appVersion `v1.6.1` → `v2.1.1` (the previous default tag is not published for `smp46/pingvin-share-x`); remove unused nginx emptyDir volumes (no chart ships nginx, so nginx2root needs no image change); CI values use chart-default data paths so `ct install` works under `readOnlyRootFilesystem`
 - **cryptgeon** version bump `2.11.0` → `3.0.0`; requires cryptgeon v3: cache URL passed as `CACHE` instead of `REDIS`, liveness probe `/api/live/` → `/`, readiness probe `/` → `/healthz`, appVersion `2.8.2` → `3.0.0-rc.4`; v2 notes are not readable by v3
 
 ### Added
@@ -372,6 +373,18 @@ All notable changes to the dlake Helm Charts repository are documented here.
 ---
 
 ## pingvin-share
+
+### [2.0.0] — 2026-11-19
+
+**Breaking changes:**
+- S3 storage: Pingvin Share X v2 transfers files directly to the bucket with presigned URLs, so the bucket needs a CORS policy for the Pingvin Share URL before upgrading (see the chart README "Upgrading from 1.x")
+- The container applies database migrations at start (`prisma migrate deploy`) and Prisma has no down-migrations; back up `/opt/app/backend/data/pingvin-share.db` before upgrading — returning to a 1.x image requires restoring that backup
+
+**Changes:**
+- `appVersion` `v1.6.1` → `v2.1.1`; default image is now `smp46/pingvin-share-x:v2.1.1` — the previous default tag `v1.6.1` is not published for `smp46/pingvin-share-x`, so 1.x installs only pulled with an explicit `image.tag`; `helm upgrade` keeps that override, remove it to run v2.1.1
+- Removed the unused nginx `emptyDir` volumes and mounts (`/var/lib/nginx`, `/var/lib/nginx/logs`, `/var/lib/nginx/tmp`, `/run/nginx`) left over from the nginx-based `stonith404/pingvin-share` image; Pingvin Share X serves through Caddy. Prompted by the nginx2root audit (CVE-2026-123007, CVE-2026-123634, CVE-2026-123633, CVE-2026-121810, CVE-2026-113425; fixed in nginx 1.31.9+ / 1.30.7+): no chart in this repository ships an nginx container, so no image change is needed
+- `ci/default-values.yaml` keeps the chart-default `DATABASE_URL`, `DATA_DIRECTORY` and `API_URL` — the previous `/tmp` paths are read-only under `readOnlyRootFilesystem: true` (backend migrations failed, so readiness on `/api/health` never passed) and `http://pingvin-share:3000` does not name the Service under `ct install`'s generated release names
+- Chart README regenerated: intro links Pingvin Share X; the `image.repository` row shows `smp46/pingvin-share-x` instead of the stale `stonith404/pingvin-share`; new "Upgrading from 1.x" section
 
 ### [1.8.0] — 2026-07-08
 - Added HTTP→HTTPS redirect for Gateway API: new `templates/httproute-redirect.yaml` renders a secondary HTTPRoute `<fullname>-http-redirect` on the Gateway's HTTP (`:80`) listener with a `RequestRedirect` filter (`scheme: https`, `statusCode` default 301), reusing the app hostnames

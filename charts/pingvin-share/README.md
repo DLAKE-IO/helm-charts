@@ -1,8 +1,8 @@
 A Helm chart to install Pingvin Share
 
-![Version: 1.8.0](https://img.shields.io/badge/Version-1.8.0-informational?style=flat-square)
+![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
-![AppVersion: v1.6.1](https://img.shields.io/badge/AppVersion-v1.6.1-informational?style=flat-square)
+![AppVersion: v2.1.1](https://img.shields.io/badge/AppVersion-v2.1.1-informational?style=flat-square)
 
 ## Maintainers
 
@@ -19,7 +19,7 @@ helm install pingvin-share dlake/pingvin-share -n pingvin-share
 
 ## Introduction
 
-This chart bootstraps a [pingvin-share](https://github.com/stonith404/pingvin-share) Deployment on a [Kubernetes](https://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+This chart bootstraps a [Pingvin Share X](https://github.com/smp46/pingvin-share-x) Deployment on a [Kubernetes](https://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
 > :warning: Currently, this serves as a proof of concept since the application's architecture restricts it from having more than one replica.
 
@@ -38,6 +38,29 @@ To uninstall the `pingvin-share` deployment:
 ```bash
 helm uninstall pingvin-share
 ```
+
+## Upgrading from 1.x
+
+Chart 2.x deploys Pingvin Share X v2.1.1 (`smp46/pingvin-share-x:v2.1.1`). The
+chart 1.x default tag `v1.6.1` is not published for `smp46/pingvin-share-x`, so
+1.x installs had to set `image.tag`; `helm upgrade` keeps that override — remove
+it to run v2.1.1.
+
+- **Back up first.** The container applies database migrations at start
+  (`prisma migrate deploy`) and Prisma has no down-migrations; to return to a
+  1.x image, restore the backup. The SQLite database is
+  `/opt/app/backend/data/pingvin-share.db`:
+
+  ```bash
+  kubectl cp <namespace>/<pod>:/opt/app/backend/data/pingvin-share.db ./pingvin-share.db
+  ```
+
+- **S3 storage:** v2 transfers files directly to the bucket with presigned URLs,
+  so the bucket needs a CORS policy for your Pingvin Share URL before upgrading —
+  see [S3 CORS configuration](https://smp46.github.io/pingvin-share-x/setup/s3/#cors-configuration).
+- The unused nginx `emptyDir` volumes (`/var/lib/nginx`, `/var/lib/nginx/logs`,
+  `/var/lib/nginx/tmp`, `/run/nginx`) are removed; the image serves through Caddy.
+
 ## Requirements
 
 | Repository | Name | Version |
@@ -117,7 +140,7 @@ httpRoute:
 | httpRoute.paths[0].type | string | `"PathPrefix"` |  |
 | httpRoute.paths[0].value | string | `"/"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.repository | string | `"stonith404/pingvin-share"` |  |
+| image.repository | string | `"smp46/pingvin-share-x"` |  |
 | image.tag | string | `""` |  |
 | imagePullSecrets | list | `[]` |  |
 | ingress.annotations | object | `{}` |  |

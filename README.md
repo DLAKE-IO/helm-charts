@@ -23,7 +23,7 @@ helm pull oci://ghcr.io/dlake-io/charts/<chart-name> --version <version>
 | [bookstack](charts/bookstack/) | 2.8.0 | 26.9 | BookStack is a simple, self-hosted, easy-to-use platform for organising and storing information. |
 | [cryptgeon](charts/cryptgeon/) | 3.0.0 | 3.0.0-rc.4 | A Helm chart to install cryptgeon |
 | [ocsinventory](charts/ocsinventory/) | 1.4.0 | 2.12.3 | Open Computers and Software Inventory Next Generation is an assets management and deployment solution. |
-| [pingvin-share](charts/pingvin-share/) | 1.8.0 | v1.6.1 | A Helm chart to install Pingvin Share |
+| [pingvin-share](charts/pingvin-share/) | 2.0.0 | v2.1.1 | A Helm chart to install Pingvin Share |
 | [wazuh](charts/wazuh/) | 2.8.1 | 4.14.9 | Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads. |
 <!-- END_CHARTS_TABLE -->
 
@@ -69,11 +69,13 @@ See [charts/ocsinventory/README.md](charts/ocsinventory/README.md) for full docu
 
 ### pingvin-share
 
-![Version: 1.8.0](https://img.shields.io/badge/Version-1.8.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.6.1](https://img.shields.io/badge/AppVersion-v1.6.1-informational?style=flat-square)
+![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2.1.1](https://img.shields.io/badge/AppVersion-v2.1.1-informational?style=flat-square)
 
 A self-hosted file sharing platform.
 
 > **Note:** Currently limited to 1 replica due to SQLite architecture.
+
+Chart 2.x runs Pingvin Share X v2; back up the data volume first, and S3 storage users must add a bucket CORS policy before upgrading — see [Upgrading from 1.x](charts/pingvin-share/README.md#upgrading-from-1x).
 
 See [charts/pingvin-share/README.md](charts/pingvin-share/README.md) for full documentation.
 
